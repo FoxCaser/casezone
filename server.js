@@ -115,6 +115,18 @@ async function initDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
+    await pool.query(`
+    CREATE TABLE IF NOT EXISTS withdrawals (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      inventory_id INTEGER NOT NULL REFERENCES inventory(id) ON DELETE CASCADE,
+      steam_id TEXT NOT NULL,
+      item_name TEXT NOT NULL,
+      value INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
 
   console.log("PostgreSQL готовий");
 }
