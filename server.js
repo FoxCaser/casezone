@@ -186,7 +186,7 @@ function weightedPick(items) {
 app.get("/api/skins", (req, res) => {
   const skins = Object.entries(skinImages)
     .filter(([name, image]) => name && image)
-    .slice(0, 100);
+    
 
   res.json(skins.map(([name, image]) => ({
     name,
