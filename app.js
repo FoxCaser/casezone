@@ -17,6 +17,8 @@ async function loadCases(){
 }
 async function openCase(id){
   if(!currentUser){
+    async function openCase(id){
+  if(!currentUser){
     return auth();
   }
 
