@@ -9,20 +9,29 @@ async function refresh(){
   $("#balance").textContent=(currentUser?.balance||0)+" ₴";
   $("#authBtn").textContent=currentUser?"Вийти":"Увійти";
 }
+let skins = [];
 async function loadCases(){
   cases = await api("/api/cases");
+  skins = await api("/api/skins");
 
-  $("#cases").innerHTML = cases.map((c,i) => {
+  $("#cases").innerHTML = cases.map((c, i) => {
 
-    const total = c.items.reduce((sum, item) => sum + item[2], 0);
+    const total = c.items.reduce(
+      (sum, item) => sum + item[2],
+      0
+    );
 
     const items = c.items.map(item => {
       const chance = ((item[2] / total) * 100).toFixed(1);
+      const image = skins.find(s => s.name === item[0])?.image || "";
 
       return `
         <div class="case-item">
-          <span>${item[0]}</span>
-          <span>${chance}%</span>
+          <img src="${image}" class="case-item-img" alt="${item[0]}">
+          <div>
+            <div>${item[0]}</div>
+            <small>${chance}% • ${item[3]} ₴</small>
+          </div>
         </div>
       `;
     }).join("");
@@ -44,7 +53,6 @@ async function loadCases(){
     `;
   }).join("");
 }
-
     async function openCase(id){
   if(!currentUser){
     return auth();
