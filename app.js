@@ -43,18 +43,8 @@ async function loadCases(){
     `;
     return;
   }
-const fake = [
-  "AK-47 | Fire Serpent",
-  "AWP | Asiimov",
-  "M4A1-S | Printstream",
-  "Glock-18 | Vogue",
-  "AK-47 | Elite Build"
-];
-
-function skinImage(name) {
-  return "https://api.steamapis.com/image/item/730/" + encodeURIComponent(name);
-}
-
+const skins = await api("/api/skins");
+const fake = skins.filter(x => x.image);
   const reel = $("#reel");
 
   // Створюємо предмети рулетки
@@ -81,10 +71,11 @@ function skinImage(name) {
   slot.appendChild(title);
 }
       else{
-  const name = fake[Math.floor(Math.random() * fake.length)];
+  const skin = fake[Math.floor(Math.random() * fake.length)];
+const name = skin.name;
 
   const img = document.createElement("img");
-  img.src = skinImage(name);
+  img.src = skin.image;
   img.alt = name;
   img.style.width = "110px";
   img.style.height = "80px";
