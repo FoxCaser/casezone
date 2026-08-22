@@ -807,6 +807,32 @@ app.get("/auth/steam/callback", async (req, res) => {
     );
   }
 });
+app.get("/admin", auth, async (req, res) => {
+  try {
+    const userResult = await pool.query(
+      `
+      SELECT steam_id
+      FROM users
+      WHERE id = $1
+      `,
+      [req.session.userId]
+    );
+
+    const user = userResult.rows[0];
+
+    if (!user || user.steam_id !== "76561199848778920") {
+      return res.status(403).send("Доступ заборонено");
+    }
+
+    res.sendFile(
+      path.join(__dirname, "admin.html")
+    );
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).send("Помилка сервера");
+  }
+});
 await loadSkinImages();
 await initDatabase();
 
