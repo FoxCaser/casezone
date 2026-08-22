@@ -340,6 +340,30 @@ app.post("/api/withdraw/:inventoryId", auth, async (req, res) => {
     client.release();
   }
 });
+app.get("/api/withdrawals", auth, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        id,
+        steam_id,
+        item_name,
+        value,
+        status,
+        created_at
+      FROM withdrawals
+      ORDER BY id DESC
+    `);
+
+    res.json(result.rows);
+
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).json({
+      error: "Помилка отримання заявок"
+    });
+  }
+});
 app.post("/api/login", async (req, res) => {
   try {
     const username = req.body.username?.trim();
