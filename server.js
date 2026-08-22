@@ -112,8 +112,8 @@ app.post("/api/register", async (req, res) => {
     return res.status(400).json({ error: "Логін від 3 символів, пароль від 6" });
   try {
     const hash = await bcrypt.hash(password, 12);
-    const result = db.prepare("INSERT INTO users (username,password_hash,created_at) VALUES (?,?,?)")
-      .run(username.trim(), hash, now());
+  const result = db.prepare("INSERT INTO users (username,password_hash,balance,created_at) VALUES (?,?,?,?)")
+  .run(username.trim(), hash, 1000, now());
     req.session.userId = result.lastInsertRowid;
     res.json({ ok: true });
   } catch {
