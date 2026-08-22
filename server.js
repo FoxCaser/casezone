@@ -175,7 +175,9 @@ app.post("/api/open/:caseId", auth, (req, res) => {
   res.json({ item: { name: item[0], rarity: item[1], value: item[3] }, balance: updated.balance });
 });
 
-app.get("/{*splat}", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
 app.listen(process.env.PORT || 3000, () => {
   console.log("CaseZone running on http://localhost:" + (process.env.PORT || 3000));
