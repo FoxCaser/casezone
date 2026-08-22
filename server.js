@@ -864,6 +864,11 @@ app.get("/auth/steam/callback", async (req, res) => {
     );
   }
 });
+app.get("/", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "index.html")
+  );
+});
 app.get("/admin", auth, async (req, res) => {
   try {
     const userResult = await pool.query(
