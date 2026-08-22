@@ -75,6 +75,7 @@ async function loadCases(){
   let result;
 
   try{
+    console.log("OPEN CASE:", id);
     result = await api("/api/open/" + id, {
       method: "POST"
     });
