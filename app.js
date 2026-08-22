@@ -10,10 +10,39 @@ async function refresh(){
   $("#authBtn").textContent=currentUser?"Вийти":"Увійти";
 }
 async function loadCases(){
- cases=await api("/api/cases");
- $("#cases").innerHTML=cases.map((c,i)=>`<article class="card">
- <div class="case-art">${["🔴","🟣","🟡"][i]}</div><h3>${c.name}</h3>
- <div class="price">${c.price} ₴</div><button onclick="openCase('${c.id}')">Відкрити кейс</button></article>`).join("");
+  cases = await api("/api/cases");
+
+  $("#cases").innerHTML = cases.map((c,i) => {
+
+    const total = c.items.reduce((sum, item) => sum + item[2], 0);
+
+    const items = c.items.map(item => {
+      const chance = ((item[2] / total) * 100).toFixed(1);
+
+      return `
+        <div class="case-item">
+          <span>${item[0]}</span>
+          <span>${chance}%</span>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <article class="card">
+        <div class="case-art">${["🔴","🟣","🟡"][i]}</div>
+        <h3>${c.name}</h3>
+        <div class="price">${c.price} ₴</div>
+
+        <div class="case-items">
+          ${items}
+        </div>
+
+        <button onclick="openCase('${c.id}')">
+          Відкрити кейс
+        </button>
+      </article>
+    `;
+  }).join("");
 }
 
     async function openCase(id){
