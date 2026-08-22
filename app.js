@@ -366,6 +366,32 @@ if(!currentUser) return auth();
       }).join("")
     : "<p class='muted'>Інвентар порожній.</p>";
 }
-$("#authBtn").onclick=async()=>{if(currentUser){await api("/api/logout",{method:"POST"});location.reload()}else auth()};
-$("#inventoryBtn").onclick=showInventory;$("#closeInv").onclick=()=>$("#inventory").classList.add("hidden");$("#closeModal").onclick=()=>$("#modal").classList.add("hidden");
-refresh();loadCases();
+$("#authBtn").onclick=async()=>{
+  if(currentUser){
+    await api("/api/logout",{method:"POST"});
+    location.reload();
+  }else{
+    auth();
+  }
+};
+
+$("#inventoryBtn").onclick=showInventory;
+
+$("#closeInv").onclick=()=>{
+  $("#inventory").classList.add("hidden");
+};
+
+$("#closeModal").onclick=()=>{
+  $("#modal").classList.add("hidden");
+};
+
+$("#depositBtn").onclick=()=>{
+  $("#depositModal").classList.remove("hidden");
+};
+
+$("#closeDeposit").onclick=()=>{
+  $("#depositModal").classList.add("hidden");
+};
+
+refresh();
+loadCases();
