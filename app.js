@@ -220,10 +220,40 @@ async function sellItem(id){
   }
 }
 async function showInventory(){
- if(!currentUser)return auth();
- const items=await api("/api/inventory");$("#inventory").classList.remove("hidden");
-$("#items").innerHTML=items.length?items.map(x=>`<div class="item"><strong>${x.item_name}</strong><span class="muted">${x.rarity} · ${x.value} ₴</span><button onclick="sellItem(${x.id})">Продати за ${x.value} ₴</button></div>`).join(""):"<p class='muted'>Інвентар порожній.</p>";
- } 
+  if(!currentUser) return auth();
+
+  const items = await api("/api/inventory");
+  const skins = await api("/api/skins");
+
+  $("#inventory").classList.remove("hidden");
+
+  $("#items").innerHTML = items.length
+    ? items.map(x => {
+        const skin = skins.find(s => s.name === x.item_name);
+        const image = skin?.image || "";
+
+        return `
+          <div class="item">
+            <img
+              src="${image}"
+              alt="${x.item_name}"
+              style="width:100px;height:70px;object-fit:contain"
+            >
+
+            <strong>${x.item_name}</strong>
+
+            <span class="muted">
+              ${x.rarity} · ${x.value} ₴
+            </span>
+
+            <button onclick="sellItem(${x.id})">
+              Продати за ${x.value} ₴
+            </button>
+          </div>
+        `;
+      }).join("")
+    : "<p class='muted'>Інвентар порожній.</p>";
+}
 $("#authBtn").onclick=async()=>{if(currentUser){await api("/api/logout",{method:"POST"});location.reload()}else auth()};
 $("#inventoryBtn").onclick=showInventory;$("#closeInv").onclick=()=>$("#inventory").classList.add("hidden");$("#closeModal").onclick=()=>$("#modal").classList.add("hidden");
 refresh();loadCases();
