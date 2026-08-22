@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: casezone
+    runtime: node
+    envVars:
+      - fromGroup: casezone-env
