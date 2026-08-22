@@ -183,12 +183,22 @@ function weightedPick(items) {
   return items[items.length - 1];
 }
 
+app.get("/api/skins", (req, res) => {
+  const skins = Object.entries(skinImages)
+    .filter(([name, image]) => name && image)
+    .slice(0, 100);
+
+  res.json(skins.map(([name, image]) => ({
+    name,
+    image
+  })));
+});
+
 app.get("/api/cases", (req, res) => {
   res.json(
     cases.map(({ items, ...caseData }) => caseData)
   );
 });
-
 app.post("/api/register", async (req, res) => {
   try {
     const { username, password } = req.body;
