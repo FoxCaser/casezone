@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS openings (
   created_at TEXT NOT NULL
 );
 `);
-db.prepare("UPDATE users SET balance = 1000 WHERE username = ?").run("test1111");
+db.prepare("UPDATE users SET balance = 1000 WHERE username = ?").run("test22222");
 
 const cases = [
   {
