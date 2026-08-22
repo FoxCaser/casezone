@@ -217,8 +217,31 @@ async function closeWin(){
 }
 
 async function auth(){
- $("#modal").classList.remove("hidden");
- $("#modalContent").innerHTML=`<h2>Вхід / реєстрація</h2><input id="u" placeholder="Логін" style="padding:12px;margin:7px;border-radius:8px"><input id="p" type="password" placeholder="Пароль" style="padding:12px;margin:7px;border-radius:8px"><br><button onclick="login()">Увійти</button> <button class="ghost" onclick="register()">Створити</button>`;
+  $("#modal").classList.remove("hidden");
+
+  $("#modalContent").innerHTML = `
+    <h2>Вхід / реєстрація</h2>
+
+    <input id="u"
+      placeholder="Логін"
+      style="padding:12px;margin:7px;border-radius:8px">
+
+    <input id="p"
+      type="password"
+      placeholder="Пароль"
+      style="padding:12px;margin:7px;border-radius:8px">
+
+    <br>
+
+    <button onclick="login()">Увійти</button>
+    <button class="ghost" onclick="register()">Створити</button>
+
+    <br><br>
+
+    <button onclick="loginSteam()">
+      🎮 Увійти через Steam
+    </button>
+  `;
 }
 async function login(){try{await api("/api/login",{method:"POST",body:JSON.stringify({username:$("#u").value,password:$("#p").value})});$("#modal").classList.add("hidden");await refresh()}catch(e){alert(e.message)}}
 async function register(){try{await api("/api/register",{method:"POST",body:JSON.stringify({username:$("#u").value,password:$("#p").value})});$("#modal").classList.add("hidden");await refresh()}catch(e){alert(e.message)}}
