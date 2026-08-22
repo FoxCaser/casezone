@@ -63,10 +63,24 @@ function skinImage(name) {
     const slot = document.createElement("div");
     slot.className = "slot";
 
-    if(i === 27){
-      slot.textContent = result.item.name;
-      slot.classList.add("win");
-      slot.id = "winningItem";
+   if(i === 27){
+  slot.classList.add("win");
+  slot.id = "winningItem";
+
+  const img = document.createElement("img");
+  img.src = result.item.image || skinImage(result.item.name);
+  img.alt = result.item.name;
+  img.style.width = "110px";
+  img.style.height = "80px";
+  img.style.objectFit = "contain";
+
+  const title = document.createElement("div");
+  title.textContent = result.item.name;
+  title.style.fontSize = "11px";
+
+  slot.appendChild(img);
+  slot.appendChild(title);
+}
    }else{
   const name = fake[Math.floor(Math.random() * fake.length)];
 
