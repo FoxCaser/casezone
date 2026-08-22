@@ -128,10 +128,45 @@
 
     <div id="modalContent"></div>
 
+</div>
+</div>
+
+<div id="depositModal" class="modal hidden">
+
+  <div class="modal-card">
+
+    <button id="closeDeposit" class="x">
+      ×
+    </button>
+
+    <h2>💰 Поповнення балансу</h2>
+
+    <p>Оберіть спосіб поповнення:</p>
+
+    <div class="deposit-methods">
+
+      <button onclick="depositMethod('privat')">
+        🏦 ПриватБанк
+      </button>
+
+      <button onclick="depositMethod('oschad')">
+        🏦 Ощадбанк
+      </button>
+
+      <button onclick="depositMethod('crypto')">
+        ₿ Крипта
+      </button>
+
+      <button onclick="depositMethod('skins')">
+        🎮 Скінами CS2
+      </button>
+
+    </div>
+
+    <div id="depositInfo"></div>
+
   </div>
+
 </div>
 
 <script src="/app.js"></script>
-
-</body>
-</html>
