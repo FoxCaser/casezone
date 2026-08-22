@@ -141,6 +141,29 @@ app.get("/api/inventory", auth, (req, res) => {
   res.json(db.prepare("SELECT id,item_name,rarity,value,created_at FROM inventory WHERE user_id=? ORDER BY id DESC")
     .all(req.session.userId));
 });
+app.post("/api/inventory/:id/sell", auth, (req, res) => {
+  const item = db.prepare("SELECT * FROM inventory WHERE id=? AND user_id=?")
+    .get(req.params.id, req.session.userId);
+
+  if (!item) {
+    return res.status(404).json({ error: "Предмет не знайдено" });
+  }
+
+  const tx = db.transaction(() => {
+    db.prepare("UPDATE users SET balance=balance+? WHERE id=?")
+      .run(item.value, req.session.userId);
+
+    db.prepare("DELETE FROM inventory WHERE id=? AND user_id=?")
+      .run(item.id, req.session.userId);
+  });
+
+  tx();
+
+  const updated = db.prepare("SELECT balance FROM users WHERE id=?")
+    .get(req.session.userId);
+
+  res.json({ ok: true, balance: updated.balance });
+});
 
 /* TEST TOP-UP:
    This endpoint is intentionally disabled for public deployment.
