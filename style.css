@@ -77,3 +77,31 @@
   font-weight:900;
   font-size:15px;
 }
+.item.rarity-consumer{
+  border-color:#b0b0b0;
+}
+
+.item.rarity-mil-spec{
+  border-color:#4b69ff;
+}
+
+.item.rarity-restricted{
+  border-color:#8847ff;
+}
+
+.item.rarity-classified{
+  border-color:#d32ce6;
+}
+
+.item.rarity-covert{
+  border-color:#eb4b4b;
+}
+
+.item.rarity-rare{
+  border-color:#ffd700;
+}
+
+.item.rarity-contraband{
+  border-color:#ffd700;
+  box-shadow:0 0 15px rgba(255,215,0,.35);
+}
