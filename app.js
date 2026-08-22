@@ -44,12 +44,11 @@ async function loadCases(){
     return;
   }
 const fake = [
-  "Nova | Red Quartz",
-  "Glock-18 | Vogue",
-  "AK-47 | Elite Build",
-  "M4A1-S | Printstream",
+  "AK-47 | Fire Serpent",
   "AWP | Asiimov",
-  "★ Karambit | Doppler"
+  "M4A1-S | Printstream",
+  "Glock-18 | Vogue",
+  "AK-47 | Elite Build"
 ];
 
 function skinImage(name) {
