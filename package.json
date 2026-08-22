@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "better-sqlite3": "^11.8.1",
+    "pg": "^8.13.1",
+    "connect-pg-simple": "^10.0.0",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
     "bcryptjs": "^3.0.2"
