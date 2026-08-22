@@ -86,7 +86,11 @@ async function loadCases(){
     return;
   }
 const skins = await api("/api/skins");
-const fake = skins.filter(x => x.image);
+const fake = c.items.map(item => ({
+  name: item[0],
+  rarity: item[1],
+  image: skins.find(s => s.name === item[0])?.image || ""
+})).filter(x => x.image);
   const reel = $("#reel");
 
   // Створюємо предмети рулетки
@@ -119,14 +123,10 @@ const fake = skins.filter(x => x.image);
       else{
   const skin = fake[Math.floor(Math.random() * fake.length)];
 const name = skin.name;
-       const caseItem = c.items.find(item => item[0] === name);
-
-if(caseItem){
-  slot.classList.add(
-    "rarity-" +
-    caseItem[1].toLowerCase().replace(/[^a-z0-9]+/g, "-")
-  );
-} 
+      slot.classList.add(
+  "rarity-" +
+  skin.rarity.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+);
 
   const img = document.createElement("img");
   img.src = skin.image;
