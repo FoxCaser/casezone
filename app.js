@@ -50,7 +50,7 @@ async function showInventory(){
  if(!currentUser)return auth();
  const items=await api("/api/inventory");$("#inventory").classList.remove("hidden");
 $("#items").innerHTML=items.length?items.map(x=>`<div class="item"><strong>${x.item_name}</strong><span class="muted">${x.rarity} · ${x.value} ₴</span><button onclick="sellItem(${x.id})">Продати за ${x.value} ₴</button></div>`).join(""):"<p class='muted'>Інвентар порожній.</p>";
-  
+ } 
 $("#authBtn").onclick=async()=>{if(currentUser){await api("/api/logout",{method:"POST"});location.reload()}else auth()};
 $("#inventoryBtn").onclick=showInventory;$("#closeInv").onclick=()=>$("#inventory").classList.add("hidden");$("#closeModal").onclick=()=>$("#modal").classList.add("hidden");
 refresh();loadCases();
