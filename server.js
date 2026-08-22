@@ -87,6 +87,10 @@ async function initDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
+    await pool.query(`
+    ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS steam_id TEXT UNIQUE;
+  `);
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS inventory (
