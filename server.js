@@ -169,9 +169,125 @@ const cases = [
       ["★ Butterfly Knife | Doppler", "Covert", 5, 7500],
       ["★ Karambit | Case Hardened", "Rare", 1, 15000]
     ]
+  },
+
+  {
+    id: "bronze",
+    name: "BRONZE CASE",
+    price: 50,
+    items: [
+      ["MP9 | Food Chain", "Mil-Spec", 40, 70],
+      ["Glock-18 | Moonrise", "Mil-Spec", 30, 80],
+      ["AK-47 | Slate", "Restricted", 18, 180],
+      ["AWP | Mortis", "Classified", 10, 300],
+      ["★ Falchion Knife | Night", "Covert", 2, 1800]
+    ]
+  },
+
+  {
+    id: "silver",
+    name: "SILVER CASE",
+    price: 200,
+    items: [
+      ["USP-S | Ticket to Hell", "Mil-Spec", 35, 120],
+      ["M4A4 | Magnesium", "Mil-Spec", 28, 150],
+      ["AK-47 | Ice Coaled", "Restricted", 20, 350],
+      ["AWP | Neo-Noir", "Classified", 12, 700],
+      ["★ Huntsman Knife | Doppler", "Covert", 5, 3500]
+    ]
+  },
+
+  {
+    id: "gold",
+    name: "GOLD CASE",
+    price: 400,
+    items: [
+      ["FAMAS | Commemoration", "Mil-Spec", 32, 180],
+      ["M4A1-S | Hyper Beast", "Restricted", 28, 500],
+      ["AK-47 | Bloodsport", "Classified", 20, 1000],
+      ["AWP | Hyper Beast", "Covert", 15, 1800],
+      ["★ Bayonet | Doppler", "Covert", 5, 6000]
+    ]
+  },
+
+  {
+    id: "fire",
+    name: "FIRE CASE",
+    price: 750,
+    items: [
+      ["Glock-18 | Water Elemental", "Restricted", 30, 300],
+      ["M4A1-S | Chantico's Fire", "Classified", 25, 900],
+      ["AK-47 | Vulcan", "Covert", 20, 2200],
+      ["AWP | Wildfire", "Covert", 15, 3000],
+      ["★ Butterfly Knife | Slaughter", "Covert", 3, 9000]
+    ]
+  },
+
+  {
+    id: "dragon",
+    name: "DRAGON CASE",
+    price: 1000,
+    items: [
+      ["USP-S | Kill Confirmed", "Classified", 30, 900],
+      ["M4A1-S | Golden Coil", "Covert", 25, 1800],
+      ["AK-47 | The Empress", "Covert", 20, 2500],
+      ["AWP | Oni Taiji", "Covert", 15, 3500],
+      ["★ Karambit | Doppler", "Covert", 3, 12000]
+    ]
+  },
+
+  {
+    id: "knife",
+    name: "KNIFE CASE",
+    price: 1500,
+    items: [
+      ["★ Navaja Knife | Doppler", "Covert", 35, 2200],
+      ["★ Gut Knife | Doppler", "Covert", 25, 2800],
+      ["★ Falchion Knife | Doppler", "Covert", 20, 3500],
+      ["★ Bayonet | Doppler", "Covert", 12, 6500],
+      ["★ Karambit | Doppler", "Covert", 3, 12000]
+    ]
+  },
+
+  {
+    id: "premium",
+    name: "PREMIUM CASE",
+    price: 2500,
+    items: [
+      ["AK-47 | Asiimov", "Covert", 30, 3000],
+      ["M4A1-S | Printstream", "Covert", 25, 4500],
+      ["AWP | Asiimov", "Covert", 20, 5000],
+      ["★ M9 Bayonet | Doppler", "Covert", 12, 10000],
+      ["★ Butterfly Knife | Doppler", "Covert", 5, 18000]
+    ]
+  },
+
+  {
+    id: "black",
+    name: "BLACK MARKET",
+    price: 5000,
+    items: [
+      ["AK-47 | Fire Serpent", "Covert", 30, 1800],
+      ["AWP | Lightning Strike", "Covert", 25, 8000],
+      ["M4A4 | Howl", "Contraband", 15, 25000],
+      ["★ Karambit | Case Hardened", "Rare", 8, 15000],
+      ["AWP | Dragon Lore", "Contraband", 2, 600000]
+    ]
+  },
+
+  {
+    id: "ultimate",
+    name: "ULTIMATE CASE",
+    price: 10000,
+    items: [
+      ["AK-47 | Wild Lotus", "Covert", 35, 25000],
+      ["AWP | Gungnir", "Covert", 25, 35000],
+      ["M4A4 | Howl", "Contraband", 15, 25000],
+      ["★ Butterfly Knife | Gamma Doppler", "Covert", 8, 30000],
+      ["AWP | Dragon Lore", "Contraband", 2, 600000]
+    ]
   }
 ];
-
 function auth(req, res, next) {
   if (!req.session.userId) {
     return res.status(401).json({
