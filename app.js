@@ -53,8 +53,7 @@ const fake = [
 ];
 
 function skinImage(name) {
-  return "https://api.steamapis.com/image/item/730/" +
-    encodeURIComponent(name);
+  return "https://api.steamapis.com/image/item/730/" + encodeURIComponent(name);
 }
 
   const reel = $("#reel");
