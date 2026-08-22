@@ -578,10 +578,102 @@ app.get("/auth/steam", (req, res) => {
   );
 });
 
-app.get("/", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "index.html")
-  );
+app.get("/auth/steam/callback", async (req, res) => {
+  try {
+    const params = new URLSearchParams();
+
+    for (const [key, value] of Object.entries(req.query)) {
+      if (typeof value === "string") {
+        params.set(key, value);
+      }
+    }
+
+    const claimedId = params.get("openid.claimed_id");
+    const returnTo = params.get("openid.return_to");
+
+    if (!claimedId) {
+      return res.status(400).send("SteamID не отримано");
+    }
+
+    if (
+      returnTo !==
+      "https://casezone.onrender.com/auth/steam/callback"
+    ) {
+      return res.status(400).send("Невірний callback");
+    }
+
+    params.set("openid.mode", "check_authentication");
+
+    const verifyResponse = await fetch(
+      "https://steamcommunity.com/openid/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/x-www-form-urlencoded"
+        },
+        body: params.toString()
+      }
+    );
+
+    const verification = await verifyResponse.text();
+
+    if (!verification.includes("is_valid:true")) {
+      return res.status(401).send(
+        "Steam не підтвердив авторизацію"
+      );
+    }
+
+    const steamId = claimedId.split("/").pop();
+
+    let result = await pool.query(
+      `
+      SELECT *
+      FROM users
+      WHERE steam_id = $1
+      `,
+      [steamId]
+    );
+
+    let user = result.rows[0];
+
+    if (!user) {
+      const username = "Steam_" + steamId.slice(-8);
+
+      const randomPassword =
+        crypto.randomBytes(32).toString("hex");
+
+      const passwordHash =
+        await bcrypt.hash(randomPassword, 10);
+
+      result = await pool.query(
+        `
+        INSERT INTO users
+          (username, password_hash, steam_id)
+        VALUES
+          ($1, $2, $3)
+        RETURNING *
+        `,
+        [
+          username,
+          passwordHash,
+          steamId
+        ]
+      );
+
+      user = result.rows[0];
+    }
+
+    req.session.userId = user.id;
+
+    res.redirect("/");
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).send(
+      "Помилка входу через Steam"
+    );
+  }
 });
 await loadSkinImages();
 await initDatabase();
