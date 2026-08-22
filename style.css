@@ -20,3 +20,8 @@
   object-fit:contain;
   display:block;
 }.win{box-shadow:0 0 0 2px #ffad2f,0 0 35px #ff9f1a88}.hidden{display:none}@media(max-width:800px){.grid{grid-template-columns:1fr}.inventory{grid-template-columns:1fr 1fr}.hero h1{font-size:42px}.account span{display:none}}
+.case-item-img{
+  width:70px;
+  height:50px;
+  object-fit:contain;
+}
