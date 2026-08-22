@@ -16,6 +16,127 @@ async function loadCases(){
  <div class="price">${c.price} ₴</div><button onclick="openCase('${c.id}')">Відкрити кейс</button></article>`).join("");
 }
 async function openCase(id){
+  if(!currentUser){
+    return auth();
+  }
+
+  const c = cases.find(x => x.id === id);
+
+  $("#modal").classList.remove("hidden");
+  $("#modalContent").innerHTML = `
+    <h2>${c.name}</h2>
+    <p class="muted">Відкриваємо кейс...</p>
+    <div class="reel" id="reel"></div>
+  `;
+
+  let result;
+
+  try{
+    result = await api("/api/open/" + id, {
+      method: "POST"
+    });
+  }catch(e){
+    $("#modalContent").innerHTML = `
+      <h2>${c.name}</h2>
+      <h3>${e.message}</h3>
+    `;
+    return;
+  }
+
+  const fake = [
+    "Nova | Red Quartz",
+    "Glock-18 | Vogue",
+    "AK-47 | Elite Build",
+    "M4A1-S | Printstream",
+    "AWP | Asiimov",
+    "★ Karambit | Doppler"
+  ];
+
+  const reel = $("#reel");
+
+  // Створюємо предмети рулетки
+  for(let i = 0; i < 30; i++){
+    const slot = document.createElement("div");
+    slot.className = "slot";
+
+    if(i === 27){
+      slot.textContent = result.item.name;
+      slot.classList.add("win");
+      slot.id = "winningItem";
+    }else{
+      slot.textContent =
+        fake[Math.floor(Math.random() * fake.length)];
+    }
+
+    reel.appendChild(slot);
+  }
+
+  // Починаємо зліва
+  reel.scrollLeft = 0;
+
+  setTimeout(() => {
+    const win = $("#winningItem");
+
+    const target =
+      win.offsetLeft -
+      reel.clientWidth / 2 +
+      win.clientWidth / 2;
+
+    const start = reel.scrollLeft;
+    const distance = target - start;
+    const duration = 3000;
+    const startTime = performance.now();
+
+    function animate(time){
+      const progress =
+        Math.min((time - startTime) / duration, 1);
+
+      // Плавне гальмування
+      const ease =
+        1 - Math.pow(1 - progress, 4);
+
+      reel.scrollLeft =
+        start + distance * ease;
+
+      if(progress < 1){
+        requestAnimationFrame(animate);
+      }else{
+        setTimeout(() => {
+          $("#modalContent").innerHTML = `
+            <h2>🎉 Вітаємо!</h2>
+
+            <div class="slot win"
+                 style="margin:25px auto;max-width:320px">
+
+              ${result.item.name}
+
+              <br>
+
+              <small>
+                ${result.item.rarity} ·
+                ${result.item.value} ₴
+              </small>
+
+            </div>
+
+            <button onclick="closeWin()">
+              Забрати
+            </button>
+          `;
+        }, 500);
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }, 300);
+
+  currentUser.balance = result.balance;
+  await refresh();
+}
+
+function closeWin(){
+  $("#modal").classList.add("hidden");
+}
  if(!currentUser){return auth()}
  const c=cases.find(x=>x.id===id);
  $("#modal").classList.remove("hidden");
