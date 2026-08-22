@@ -3,169 +3,117 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>CaseZone Admin</title>
 
-  <style>
-    body {
-      margin: 0;
-      padding: 30px;
-      background: #080b10;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
+  <title>CaseZone</title>
 
-    h1 {
-      margin-bottom: 25px;
-    }
-
-    .request {
-      background: #11161e;
-      border: 1px solid #293342;
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 15px;
-    }
-
-    .info {
-      color: #aaa;
-      margin: 6px 0;
-    }
-
-    .status {
-      display: inline-block;
-      padding: 6px 10px;
-      border-radius: 7px;
-      background: #3b2d00;
-      color: #ffd700;
-      margin: 10px 0;
-    }
-
-    button {
-      border: 0;
-      border-radius: 8px;
-      padding: 10px 18px;
-      margin-right: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .give {
-      background: #ff9f1c;
-      color: #000;
-    }
-
-    .reject {
-      background: #333b48;
-      color: #fff;
-    }
-
-    .empty {
-      color: #888;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h1>CASEZONE ADMIN</h1>
+<header>
+  <div class="logo">
+    CASE<span>ZONE</span>
+  </div>
 
-<div id="requests">
-  Завантаження заявок...
+  <div class="account">
+    <span id="userLabel">Гість</span>
+    <span id="balance">0 ₴</span>
+
+    <button id="authBtn">
+      Увійти
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+
+    <div>
+      <div class="eyebrow">
+        CS2 CASE OPENING
+      </div>
+
+      <h1>
+        ВІДКРИВАЙ.<br>
+        <span>ВИГРАВАЙ.</span>
+      </h1>
+
+      <p class="sub">
+        Відкривай кейси, отримуй скіни та збирай власний інвентар.
+      </p>
+    </div>
+
+  </section>
+
+  <section>
+
+    <div class="section-title">
+      <h2>Кейси</h2>
+
+      <button
+        class="ghost"
+        id="inventoryBtn">
+        🎒 Інвентар
+      </button>
+    </div>
+
+    <div
+      id="cases"
+      class="grid">
+    </div>
+
+  </section>
+
+</main>
+
+<!-- INVENTORY -->
+
+<div
+  id="inventory"
+  class="modal hidden">
+
+  <div class="modal-card">
+
+    <button
+      id="closeInv"
+      class="x">
+      ×
+    </button>
+
+    <h2>🎒 Мій інвентар</h2>
+
+    <div
+      id="items"
+      class="inventory">
+    </div>
+
+  </div>
+
 </div>
 
-<script>
-async function loadRequests() {
-  try {
-    const response = await fetch("/api/withdrawals");
-    const result = await response.json();
+<!-- CASE MODAL -->
 
-    if (!response.ok) {
-      throw new Error(result.error || "Помилка завантаження");
-    }
+<div
+  id="modal"
+  class="modal hidden">
 
-    if (!result.length) {
-      document.querySelector("#requests").innerHTML =
-        '<p class="empty">Заявок немає.</p>';
-      return;
-    }
+  <div class="modal-card">
 
-    document.querySelector("#requests").innerHTML =
-      result.map(function(x) {
-        return `
-          <div class="request">
+    <button
+      id="closeModal"
+      class="x">
+      ×
+    </button>
 
-            <h2>Заявка #${x.id}</h2>
+    <div id="modalContent"></div>
 
-            <div class="info">
-              Скін: <b>${x.item_name}</b>
-            </div>
+  </div>
 
-            <div class="info">
-              SteamID: ${x.steam_id}
-            </div>
+</div>
 
-            <div class="info">
-              Вартість: ${x.value} ₴
-            </div>
-
-            <div class="status">
-              ${x.status}
-            </div>
-
-            <br>
-
-            <button
-              class="give"
-              onclick="changeStatus(${x.id}, 'approved')">
-              🎁 Видати
-            </button>
-
-            <button
-              class="reject"
-              onclick="changeStatus(${x.id}, 'rejected')">
-              ❌ Відхилити
-            </button>
-
-          </div>
-        `;
-      }).join("");
-
-  } catch (e) {
-    document.querySelector("#requests").innerHTML =
-      "<p>Помилка: " + e.message + "</p>";
-  }
-}
-
-async function changeStatus(id, status) {
-  try {
-    const response = await fetch(
-      "/api/withdrawals/" + id + "/status",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          status: status
-        })
-      }
-    );
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || "Помилка");
-    }
-
-    await loadRequests();
-
-  } catch (e) {
-    alert(e.message);
-  }
-}
-
-loadRequests();
-</script>
+<script src="app.js"></script>
 
 </body>
 </html>
