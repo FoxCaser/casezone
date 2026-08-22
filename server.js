@@ -195,9 +195,7 @@ app.get("/api/skins", (req, res) => {
 });
 
 app.get("/api/cases", (req, res) => {
-  res.json(
-    cases.map(({ items, ...caseData }) => caseData)
-  );
+  res.json(cases);
 });
 app.post("/api/register", async (req, res) => {
   try {
