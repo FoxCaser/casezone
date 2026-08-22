@@ -38,7 +38,12 @@ async function loadCases(){
 
     return `
       <article class="card">
-        <div class="case-art">${["🔴","🟣","🟡"][i]}</div>
+       <div class="case-art case-${c.id}">
+  <div class="case-box">
+    <div class="case-lock">🔒</div>
+    <div class="case-label">${c.name}</div>
+  </div>
+</div>
         <h3>${c.name}</h3>
         <div class="price">${c.price} ₴</div>
 
