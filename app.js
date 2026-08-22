@@ -43,15 +43,19 @@ async function loadCases(){
     `;
     return;
   }
+const fake = [
+  "Nova | Red Quartz",
+  "Glock-18 | Vogue",
+  "AK-47 | Elite Build",
+  "M4A1-S | Printstream",
+  "AWP | Asiimov",
+  "★ Karambit | Doppler"
+];
 
-  const fake = [
-    "Nova | Red Quartz",
-    "Glock-18 | Vogue",
-    "AK-47 | Elite Build",
-    "M4A1-S | Printstream",
-    "AWP | Asiimov",
-    "★ Karambit | Doppler"
-  ];
+function skinImage(name) {
+  return "https://api.steamapis.com/image/item/730/" +
+    encodeURIComponent(name);
+}
 
   const reel = $("#reel");
 
@@ -64,11 +68,23 @@ async function loadCases(){
       slot.textContent = result.item.name;
       slot.classList.add("win");
       slot.id = "winningItem";
-    }else{
-      slot.textContent =
-        fake[Math.floor(Math.random() * fake.length)];
-    }
+   }else{
+  const name = fake[Math.floor(Math.random() * fake.length)];
 
+  const img = document.createElement("img");
+  img.src = skinImage(name);
+  img.alt = name;
+  img.style.width = "110px";
+  img.style.height = "80px";
+  img.style.objectFit = "contain";
+
+  const title = document.createElement("div");
+  title.textContent = name;
+  title.style.fontSize = "11px";
+
+  slot.appendChild(img);
+  slot.appendChild(title);
+}
     reel.appendChild(slot);
   }
 
