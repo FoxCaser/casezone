@@ -38,3 +38,42 @@
 .case-item small{
   font-size:11px;
 }
+.case-art{
+  height:150px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.case-box{
+  width:180px;
+  height:110px;
+  border-radius:14px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+
+.case-red .case-box{
+  background:linear-gradient(135deg,#8b0000,#ff3333);
+}
+
+.case-epic .case-box{
+  background:linear-gradient(135deg,#4b0082,#a855f7);
+}
+
+.case-legend .case-box{
+  background:linear-gradient(135deg,#8a5a00,#ffd700);
+}
+
+.case-lock{
+  font-size:35px;
+}
+
+.case-label{
+  margin-top:6px;
+  font-weight:900;
+  font-size:15px;
+}
