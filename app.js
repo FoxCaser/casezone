@@ -198,9 +198,9 @@ const name = skin.name;
   currentUser.balance = result.balance;
   await refresh();
 }
-
-function closeWin(){
+async function closeWin(){
   $("#modal").classList.add("hidden");
+  await showInventory();
 }
 
 async function auth(){
