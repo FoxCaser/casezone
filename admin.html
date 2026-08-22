@@ -126,23 +126,43 @@ async function loadRequests(){
 
         <br>
 
-        <button
-          class="give"
-          onclick="alert('Поки що реальна передача Steam не підключена')">
-          🎁 Видати
-        </button>
+       <button
+  class="give"
+  onclick="changeStatus(${x.id}, 'approved')">
+  🎁 Видати
+</button>
 
-        <button
-          class="reject"
-          onclick="alert('Відхилення поки не підключене')">
-          ❌ Відхилити
-        </button>
+<button
+  class="reject"
+  onclick="changeStatus(${x.id}, 'rejected')">
+  ❌ Відхилити
+</button>
 
-      </div>
+async function changeStatus(id, status){
+  try{
+    const response = await fetch(
+      "/api/withdrawals/" + id + "/status",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ status })
+      }
+    );
 
-    `).join("");
+    const result = await response.json();
+
+    if(!response.ok){
+      throw new Error(result.error || "Помилка");
+    }
+
+    await loadRequests();
+
+  }catch(e){
+    alert(e.message);
+  }
 }
-
 loadRequests();
 
 </script>
