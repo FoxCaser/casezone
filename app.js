@@ -10,11 +10,34 @@ async function refresh(){
   $("#authBtn").textContent=currentUser?"Вийти":"Увійти";
 }
 let skins = [];
+let activeCaseFilter = "all";
+
 async function loadCases(){
   cases = await api("/api/cases");
   skins = await api("/api/skins");
 
-  $("#cases").innerHTML = cases.map((c, i) => {
+  renderCases();
+}
+
+function renderCases(){
+
+  let filteredCases = cases;
+
+  if(activeCaseFilter === "cheap"){
+    filteredCases = cases.filter(c => c.price <= 250);
+  }
+
+  if(activeCaseFilter === "premium"){
+    filteredCases = cases.filter(
+      c => c.price > 250 && c.price <= 2500
+    );
+  }
+
+  if(activeCaseFilter === "expensive"){
+    filteredCases = cases.filter(c => c.price > 2500);
+  }
+
+  $("#cases").innerHTML = filteredCases.map(c => {
 
     const total = c.items.reduce(
       (sum, item) => sum + item[2],
@@ -22,30 +45,57 @@ async function loadCases(){
     );
 
     const items = c.items.map(item => {
-      const chance = ((item[2] / total) * 100).toFixed(1);
-      const image = skins.find(s => s.name === item[0])?.image || "";
+
+      const chance =
+        ((item[2] / total) * 100).toFixed(1);
+
+      const image =
+        skins.find(s => s.name === item[0])?.image || "";
 
       return `
         <div class="case-item">
-          <img src="${image}" class="case-item-img" alt="${item[0]}">
+
+          <img
+            src="${image}"
+            class="case-item-img"
+            alt="${item[0]}"
+          >
+
           <div>
             <div>${item[0]}</div>
-            <small>${chance}% • ${item[3]} ₴</small>
+
+            <small>
+              ${chance}% • ${item[3]} ₴
+            </small>
           </div>
+
         </div>
       `;
+
     }).join("");
 
     return `
       <article class="card">
-       <div class="case-art case-${c.id}">
-  <div class="case-box">
-    <div class="case-lock">🔒</div>
-    <div class="case-label">${c.name}</div>
-  </div>
-</div>
-       
-        <div class="price">${c.price} ₴</div>
+
+        <div class="case-art case-${c.id}">
+
+          <div class="case-box">
+
+            <div class="case-lock">
+              🔒
+            </div>
+
+            <div class="case-label">
+              ${c.name}
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="price">
+          ${c.price} ₴
+        </div>
 
         <div class="case-items">
           ${items}
@@ -54,9 +104,16 @@ async function loadCases(){
         <button onclick="openCase('${c.id}')">
           Відкрити кейс
         </button>
+
       </article>
     `;
+
   }).join("");
+}
+
+function filterCases(type){
+  activeCaseFilter = type;
+  renderCases();
 }
     async function openCase(id){
   if(!currentUser){
