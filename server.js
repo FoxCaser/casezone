@@ -40,12 +40,6 @@ async function loadSkinImages() {
   }
 }
 
-    console.log("Картинки скінів завантажені:", Object.keys(skinImages).length);
-  } catch (e) {
-    console.error("Не вдалося завантажити картинки скінів:", e.message);
-  }
-}
-
 app.set("trust proxy", 1);
 
 if (!process.env.DATABASE_URL) {
