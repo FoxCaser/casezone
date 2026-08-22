@@ -554,6 +554,30 @@ app.post("/api/open/:caseId", auth, async (req, res) => {
   }
 });
 
+app.get("/auth/steam", (req, res) => {
+  const returnUrl =
+    "https://casezone.onrender.com/auth/steam/callback";
+
+  const realm =
+    "https://casezone.onrender.com/";
+
+  const params = new URLSearchParams({
+    "openid.ns": "http://specs.openid.net/auth/2.0",
+    "openid.mode": "checkid_setup",
+    "openid.return_to": returnUrl,
+    "openid.realm": realm,
+    "openid.identity":
+      "http://specs.openid.net/auth/2.0/identifier_select",
+    "openid.claimed_id":
+      "http://specs.openid.net/auth/2.0/identifier_select"
+  });
+
+  res.redirect(
+    "https://steamcommunity.com/openid/login?" +
+    params.toString()
+  );
+});
+
 app.get("/", (req, res) => {
   res.sendFile(
     path.join(__dirname, "index.html")
