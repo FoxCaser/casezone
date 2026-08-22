@@ -119,6 +119,14 @@ const fake = skins.filter(x => x.image);
       else{
   const skin = fake[Math.floor(Math.random() * fake.length)];
 const name = skin.name;
+       const caseItem = c.items.find(item => item[0] === name);
+
+if(caseItem){
+  slot.classList.add(
+    "rarity-" +
+    caseItem[1].toLowerCase().replace(/[^a-z0-9]+/g, "-")
+  );
+} 
 
   const img = document.createElement("img");
   img.src = skin.image;
