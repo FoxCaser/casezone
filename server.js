@@ -261,6 +261,85 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
+app.post("/api/withdraw/:inventoryId", auth, async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const inventoryResult = await client.query(
+      `
+      SELECT *
+      FROM inventory
+      WHERE id = $1
+        AND user_id = $2
+      FOR UPDATE
+      `,
+      [req.params.inventoryId, req.session.userId]
+    );
+
+    const item = inventoryResult.rows[0];
+
+    if (!item) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({
+        error: "Предмет не знайдено"
+      });
+    }
+
+    const userResult = await client.query(
+      `
+      SELECT steam_id
+      FROM users
+      WHERE id = $1
+      `,
+      [req.session.userId]
+    );
+
+    const user = userResult.rows[0];
+
+    if (!user || !user.steam_id) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        error: "Спочатку увійдіть через Steam"
+      });
+    }
+
+    const withdrawal = await client.query(
+      `
+      INSERT INTO withdrawals
+        (user_id, inventory_id, steam_id, item_name, value)
+      VALUES
+        ($1, $2, $3, $4, $5)
+      RETURNING id
+      `,
+      [
+        req.session.userId,
+        item.id,
+        user.steam_id,
+        item.item_name,
+        item.value
+      ]
+    );
+
+    await client.query("COMMIT");
+
+    res.json({
+      ok: true,
+      withdrawalId: withdrawal.rows[0].id
+    });
+
+  } catch (e) {
+    await client.query("ROLLBACK");
+    console.error(e);
+
+    res.status(500).json({
+      error: "Помилка створення заявки"
+    });
+  } finally {
+    client.release();
+  }
+});
 app.post("/api/login", async (req, res) => {
   try {
     const username = req.body.username?.trim();
