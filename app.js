@@ -243,6 +243,9 @@ async function auth(){
     </button>
   `;
 }
+function loginSteam(){
+  window.location.href = "/auth/steam";
+}
 async function login(){try{await api("/api/login",{method:"POST",body:JSON.stringify({username:$("#u").value,password:$("#p").value})});$("#modal").classList.add("hidden");await refresh()}catch(e){alert(e.message)}}
 async function register(){try{await api("/api/register",{method:"POST",body:JSON.stringify({username:$("#u").value,password:$("#p").value})});$("#modal").classList.add("hidden");await refresh()}catch(e){alert(e.message)}}
 async function sellItem(id){
