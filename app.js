@@ -258,6 +258,23 @@ async function sellItem(id){
     alert(e.message);
   }
 }
+async function withdrawItem(id){
+  try{
+    const result = await api(
+      "/api/withdraw/" + id,
+      {
+        method: "POST"
+      }
+    );
+
+    alert("Заявка на вивід створена! ID: " + result.withdrawalId);
+
+  }catch(e){
+    alert(e.message);
+  }
+}
+
+async function showInventory(){
 async function showInventory(){
   if(!currentUser) return auth();
 
@@ -288,6 +305,9 @@ async function showInventory(){
             <button onclick="sellItem(${x.id})">
               Продати за ${x.value} ₴
             </button>
+          <button onclick="withdrawItem(${x.id})">
+  🎁 Вивести
+</button>
           </div>
         `;
       }).join("")
