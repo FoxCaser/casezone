@@ -272,8 +272,7 @@ async function withdrawItem(id){
   }
 }
 async function showInventory(){
-async function showInventory(){
-  if(!currentUser) return auth();
+if(!currentUser) return auth();
 
   const items = await api("/api/inventory");
   const skins = await api("/api/skins");
