@@ -44,7 +44,7 @@ async function loadCases(){
     <div class="case-label">${c.name}</div>
   </div>
 </div>
-        <h3>${c.name}</h3>
+       
         <div class="price">${c.price} ₴</div>
 
         <div class="case-items">
