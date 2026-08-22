@@ -81,7 +81,6 @@ function skinImage(name) {
   slot.appendChild(img);
   slot.appendChild(title);
 }
-   }
       else{
   const name = fake[Math.floor(Math.random() * fake.length)];
 
