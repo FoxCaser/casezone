@@ -12,6 +12,39 @@ const { Pool } = pg;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
+const SKIN_API =
+  "https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/api/en/skins.json";
+
+let skinImages = {};
+
+async function loadSkinImages() {
+  try {
+    const response = await fetch(SKIN_API);
+    const skins = await response.json();
+
+    for (const skin of skins) {
+      if (skin.name && skin.image) {
+        skinImages[skin.name] = skin.image;
+              }
+    }
+
+    console.log(
+      "Картинки скінів завантажені:",
+      Object.keys(skinImages).length
+    );
+  } catch (e) {
+    console.error(
+      "Не вдалося завантажити картинки скінів:",
+      e.message
+    );
+  }
+}
+
+    console.log("Картинки скінів завантажені:", Object.keys(skinImages).length);
+  } catch (e) {
+    console.error("Не вдалося завантажити картинки скінів:", e.message);
+  }
+}
 
 app.set("trust proxy", 1);
 
@@ -497,7 +530,8 @@ app.post("/api/open/:caseId", auth, async (req, res) => {
       item: {
         name: item[0],
         rarity: item[1],
-        value: item[3]
+        value: item[3],
+        image: skinImages[item[0]] || null
       },
       balance: balanceResult.rows[0].balance
     });
@@ -519,7 +553,7 @@ app.get("/", (req, res) => {
     path.join(__dirname, "index.html")
   );
 });
-
+await loadSkinImages();
 await initDatabase();
 
 const PORT = process.env.PORT || 3000;
