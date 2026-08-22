@@ -55,8 +55,32 @@
         🎒 Інвентар
       </button>
     </div>
+    
+     <div class="case-filters">
 
-    <div
+  <button class="filter active" onclick="filterCases('all')">
+    Усі
+  </button>
+
+  <button class="filter" onclick="filterCases('cheap')">
+    💰 Дешеві
+  </button>
+
+  <button class="filter" onclick="filterCases('premium')">
+    💎 Преміум
+  </button>
+
+  <button class="filter" onclick="filterCases('expensive')">
+    🔥 Дорогі
+  </button>
+
+</div>
+
+<div
+  id="cases"
+  class="grid">
+</div>
+
       id="cases"
       class="grid">
     </div>
