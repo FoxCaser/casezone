@@ -95,6 +95,10 @@ const fake = skins.filter(x => x.image);
     slot.className = "slot";
 
    if(i === 27){
+     slot.classList.add(
+  "rarity-" +
+  result.item.rarity.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+);
   slot.classList.add("win");
   slot.id = "winningItem";
 
