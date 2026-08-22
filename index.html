@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CaseZone — CS2 Cases</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#0b0e13;color:#fff}
+header{padding:20px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #252a33}
+.logo{font-size:28px;font-weight:800;color:#ff9f1a}.balance{background:#171c24;padding:12px 18px;border-radius:10px}
+main{max-width:1100px;margin:50px auto;padding:0 20px}.hero{text-align:center;margin-bottom:45px}
+.hero h1{font-size:48px;margin:0 0 12px}.hero p{color:#9da5b4;font-size:18px}
+.cases{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:22px}
+.card{background:#151a22;border:1px solid #292f3a;border-radius:16px;padding:25px;text-align:center;box-shadow:0 10px 30px #0005}
+.case-img{height:150px;border-radius:12px;background:linear-gradient(135deg,#242b38,#11151c);display:flex;align-items:center;justify-content:center;font-size:60px;margin-bottom:18px}
+.card h2{margin:8px 0}.price{color:#ffb13b;font-size:20px;font-weight:bold;margin:12px}
+button{border:0;border-radius:9px;padding:13px 22px;background:#ff9f1a;color:#111;font-weight:800;cursor:pointer}
+button:hover{filter:brightness(1.1)}.panel{margin-top:40px;background:#11161e;border-radius:14px;padding:25px}
+#result{min-height:35px;color:#ffd166;font-size:20px;text-align:center}
+footer{text-align:center;color:#697181;padding:50px}
+</style>
+</head>
+<body>
+<header><div class="logo">CASEZONE</div><div class="balance">Баланс: <b id="balance">1000</b>₴</div></header>
+<main>
+<section class="hero"><h1>Відкривай кейси CS2</h1><p>Обирай кейс, відкривай його та отримуй випадковий предмет.</p></section>
+<section class="cases">
+<div class="card"><div class="case-img">🔴</div><h2>RED CASE</h2><div class="price">100 ₴</div><button onclick="openCase('Red Case',100)">Відкрити</button></div>
+<div class="card"><div class="case-img">🟣</div><h2>EPIC CASE</h2><div class="price">250 ₴</div><button onclick="openCase('Epic Case',250)">Відкрити</button></div>
+<div class="card"><div class="case-img">🟡</div><h2>LEGEND CASE</h2><div class="price">500 ₴</div><button onclick="openCase('Legend Case',500)">Відкрити</button></div>
+</section>
+<div class="panel"><div id="result">Вибери кейс для відкриття</div></div>
+</main>
+<footer>© 2026 CaseZone</footer>
+<script>
+let balance=1000;
+const drops=['AK-47 | Redline','AWP | Asiimov','M4A1-S | Printstream','Glock-18 | Fade','★ Karambit | Doppler'];
+function openCase(name,price){
+ if(balance<price){document.getElementById('result').textContent='Недостатньо балансу';return}
+ balance-=price;
+ const drop=drops[Math.floor(Math.random()*drops.length)];
+ document.getElementById('balance').textContent=balance;
+ document.getElementById('result').textContent='Вітаємо! '+name+': '+drop;
+}
+</script>
+</body>
+</html>
