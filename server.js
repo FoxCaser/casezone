@@ -122,7 +122,7 @@ const cases = [
     items: [
       ["M4A1-S | Printstream", "Classified", 35, 600],
       ["AK-47 | Fire Serpent", "Covert", 25, 1800],
-      ["AWP | Dragon Lore", "Contraband", 10, 600.000],
+      ["AWP | Dragon Lore", "Contraband", 10, 600000],
       ["★ Butterfly Knife | Doppler", "Covert", 5, 7500],
       ["★ Karambit | Case Hardened", "Rare", 1, 15000]
     ]
