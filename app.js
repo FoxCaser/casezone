@@ -167,20 +167,23 @@ const name = skin.name;
           $("#modalContent").innerHTML = `
             <h2>🎉 Вітаємо!</h2>
 
-            <div class="slot win"
-                 style="margin:25px auto;max-width:320px">
+          <div class="slot win"
+     style="margin:25px auto;max-width:320px">
 
-              ${result.item.name}
+  <img
+    src="${result.item.image || skinImage(result.item.name)}"
+    alt="${result.item.name}"
+    style="width:180px;height:130px;object-fit:contain"
+  >
 
-              <br>
+  <div>${result.item.name}</div>
 
-              <small>
-                ${result.item.rarity} ·
-                ${result.item.value} ₴
-              </small>
+  <small>
+    ${result.item.rarity} ·
+    ${result.item.value} ₴
+  </small>
 
-            </div>
-
+</div>
             <button onclick="closeWin()">
               Забрати
             </button>
