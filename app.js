@@ -36,11 +36,21 @@ async function auth(){
 }
 async function login(){try{await api("/api/login",{method:"POST",body:JSON.stringify({username:$("#u").value,password:$("#p").value})});$("#modal").classList.add("hidden");await refresh()}catch(e){alert(e.message)}}
 async function register(){try{await api("/api/register",{method:"POST",body:JSON.stringify({username:$("#u").value,password:$("#p").value})});$("#modal").classList.add("hidden");await refresh()}catch(e){alert(e.message)}}
+async function sellItem(id){
+  try{
+    const result = await api("/api/inventory/" + id + "/sell", {method:"POST"});
+    currentUser.balance = result.balance;
+    await refresh();
+    await showInventory();
+  }catch(e){
+    alert(e.message);
+  }
+}
 async function showInventory(){
  if(!currentUser)return auth();
  const items=await api("/api/inventory");$("#inventory").classList.remove("hidden");
- $("#items").innerHTML=items.length?items.map(x=>`<div class="item"><strong>${x.item_name}</strong><span class="muted">${x.rarity} · ${x.value} ₴</span></div>`).join(""):"<p class='muted'>Інвентар порожній.</p>";
-}
+$("#items").innerHTML=items.length?items.map(x=>`<div class="item"><strong>${x.item_name}</strong><span class="muted">${x.rarity} · ${x.value} ₴</span><button onclick="sellItem(${x.id})">Продати за ${x.value} ₴</button></div>`).join(""):"<p class='muted'>Інвентар порожній.</p>";
+  
 $("#authBtn").onclick=async()=>{if(currentUser){await api("/api/logout",{method:"POST"});location.reload()}else auth()};
 $("#inventoryBtn").onclick=showInventory;$("#closeInv").onclick=()=>$("#inventory").classList.add("hidden");$("#closeModal").onclick=()=>$("#modal").classList.add("hidden");
 refresh();loadCases();
