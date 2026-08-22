@@ -15,8 +15,7 @@ async function loadCases(){
  <div class="case-art">${["🔴","🟣","🟡"][i]}</div><h3>${c.name}</h3>
  <div class="price">${c.price} ₴</div><button onclick="openCase('${c.id}')">Відкрити кейс</button></article>`).join("");
 }
-async function openCase(id){
-  if(!currentUser){
+
     async function openCase(id){
   if(!currentUser){
     return auth();
