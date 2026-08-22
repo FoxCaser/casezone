@@ -233,7 +233,7 @@ async function showInventory(){
         const image = skin?.image || "";
 
         return `
-          <div class="item">
+         <div class="item rarity-${x.rarity.toLowerCase().replace(/[^a-z0-9]+/g, "-")}">
             <img
               src="${image}"
               alt="${x.item_name}"
