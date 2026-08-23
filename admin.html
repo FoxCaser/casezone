@@ -4,116 +4,290 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <title>CaseZone</title>
+  <title>CaseZone Admin</title>
 
-  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px;
+      background: #111827;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      margin-bottom: 25px;
+    }
+
+    .admin-info {
+      background: #1f2937;
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .requests {
+      display: grid;
+      gap: 15px;
+    }
+
+    .request {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 12px;
+      padding: 15px;
+    }
+
+    .request img {
+      width: 100px;
+      height: 75px;
+      object-fit: contain;
+      background: #111827;
+      border-radius: 8px;
+    }
+
+    .request-info {
+      flex: 1;
+    }
+
+    .request-info h3 {
+      margin: 0 0 8px;
+    }
+
+    .price {
+      color: #4ade80;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .status {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      background: #f59e0b;
+      color: #111;
+      font-weight: bold;
+    }
+
+    .date {
+      color: #9ca3af;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .empty {
+      background: #1f2937;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      color: #9ca3af;
+    }
+
+    .error {
+      background: #7f1d1d;
+      padding: 20px;
+      border-radius: 10px;
+      color: #fecaca;
+    }
+
+    .refresh {
+      background: #f59e0b;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 18px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+      }
+
+      .request {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<header>
-  <div class="logo">
-    CASE<span>ZONE</span>
+  <h1>🛠 CaseZone Admin</h1>
+
+  <div class="admin-info">
+    <b>Заявки на поповнення скінами</b>
   </div>
 
-  <div class="account">
-    <span id="userLabel">Гість</span>
-    <span id="balance">0 ₴</span>
+  <button
+    class="refresh"
+    onclick="loadRequests()">
+    🔄 Оновити
+  </button>
 
-    <button id="authBtn">
-      Увійти
-    </button>
+  <div
+    id="requests"
+    class="requests">
+    Завантаження...
   </div>
-</header>
 
-<main>
+<script>
 
-  <section class="hero">
+async function loadRequests() {
 
-    <div>
-      <div class="eyebrow">
-        CS2 CASE OPENING
+  const container =
+    document.querySelector("#requests");
+
+  container.innerHTML =
+    "Завантаження...";
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/admin/skin-deposits",
+        {
+          credentials: "include"
+        }
+      );
+
+    if (!response.ok) {
+
+      if (response.status === 403) {
+        throw new Error(
+          "Доступ заборонено. Ви не адміністратор."
+        );
+      }
+
+      if (response.status === 401) {
+        throw new Error(
+          "Необхідно увійти через Steam."
+        );
+      }
+
+      throw new Error(
+        "Помилка сервера: " +
+        response.status
+      );
+    }
+
+    const data =
+      await response.json();
+
+    const requests =
+      data.requests || [];
+
+    if (!requests.length) {
+
+      container.innerHTML = `
+        <div class="empty">
+          Заявок поки немає.
+        </div>
+      `;
+
+      return;
+    }
+
+    container.innerHTML =
+      requests.map(request => {
+
+        const image =
+          request.skin_image || "";
+
+        const price =
+          Number(request.value || 0)
+            .toFixed(2);
+
+        const date =
+          request.created_at
+            ? new Date(
+                request.created_at
+              ).toLocaleString("uk-UA")
+            : "";
+
+        return `
+          <div class="request">
+
+            <img
+              src="${image}"
+              alt=""
+              onerror="this.style.display='none'"
+            >
+
+            <div class="request-info">
+
+              <h3>
+                ${escapeHtml(
+                  request.skin_name || "Невідомий скін"
+                )}
+              </h3>
+
+              <div>
+                Користувач ID:
+                <b>${request.user_id}</b>
+              </div>
+
+              <div class="price">
+                ${price} ₴
+              </div>
+
+              <div class="status">
+                ${escapeHtml(
+                  request.status || "pending"
+                )}
+              </div>
+
+              <div class="date">
+                ${date}
+              </div>
+
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
+
+  } catch (error) {
+
+    console.error(error);
+
+    container.innerHTML = `
+      <div class="error">
+        ❌ ${escapeHtml(
+          error.message ||
+          "Не вдалося завантажити заявки"
+        )}
       </div>
+    `;
+  }
+}
 
-      <h1>
-        ВІДКРИВАЙ.<br>
-        <span>ВИГРАВАЙ.</span>
-      </h1>
 
-      <p class="sub">
-        Відкривай кейси, отримуй скіни та збирай власний інвентар.
-      </p>
-    </div>
+function escapeHtml(value) {
 
-  </section>
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
-  <section>
 
-    <div class="section-title">
-      <h2>Кейси</h2>
+loadRequests();
 
-      <button
-        class="ghost"
-        id="inventoryBtn">
-        🎒 Інвентар
-      </button>
-    </div>
-
-    <div
-      id="cases"
-      class="grid">
-    </div>
-
-  </section>
-
-</main>
-
-<!-- INVENTORY -->
-
-<div
-  id="inventory"
-  class="modal hidden">
-
-  <div class="modal-card">
-
-    <button
-      id="closeInv"
-      class="x">
-      ×
-    </button>
-
-    <h2>🎒 Мій інвентар</h2>
-
-    <div
-      id="items"
-      class="inventory">
-    </div>
-
-  </div>
-
-</div>
-
-<!-- CASE MODAL -->
-
-<div
-  id="modal"
-  class="modal hidden">
-
-  <div class="modal-card">
-
-    <button
-      id="closeModal"
-      class="x">
-      ×
-    </button>
-
-    <div id="modalContent"></div>
-
-  </div>
-
-</div>
-
-<script src="app.js"></script>
+</script>
 
 </body>
 </html>
