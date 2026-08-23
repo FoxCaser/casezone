@@ -768,6 +768,10 @@ async function depositMethod(method) {
 
     return auth();
   }
+    if (method === "skins") {
+    window.location.href = "/skins.html";
+    return;
+  }
 
 
   const info =
@@ -957,6 +961,7 @@ async function startLiqPay(amount) {
 }
 async function showSkinDeposit() {
   const info = $("#depositInfo");
+
 
   info.innerHTML = `
     <div class="skin-page">
