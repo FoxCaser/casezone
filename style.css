@@ -763,8 +763,35 @@ section{
 
 .skin-columns {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.skin-inventory-panel,
+.skin-selected-panel {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.skin-grid {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  max-height: 430px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.inventory-skin {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .skin-inventory-panel,
