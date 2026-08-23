@@ -451,16 +451,9 @@ async function depositMethod(method) {
     return;
   }
 
-  if (method === "skins") {
-    info.innerHTML = `
-      <h3>🎮 Скіни CS2</h3>
-      <p class="muted">
-        Поповнення скінами буде підключено окремо.
-      </p>
-    `;
-
-    return;
-  }
+if (method === "skins") {
+  showSkinDeposit();
+  return;
 }
 
 
@@ -539,5 +532,88 @@ $("#closeDeposit").onclick = () => {
 
 };
 
+async function showSkinDeposit() {
+  const info = $("#depositInfo");
+
+  info.innerHTML = `
+    <h3>🎮 Поповнення скінами CS2</h3>
+    <p>Оберіть скін для створення заявки:</p>
+
+    <div id="skinDepositList">
+      Завантаження скінів...
+    </div>
+  `;
+
+  try {
+    const skins = await api("/api/skins");
+
+    const list = $("#skinDepositList");
+
+    if (!skins.length) {
+      list.innerHTML = "<p>Скіни не знайдено</p>";
+      return;
+    }
+
+    list.innerHTML = skins
+      .slice(0, 50)
+      .map(skin => `
+        <button
+          class="skin-deposit-item"
+          onclick='createSkinDeposit(${JSON.stringify(skin.name)})'
+        >
+          <img
+            src="${skin.image}"
+            style="width:80px;height:60px;object-fit:contain"
+          >
+
+          <span>${skin.name}</span>
+        </button>
+      `)
+      .join("");
+
+  } catch (e) {
+    info.innerHTML =
+      "<p>Не вдалося завантажити скіни</p>";
+  }
+}
+
+
+async function createSkinDeposit(skinName) {
+
+  const value = Number(
+    prompt(
+      `Вкажи тестову вартість для ${skinName}:`
+    )
+  );
+
+  if (!value || value <= 0) {
+    return;
+  }
+
+  try {
+
+    const result = await api(
+      "/api/skin-deposit",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          skinName,
+          value
+        })
+      }
+    );
+
+    alert(
+      `Заявку №${result.request.id} створено!`
+    );
+
+  } catch (e) {
+
+    alert(
+      e.message ||
+      "Не вдалося створити заявку"
+    );
+  }
+}
 refresh();
 loadCases();
