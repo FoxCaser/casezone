@@ -455,7 +455,7 @@ if (method === "skins") {
   showSkinDeposit();
   return;
 }
-
+}
 
 async function startLiqPay(amount) {
 
