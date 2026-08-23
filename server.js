@@ -1634,6 +1634,102 @@ app.get(
   }
 );
 /* =========================
+   ADMIN: ОПРАЦЮВАННЯ СКІНІВ
+========================= */
+
+app.post(
+  "/api/admin/skin-deposits/:id/status",
+  auth,
+  async (req, res) => {
+    try {
+
+      const userResult = await pool.query(
+        `
+        SELECT steam_id
+        FROM users
+        WHERE id = $1
+        `,
+        [req.session.userId]
+      );
+
+      const user = userResult.rows[0];
+
+      if (
+        !user ||
+        user.steam_id !== "76561199848778920"
+      ) {
+        return res
+          .status(403)
+          .json({
+            error: "Доступ заборонено"
+          });
+      }
+
+      const { status } = req.body;
+
+      if (
+        status !== "approved" &&
+        status !== "rejected"
+      ) {
+        return res
+          .status(400)
+          .json({
+            error: "Невірний статус"
+          });
+      }
+
+      const id = Number(req.params.id);
+
+      if (!Number.isInteger(id)) {
+        return res
+          .status(400)
+          .json({
+            error: "Невірний ID"
+          });
+      }
+
+      const result = await pool.query(
+        `
+        UPDATE skin_deposit_requests
+        SET status = $1
+        WHERE id = $2
+        RETURNING *
+        `,
+        [
+          status,
+          id
+        ]
+      );
+
+      if (!result.rows.length) {
+        return res
+          .status(404)
+          .json({
+            error: "Заявку не знайдено"
+          });
+      }
+
+      res.json({
+        ok: true,
+        request: result.rows[0]
+      });
+
+    } catch (e) {
+
+      console.error(
+        "Admin skin deposit status error:",
+        e
+      );
+
+      res
+        .status(500)
+        .json({
+          error: "Помилка сервера"
+        });
+    }
+  }
+);
+/* =========================
    ЗАПУСК
 ========================= */
 
