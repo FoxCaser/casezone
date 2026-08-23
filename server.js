@@ -146,6 +146,17 @@ async function initDatabase() {
     );
   `);
 
+ await pool.query(`
+  CREATE TABLE IF NOT EXISTS skin_deposit_requests (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    skin_name TEXT NOT NULL,
+    skin_image TEXT,
+    value INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
+`);
   console.log("PostgreSQL готовий");
 }
 
@@ -347,6 +358,47 @@ app.get("/api/skins", (req, res) => {
       image
     }))
   );
+});
+app.post("/api/skin-deposit", auth, async (req, res) => {
+  try {
+    const { skinName, value } = req.body;
+
+    if (!skinName || !Number.isFinite(Number(value))) {
+      return res.status(400).json({
+        error: "Невірні дані"
+      });
+    }
+
+    const skinImage = skinImages[skinName] || null;
+
+    const result = await pool.query(
+      `
+      INSERT INTO skin_deposit_requests
+        (user_id, skin_name, skin_image, value)
+      VALUES
+        ($1, $2, $3, $4)
+      RETURNING id, skin_name, value, status, created_at
+      `,
+      [
+        req.session.userId,
+        skinName,
+        skinImage,
+        Number(value)
+      ]
+    );
+
+    res.json({
+      ok: true,
+      request: result.rows[0]
+    });
+
+  } catch (e) {
+    console.error("Skin deposit error:", e);
+
+    res.status(500).json({
+      error: "Не вдалося створити заявку"
+    });
+  }
 });
 
 app.get("/api/cases", (req, res) => {
