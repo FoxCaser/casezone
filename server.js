@@ -128,6 +128,17 @@ async function initDatabase() {
     );
   `);
 
+    await pool.query(`
+    CREATE TABLE IF NOT EXISTS payments (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      amount INTEGER NOT NULL,
+      provider TEXT NOT NULL DEFAULT 'liqpay',
+      transaction_id TEXT UNIQUE,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
   console.log("PostgreSQL готовий");
 }
 
