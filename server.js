@@ -1641,9 +1641,12 @@ app.post(
   "/api/admin/skin-deposits/:id/status",
   auth,
   async (req, res) => {
+    const client = await pool.connect();
+
     try {
 
-      const userResult = await pool.query(
+      // Перевірка адміністратора
+      const userResult = await client.query(
         `
         SELECT steam_id
         FROM users
@@ -1652,11 +1655,11 @@ app.post(
         [req.session.userId]
       );
 
-      const user = userResult.rows[0];
+      const admin = userResult.rows[0];
 
       if (
-        !user ||
-        user.steam_id !== "76561199848778920"
+        !admin ||
+        admin.steam_id !== "76561199848778920"
       ) {
         return res
           .status(403)
@@ -1688,7 +1691,65 @@ app.post(
           });
       }
 
-      const result = await pool.query(
+      await client.query("BEGIN");
+
+      // Блокуємо заявку, щоб її не можна було
+      // одночасно обробити двічі
+      const requestResult = await client.query(
+        `
+        SELECT *
+        FROM skin_deposit_requests
+        WHERE id = $1
+        FOR UPDATE
+        `,
+        [id]
+      );
+
+      if (!requestResult.rows.length) {
+
+        await client.query("ROLLBACK");
+
+        return res
+          .status(404)
+          .json({
+            error: "Заявку не знайдено"
+          });
+      }
+
+      const request = requestResult.rows[0];
+
+      // Заявка вже оброблена
+      if (request.status !== "pending") {
+
+        await client.query("ROLLBACK");
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Ця заявка вже була оброблена"
+          });
+      }
+
+      // Якщо приймаємо заявку —
+      // зараховуємо її суму користувачу
+      if (status === "approved") {
+
+        await client.query(
+          `
+          UPDATE users
+          SET balance = balance + $1
+          WHERE id = $2
+          `,
+          [
+            Number(request.value),
+            request.user_id
+          ]
+        );
+      }
+
+      // Змінюємо статус заявки
+      const updateResult = await client.query(
         `
         UPDATE skin_deposit_requests
         SET status = $1
@@ -1701,20 +1762,16 @@ app.post(
         ]
       );
 
-      if (!result.rows.length) {
-        return res
-          .status(404)
-          .json({
-            error: "Заявку не знайдено"
-          });
-      }
+      await client.query("COMMIT");
 
       res.json({
         ok: true,
-        request: result.rows[0]
+        request: updateResult.rows[0]
       });
 
     } catch (e) {
+
+      await client.query("ROLLBACK");
 
       console.error(
         "Admin skin deposit status error:",
@@ -1726,6 +1783,11 @@ app.post(
         .json({
           error: "Помилка сервера"
         });
+
+    } finally {
+
+      client.release();
+
     }
   }
 );
