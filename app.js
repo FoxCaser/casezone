@@ -960,6 +960,31 @@ async function showSkinDeposit() {
 
   info.innerHTML = `
     <div class="skin-page">
+    <div class="skin-tabs">
+
+  <button
+    type="button"
+    onclick="depositMethod('privat')"
+  >
+    💳 CARD
+  </button>
+
+  <button
+    type="button"
+    onclick="depositMethod('crypto')"
+  >
+    ₿ CRYPTO
+  </button>
+
+  <button
+    type="button"
+    class="active"
+    onclick="depositMethod('skins')"
+  >
+    🎮 SKINS
+  </button>
+
+</div>
 
       <div class="skin-header">
         <h1>PAY BY SKINS</h1>
