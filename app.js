@@ -393,5 +393,151 @@ $("#closeDeposit").onclick=()=>{
   $("#depositModal").classList.add("hidden");
 };
 
+async function depositMethod(method) {
+
+  if (!currentUser) {
+    $("#depositModal").classList.add("hidden");
+    return auth();
+  }
+
+  const info = $("#depositInfo");
+
+  if (method === "privat") {
+    info.innerHTML = `
+      <h3>🏦 ПриватБанк</h3>
+      <p class="muted">
+        Поповнення через LiqPay.
+      </p>
+
+      <div class="deposit-amounts">
+        <button onclick="startLiqPay(100)">100 ₴</button>
+        <button onclick="startLiqPay(250)">250 ₴</button>
+        <button onclick="startLiqPay(500)">500 ₴</button>
+        <button onclick="startLiqPay(1000)">1000 ₴</button>
+        <button onclick="startLiqPay(2500)">2500 ₴</button>
+      </div>
+    `;
+
+    return;
+  }
+
+  if (method === "oschad") {
+    info.innerHTML = `
+      <h3>🏦 Ощадбанк</h3>
+      <p class="muted">
+        Поповнення через LiqPay.
+      </p>
+
+      <div class="deposit-amounts">
+        <button onclick="startLiqPay(100)">100 ₴</button>
+        <button onclick="startLiqPay(250)">250 ₴</button>
+        <button onclick="startLiqPay(500)">500 ₴</button>
+        <button onclick="startLiqPay(1000)">1000 ₴</button>
+        <button onclick="startLiqPay(2500)">2500 ₴</button>
+      </div>
+    `;
+
+    return;
+  }
+
+  if (method === "crypto") {
+    info.innerHTML = `
+      <h3>₿ Крипта</h3>
+      <p class="muted">
+        Криптовалютне поповнення буде підключено окремо.
+      </p>
+    `;
+
+    return;
+  }
+
+  if (method === "skins") {
+    info.innerHTML = `
+      <h3>🎮 Скіни CS2</h3>
+      <p class="muted">
+        Поповнення скінами буде підключено окремо.
+      </p>
+    `;
+
+    return;
+  }
+}
+
+
+async function startLiqPay(amount) {
+
+  try {
+
+    const result = await api(
+      "/api/liqpay/create",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          amount
+        })
+      }
+    );
+
+    const form =
+      document.createElement("form");
+
+    form.method = "POST";
+    form.action = result.checkoutUrl;
+    form.style.display = "none";
+
+    const dataInput =
+      document.createElement("input");
+
+    dataInput.type = "hidden";
+    dataInput.name = "data";
+    dataInput.value = result.data;
+
+    const signatureInput =
+      document.createElement("input");
+
+    signatureInput.type = "hidden";
+    signatureInput.name = "signature";
+    signatureInput.value =
+      result.signature;
+
+    form.appendChild(dataInput);
+    form.appendChild(signatureInput);
+
+    document.body.appendChild(form);
+
+    form.submit();
+
+  } catch (e) {
+
+    alert(
+      e.message ||
+      "Не вдалося створити платіж"
+    );
+
+  }
+}
+
+
+$("#depositBtn").onclick = () => {
+
+  if (!currentUser) {
+    return auth();
+  }
+
+  $("#depositModal")
+    .classList
+    .remove("hidden");
+
+};
+
+
+$("#closeDeposit").onclick = () => {
+
+  $("#depositModal")
+    .classList
+    .add("hidden");
+
+};
+
 refresh();
 loadCases();
