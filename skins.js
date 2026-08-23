@@ -303,7 +303,7 @@ document.querySelector("#skinSort")?.addEventListener(
 
 document.querySelector("#skinsTopupButton")?.addEventListener(
   "click",
-  () => {
+  async () => {
 
     if (!selectedDemoSkins.length) {
       alert("Оберіть хоча б один скін");
@@ -318,14 +318,56 @@ document.querySelector("#skinsTopupButton")?.addEventListener(
       return;
     }
 
-    alert(
-      `Демо-заявка створена.\n\n` +
-      `Предметів: ${selectedDemoSkins.length}\n` +
-      `Сума: ${selectedDemoSkins.reduce(
-        (sum, skin) => sum + skin.price,
+    try {
+
+      for (const skin of selectedDemoSkins) {
+
+        const response = await fetch("/api/skin-deposit", {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          credentials: "include",
+
+          body: JSON.stringify({
+            skinName: skin.name,
+            value: Number(skin.price)
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error("Не вдалося створити заявку");
+        }
+      }
+
+      const total = selectedDemoSkins.reduce(
+        (sum, skin) => sum + Number(skin.price),
         0
-      ).toFixed(2)} ₴`
-    );
+      );
+
+      alert(
+        "Заявка на поповнення створена!\n\n" +
+        `Предметів: ${selectedDemoSkins.length}\n` +
+        `Сума: ${total.toFixed(2)} ₴\n\n` +
+        "Очікуйте обробки заявки."
+      );
+
+      selectedDemoSkins = [];
+
+      renderSkins();
+      updateSelected();
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        error.message ||
+        "Не вдалося створити заявку"
+      );
+    }
   }
 );
 
