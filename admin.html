@@ -118,7 +118,35 @@
         align-items: flex-start;
       }
     }
+  .actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.actions button {
+  border: 0;
+  border-radius: 7px;
+  padding: 9px 15px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.approve {
+  background: #22c55e;
+  color: #07130a;
+}
+
+.reject {
+  background: #ef4444;
+  color: white;
+}
+
+.processed {
+  color: #9ca3af;
+  font-size: 14px;
   </style>
+}
 </head>
 
 <body>
@@ -246,6 +274,31 @@ async function loadRequests() {
                   request.status || "pending"
                 )}
               </div>
+              <div class="actions">
+
+  ${
+    request.status === "pending"
+      ? `
+        <button
+          class="approve"
+          onclick="changeStatus(${request.id}, 'approved')">
+          ✅ Прийняти
+        </button>
+
+        <button
+          class="reject"
+          onclick="changeStatus(${request.id}, 'rejected')">
+          ❌ Відхилити
+        </button>
+      `
+      : `
+        <span class="processed">
+          Заявку вже оброблено
+        </span>
+      `
+  }
+
+</div>
 
               <div class="date">
                 ${date}
