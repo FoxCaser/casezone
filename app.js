@@ -1015,19 +1015,29 @@ async function showSkinDeposit() {
             placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
           >
 
-          <div class="skin-tools">
+         <div class="skin-tools">
 
-            <input
-              id="skinSearch"
-              type="text"
-              placeholder="Search skins"
-              oninput="filterDemoSkins()"
-            >
+  <input
+    id="skinSearch"
+    type="text"
+    placeholder="Search your inventory..."
+    oninput="filterDemoSkins()"
+  >
 
-            <select
-              id="skinSort"
-              onchange="sortDemoSkins()"
-            >
+  <select
+    id="skinSort"
+    onchange="sortDemoSkins()"
+  >
+    <option value="price">
+      Highest price
+    </option>
+
+    <option value="name">
+      Name A-Z
+    </option>
+  </select>
+
+</div>
               <option value="price">
                 Price
               </option>
