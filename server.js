@@ -340,45 +340,6 @@ app.get("/api/skins", (req, res) => {
 app.get("/api/cases", (req, res) => {
   res.json(cases);
 });
-app.post("/api/register", async (req, res) => {
-  try {
-    const { username, password } = req.body;
-
-    if (
-      !username ||
-      !password ||
-      username.trim().length < 3 ||
-      password.length < 6
-    ) {
-      return res.status(400).json({
-        error: "Логін від 3 символів, пароль від 6"
-      });
-    }
-
-    const hash = await bcrypt.hash(password, 12);
-
-    const result = await pool.query(
-      `
-      INSERT INTO users
-      (username, password_hash, balance)
-      VALUES ($1, $2, $3)
-      RETURNING id, username, balance
-      `,
-      [username.trim(), hash, 1000]
-    );
-
-    req.session.userId = result.rows[0].id;
-
-    res.json({
-      ok: true,
-      user: result.rows[0]
-    });
-  } catch (e) {
-    if (e.code === "23505") {
-      return res.status(409).json({
-        error: "Такий логін уже існує"
-      });
-    }
 
     console.error(e);
 
