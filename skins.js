@@ -24,14 +24,67 @@ async function loadSkins() {
 
     const skins = await response.json();
 
-    demoSkins = skins
-      .slice(0, 50)
-      .map((skin, index) => ({
-        id: index,
-        name: skin.name || "Unknown skin",
-        image: skin.image || "",
-        price: Number(skin.price) || 0
-      }));
+   const demoPrices = [
+  505.40,
+  505.40,
+  505.40,
+  505.40,
+  275.48,
+  275.48,
+  247.44,
+  247.44,
+  225.90,
+  198.50,
+  185.40,
+  175.20,
+  165.80,
+  155.40,
+  145.90,
+  135.50,
+  125.40,
+  115.80,
+  105.40,
+  98.50,
+  89.90,
+  82.40,
+  75.80,
+  68.25,
+  62.40,
+  58.90,
+  52.40,
+  48.24,
+  45.80,
+  42.50,
+  39.90,
+  35.90,
+  32.40,
+  29.50,
+  27.80,
+  25.40,
+  22.80,
+  20.50,
+  18.40,
+  16.90,
+  15.70,
+  14.50,
+  13.40,
+  12.20,
+  10.90,
+  9.80,
+  8.50,
+  7.40,
+  6.20,
+  5.50
+];
+
+demoSkins = skins
+  .slice(0, 50)
+  .map((skin, index) => ({
+    id: index,
+    name: skin.name || "Unknown skin",
+    image: skin.image || "",
+    price: demoPrices[index] || 5.00
+  }));
 
     selectedDemoSkins = [];
 
