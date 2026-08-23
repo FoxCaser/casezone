@@ -1509,6 +1509,50 @@ app.get("/", (req, res) => {
   );
 });
 
+// ТИМЧАСОВЕ ОБНУЛЕННЯ БАЛАНСУ
+app.get(
+  "/api/admin/reset-my-balance",
+  auth,
+  async (req, res) => {
+    try {
+
+      const result = await pool.query(
+        `
+        UPDATE users
+        SET balance = 0
+        WHERE id = $1
+          AND steam_id = '76561199848778920'
+        RETURNING id, username, steam_id, balance
+        `,
+        [req.session.userId]
+      );
+
+      if (!result.rows.length) {
+        return res
+          .status(403)
+          .json({
+            error: "Доступ заборонено"
+          });
+      }
+
+      res.json({
+        ok: true,
+        message: "Баланс обнулено",
+        user: result.rows[0]
+      });
+
+    } catch (e) {
+
+      console.error(e);
+
+      res
+        .status(500)
+        .json({
+          error: "Помилка сервера"
+        });
+    }
+  }
+);
 app.get(
   "/admin",
   auth,
