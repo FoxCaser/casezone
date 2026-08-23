@@ -60,6 +60,9 @@ const PgSession = connectPgSimple(session);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
+app.get("/skins.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "skins.html"));
+});
 
 app.use(
   session({
