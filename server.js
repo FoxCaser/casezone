@@ -1581,6 +1581,11 @@ app.get(
       );
 
       const user = userResult.rows[0];
+      console.log("ADMIN CHECK:", {
+  sessionUserId: req.session.userId,
+  user: user,
+  steamId: user?.steam_id
+});
 
       if (
         !user ||
