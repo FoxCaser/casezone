@@ -746,6 +746,7 @@ $("#depositBtn").onclick = () => {
   $("#depositModal")
     .classList
     .remove("hidden");
+    showSkinDeposit();
 };
 
 
