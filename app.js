@@ -746,6 +746,30 @@ $("#depositBtn").onclick = () => {
   $("#depositModal")
     .classList
     .remove("hidden");
+
+  $("#depositInfo").innerHTML = `
+    <p>Оберіть спосіб поповнення:</p>
+
+    <div class="deposit-methods">
+
+      <button onclick="depositMethod('privat')">
+        🏦 ПриватБанк
+      </button>
+
+      <button onclick="depositMethod('oschad')">
+        🏦 Ощадбанк
+      </button>
+
+      <button onclick="depositMethod('crypto')">
+        ₿ Крипта
+      </button>
+
+      <button onclick="depositMethod('skins')">
+        🎮 Скінами CS2
+      </button>
+
+    </div>
+  `;
 };
 
 
