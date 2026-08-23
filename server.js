@@ -1764,7 +1764,7 @@ if (status === "approved") {
       request.user_id
     ]
   );
-
+}
   // Передаємо скін у інвентар сайту
   await client.query(
     `
