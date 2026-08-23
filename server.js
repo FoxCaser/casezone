@@ -94,6 +94,11 @@ async function initDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
+    await pool.query(`
+    ALTER TABLE users
+    ALTER COLUMN balance TYPE NUMERIC(12,2)
+    USING balance::numeric;
+  `);
 
   await pool.query(`
     ALTER TABLE users
