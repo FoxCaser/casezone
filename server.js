@@ -1562,6 +1562,73 @@ app.get(
 
 
 /* =========================
+   SKIN DEPOSIT ADMIN API
+========================= */
+
+app.get(
+  "/api/admin/skin-deposits",
+  auth,
+  async (req, res) => {
+    try {
+
+      const userResult = await pool.query(
+        `
+        SELECT steam_id
+        FROM users
+        WHERE id = $1
+        `,
+        [req.session.userId]
+      );
+
+      const user = userResult.rows[0];
+
+      if (
+        !user ||
+        user.steam_id !== "76561199848778920"
+      ) {
+        return res
+          .status(403)
+          .json({
+            error: "Доступ заборонено"
+          });
+      }
+
+      const result = await pool.query(
+        `
+        SELECT
+          id,
+          user_id,
+          skin_name,
+          skin_image,
+          value,
+          status,
+          created_at
+        FROM skin_deposit_requests
+        ORDER BY created_at DESC
+        `
+      );
+
+      res.json({
+        ok: true,
+        requests: result.rows
+      });
+
+    } catch (e) {
+
+      console.error(
+        "Admin skin deposits error:",
+        e
+      );
+
+      res
+        .status(500)
+        .json({
+          error: "Помилка сервера"
+        });
+    }
+  }
+);
+/* =========================
    ЗАПУСК
 ========================= */
 
