@@ -1038,16 +1038,6 @@ async function showSkinDeposit() {
   </select>
 
 </div>
-              <option value="price">
-                Price
-              </option>
-
-              <option value="name">
-                Name
-              </option>
-            </select>
-
-          </div>
 
           <div
             id="demoInventory"
