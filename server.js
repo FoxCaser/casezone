@@ -95,6 +95,18 @@ async function initDatabase() {
     );
   `);
     await pool.query(`
+    CREATE TABLE IF NOT EXISTS site_inventory (
+      id SERIAL PRIMARY KEY,
+      item_name TEXT NOT NULL,
+      image TEXT,
+      value INTEGER NOT NULL,
+      source_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      deposit_request_id INTEGER,
+      status TEXT NOT NULL DEFAULT 'available',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+    await pool.query(`
     ALTER TABLE users
     ALTER COLUMN balance TYPE NUMERIC(12,2)
     USING balance::numeric;
