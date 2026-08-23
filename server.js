@@ -12,6 +12,7 @@ const { Pool } = pg;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
+
 const SKIN_API =
   "https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/api/en/skins.json";
 
@@ -25,7 +26,7 @@ async function loadSkinImages() {
     for (const skin of skins) {
       if (skin.name && skin.image) {
         skinImages[skin.name] = skin.image;
-              }
+      }
     }
 
     console.log(
@@ -57,6 +58,7 @@ const pool = new Pool({
 const PgSession = connectPgSimple(session);
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
 app.use(
@@ -65,7 +67,9 @@ app.use(
       pool,
       createTableIfMissing: true
     }),
-    secret: process.env.SESSION_SECRET || "casezone-change-this-secret",
+    secret:
+      process.env.SESSION_SECRET ||
+      "casezone-change-this-secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -87,7 +91,8 @@ async function initDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
-    await pool.query(`
+
+  await pool.query(`
     ALTER TABLE users
     ADD COLUMN IF NOT EXISTS steam_id TEXT UNIQUE;
   `);
@@ -115,7 +120,8 @@ async function initDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
-    await pool.query(`
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS withdrawals (
       id SERIAL PRIMARY KEY,
       user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -128,7 +134,7 @@ async function initDatabase() {
     );
   `);
 
-    await pool.query(`
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS payments (
       id SERIAL PRIMARY KEY,
       user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -139,6 +145,7 @@ async function initDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
+
   console.log("PostgreSQL готовий");
 }
 
@@ -299,6 +306,7 @@ const cases = [
     ]
   }
 ];
+
 function auth(req, res, next) {
   if (!req.session.userId) {
     return res.status(401).json({
@@ -310,7 +318,10 @@ function auth(req, res, next) {
 }
 
 function weightedPick(items) {
-  const total = items.reduce((sum, item) => sum + item[2], 0);
+  const total = items.reduce(
+    (sum, item) => sum + item[2],
+    0
+  );
 
   let random =
     crypto.randomInt(0, total * 1000) / 1000;
@@ -328,21 +339,19 @@ function weightedPick(items) {
 
 app.get("/api/skins", (req, res) => {
   const skins = Object.entries(skinImages)
-    .filter(([name, image]) => name && image)
-    
+    .filter(([name, image]) => name && image);
 
-  res.json(skins.map(([name, image]) => ({
-    name,
-    image
-  })));
+  res.json(
+    skins.map(([name, image]) => ({
+      name,
+      image
+    }))
+  );
 });
 
 app.get("/api/cases", (req, res) => {
   res.json(cases);
 });
-
-    
-
 app.post("/api/withdraw/:inventoryId", auth, async (req, res) => {
   const client = await pool.connect();
 
@@ -357,13 +366,17 @@ app.post("/api/withdraw/:inventoryId", auth, async (req, res) => {
         AND user_id = $2
       FOR UPDATE
       `,
-      [req.params.inventoryId, req.session.userId]
+      [
+        req.params.inventoryId,
+        req.session.userId
+      ]
     );
 
     const item = inventoryResult.rows[0];
 
     if (!item) {
       await client.query("ROLLBACK");
+
       return res.status(404).json({
         error: "Предмет не знайдено"
       });
@@ -382,6 +395,7 @@ app.post("/api/withdraw/:inventoryId", auth, async (req, res) => {
 
     if (!user || !user.steam_id) {
       await client.query("ROLLBACK");
+
       return res.status(400).json({
         error: "Спочатку увійдіть через Steam"
       });
@@ -413,15 +427,18 @@ app.post("/api/withdraw/:inventoryId", auth, async (req, res) => {
 
   } catch (e) {
     await client.query("ROLLBACK");
+
     console.error(e);
 
     res.status(500).json({
       error: "Помилка створення заявки"
     });
+
   } finally {
     client.release();
   }
 });
+
 app.get("/api/withdrawals", auth, async (req, res) => {
   try {
     const userResult = await pool.query(
@@ -463,6 +480,7 @@ app.get("/api/withdrawals", auth, async (req, res) => {
     });
   }
 });
+
 app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
   try {
     const userResult = await pool.query(
@@ -498,7 +516,10 @@ app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
         AND status = 'pending'
       RETURNING id, status
       `,
-      [status, req.params.id]
+      [
+        status,
+        req.params.id
+      ]
     );
 
     if (!result.rows.length) {
@@ -520,6 +541,7 @@ app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
     });
   }
 });
+
 app.post("/api/login", async (req, res) => {
   try {
     const username = req.body.username?.trim();
@@ -538,7 +560,10 @@ app.post("/api/login", async (req, res) => {
 
     if (
       !user ||
-      !(await bcrypt.compare(password, user.password_hash))
+      !(await bcrypt.compare(
+        password,
+        user.password_hash
+      ))
     ) {
       return res.status(401).json({
         error: "Неправильний логін або пароль"
@@ -550,6 +575,7 @@ app.post("/api/login", async (req, res) => {
     res.json({
       ok: true
     });
+
   } catch (e) {
     console.error(e);
 
@@ -587,6 +613,7 @@ app.get("/api/me", async (req, res) => {
     res.json({
       user: result.rows[0] || null
     });
+
   } catch (e) {
     console.error(e);
 
@@ -614,6 +641,7 @@ app.get("/api/inventory", auth, async (req, res) => {
     );
 
     res.json(result.rows);
+
   } catch (e) {
     console.error(e);
 
@@ -640,7 +668,10 @@ app.post(
         AND user_id = $2
         FOR UPDATE
         `,
-        [req.params.id, req.session.userId]
+        [
+          req.params.id,
+          req.session.userId
+        ]
       );
 
       const item = itemResult.rows[0];
@@ -659,7 +690,10 @@ app.post(
         SET balance = balance + $1
         WHERE id = $2
         `,
-        [item.value, req.session.userId]
+        [
+          item.value,
+          req.session.userId
+        ]
       );
 
       await client.query(
@@ -668,7 +702,10 @@ app.post(
         WHERE id = $1
         AND user_id = $2
         `,
-        [item.id, req.session.userId]
+        [
+          item.id,
+          req.session.userId
+        ]
       );
 
       const balanceResult = await client.query(
@@ -686,6 +723,7 @@ app.post(
         ok: true,
         balance: balanceResult.rows[0].balance
       });
+
     } catch (e) {
       await client.query("ROLLBACK");
 
@@ -694,6 +732,7 @@ app.post(
       res.status(500).json({
         error: "Помилка сервера"
       });
+
     } finally {
       client.release();
     }
@@ -752,14 +791,18 @@ app.post("/api/open/:caseId", auth, async (req, res) => {
       SET balance = balance - $1
       WHERE id = $2
       `,
-      [caseData.price, req.session.userId]
+      [
+        caseData.price,
+        req.session.userId
+      ]
     );
 
     await client.query(
       `
       INSERT INTO inventory
-      (user_id, item_name, rarity, value)
-      VALUES ($1, $2, $3, $4)
+        (user_id, item_name, rarity, value)
+      VALUES
+        ($1, $2, $3, $4)
       `,
       [
         req.session.userId,
@@ -772,15 +815,16 @@ app.post("/api/open/:caseId", auth, async (req, res) => {
     await client.query(
       `
       INSERT INTO openings
-      (
-        user_id,
-        case_name,
-        price,
-        item_name,
-        rarity,
-        value
-      )
-      VALUES ($1, $2, $3, $4, $5, $6)
+        (
+          user_id,
+          case_name,
+          price,
+          item_name,
+          rarity,
+          value
+        )
+      VALUES
+        ($1, $2, $3, $4, $5, $6)
       `,
       [
         req.session.userId,
@@ -810,8 +854,10 @@ app.post("/api/open/:caseId", auth, async (req, res) => {
         value: item[3],
         image: skinImages[item[0]] || null
       },
-      balance: balanceResult.rows[0].balance
+      balance:
+        balanceResult.rows[0].balance
     });
+
   } catch (e) {
     await client.query("ROLLBACK");
 
@@ -820,11 +866,11 @@ app.post("/api/open/:caseId", auth, async (req, res) => {
     res.status(500).json({
       error: "Помилка сервера"
     });
+
   } finally {
     client.release();
   }
 });
-
 app.get("/auth/steam", (req, res) => {
   const returnUrl =
     "https://casezone.onrender.com/auth/steam/callback";
@@ -833,7 +879,8 @@ app.get("/auth/steam", (req, res) => {
     "https://casezone.onrender.com/";
 
   const params = new URLSearchParams({
-    "openid.ns": "http://specs.openid.net/auth/2.0",
+    "openid.ns":
+      "http://specs.openid.net/auth/2.0",
     "openid.mode": "checkid_setup",
     "openid.return_to": returnUrl,
     "openid.realm": realm,
@@ -859,21 +906,33 @@ app.get("/auth/steam/callback", async (req, res) => {
       }
     }
 
-    const claimedId = params.get("openid.claimed_id");
-    const returnTo = params.get("openid.return_to");
+    const claimedId = params.get(
+      "openid.claimed_id"
+    );
+
+    const returnTo = params.get(
+      "openid.return_to"
+    );
 
     if (!claimedId) {
-      return res.status(400).send("SteamID не отримано");
+      return res
+        .status(400)
+        .send("SteamID не отримано");
     }
 
     if (
       returnTo !==
       "https://casezone.onrender.com/auth/steam/callback"
     ) {
-      return res.status(400).send("Невірний callback");
+      return res
+        .status(400)
+        .send("Невірний callback");
     }
 
-    params.set("openid.mode", "check_authentication");
+    params.set(
+      "openid.mode",
+      "check_authentication"
+    );
 
     const verifyResponse = await fetch(
       "https://steamcommunity.com/openid/login",
@@ -887,15 +946,23 @@ app.get("/auth/steam/callback", async (req, res) => {
       }
     );
 
-    const verification = await verifyResponse.text();
+    const verification =
+      await verifyResponse.text();
 
-    if (!verification.includes("is_valid:true")) {
-      return res.status(401).send(
-        "Steam не підтвердив авторизацію"
-      );
+    if (
+      !verification.includes(
+        "is_valid:true"
+      )
+    ) {
+      return res
+        .status(401)
+        .send(
+          "Steam не підтвердив авторизацію"
+        );
     }
 
-    const steamId = claimedId.split("/").pop();
+    const steamId =
+      claimedId.split("/").pop();
 
     let result = await pool.query(
       `
@@ -909,13 +976,20 @@ app.get("/auth/steam/callback", async (req, res) => {
     let user = result.rows[0];
 
     if (!user) {
-      const username = "Steam_" + steamId.slice(-8);
+      const username =
+        "Steam_" +
+        steamId.slice(-8);
 
       const randomPassword =
-        crypto.randomBytes(32).toString("hex");
+        crypto
+          .randomBytes(32)
+          .toString("hex");
 
       const passwordHash =
-        await bcrypt.hash(randomPassword, 10);
+        await bcrypt.hash(
+          randomPassword,
+          10
+        );
 
       result = await pool.query(
         `
@@ -938,52 +1012,510 @@ app.get("/auth/steam/callback", async (req, res) => {
     req.session.userId = user.id;
 
     res.redirect("/");
+
   } catch (e) {
     console.error(e);
 
-    res.status(500).send(
-      "Помилка входу через Steam"
-    );
+    res
+      .status(500)
+      .send(
+        "Помилка входу через Steam"
+      );
   }
 });
+
+
+/* =========================
+   LIQPAY
+========================= */
+
+app.post(
+  "/api/liqpay/create",
+  auth,
+  async (req, res) => {
+    try {
+      const amount =
+        Number(req.body.amount);
+
+      const allowedAmounts = [
+        100,
+        250,
+        500,
+        1000,
+        2500
+      ];
+
+      if (
+        !allowedAmounts.includes(amount)
+      ) {
+        return res.status(400).json({
+          error: "Невірна сума"
+        });
+      }
+
+      if (
+        !process.env.LIQPAY_PUBLIC_KEY ||
+        !process.env.LIQPAY_PRIVATE_KEY
+      ) {
+        return res.status(500).json({
+          error:
+            "LiqPay не налаштований"
+        });
+      }
+
+      const paymentResult =
+        await pool.query(
+          `
+          INSERT INTO payments
+            (
+              user_id,
+              amount,
+              provider,
+              status
+            )
+          VALUES
+            (
+              $1,
+              $2,
+              'liqpay',
+              'pending'
+            )
+          RETURNING id
+          `,
+          [
+            req.session.userId,
+            amount
+          ]
+        );
+
+      const paymentId =
+        paymentResult.rows[0].id;
+
+      const orderId =
+        `casezone_${paymentId}`;
+
+      const params = {
+        version: 7,
+        public_key:
+          process.env.LIQPAY_PUBLIC_KEY,
+        action: "pay",
+        amount:
+          amount.toFixed(2),
+        currency: "UAH",
+        description:
+          `Поповнення CaseZone на ${amount} грн`,
+        order_id: orderId,
+        server_url:
+          "https://casezone.onrender.com/api/liqpay/callback",
+        result_url:
+          "https://casezone.onrender.com/"
+      };
+
+      if (
+        process.env.LIQPAY_PUBLIC_KEY
+          .startsWith("sandbox_")
+      ) {
+        params.sandbox = 1;
+      }
+
+      const data =
+        Buffer
+          .from(
+            JSON.stringify(params)
+          )
+          .toString("base64");
+
+      const signature =
+        crypto
+          .createHash("sha3-256")
+          .update(
+            process.env.LIQPAY_PRIVATE_KEY +
+            data +
+            process.env.LIQPAY_PRIVATE_KEY
+          )
+          .digest("base64");
+
+      res.json({
+        ok: true,
+        paymentId,
+        orderId,
+        data,
+        signature,
+        checkoutUrl:
+          "https://www.liqpay.ua/api/3/checkout"
+      });
+
+    } catch (e) {
+      console.error(
+        "LiqPay create error:",
+        e
+      );
+
+      res.status(500).json({
+        error:
+          "Не вдалося створити платіж"
+      });
+    }
+  }
+);
+
+
+app.post(
+  "/api/liqpay/callback",
+  async (req, res) => {
+    try {
+      const {
+        data,
+        signature
+      } = req.body;
+
+      if (!data || !signature) {
+        return res
+          .status(400)
+          .send("Missing data");
+      }
+
+      const expectedSignature =
+        crypto
+          .createHash("sha3-256")
+          .update(
+            process.env.LIQPAY_PRIVATE_KEY +
+            data +
+            process.env.LIQPAY_PRIVATE_KEY
+          )
+          .digest("base64");
+
+      if (
+        signature !==
+        expectedSignature
+      ) {
+        console.error(
+          "Невірний LiqPay signature"
+        );
+
+        return res
+          .status(403)
+          .send("Invalid signature");
+      }
+
+      const payment =
+        JSON.parse(
+          Buffer
+            .from(
+              data,
+              "base64"
+            )
+            .toString("utf8")
+        );
+
+      const orderId =
+        payment.order_id;
+
+      if (
+        !orderId ||
+        !orderId.startsWith(
+          "casezone_"
+        )
+      ) {
+        return res
+          .status(400)
+          .send("Invalid order");
+      }
+
+      const paymentId =
+        Number(
+          orderId.replace(
+            "casezone_",
+            ""
+          )
+        );
+
+      if (
+        !Number.isInteger(
+          paymentId
+        )
+      ) {
+        return res
+          .status(400)
+          .send(
+            "Invalid payment ID"
+          );
+      }
+
+      const paymentResult =
+        await pool.query(
+          `
+          SELECT *
+          FROM payments
+          WHERE id = $1
+          FOR UPDATE
+          `,
+          [paymentId]
+        );
+
+      const dbPayment =
+        paymentResult.rows[0];
+
+      if (!dbPayment) {
+        return res
+          .status(404)
+          .send(
+            "Payment not found"
+          );
+      }
+
+      if (
+        dbPayment.status ===
+        "success"
+      ) {
+        return res.send("OK");
+      }
+
+      if (
+        Number(payment.amount) !==
+        Number(dbPayment.amount)
+      ) {
+        await pool.query(
+          `
+          UPDATE payments
+          SET status = 'error'
+          WHERE id = $1
+          `,
+          [paymentId]
+        );
+
+        return res
+          .status(400)
+          .send(
+            "Amount mismatch"
+          );
+      }
+
+      const isSandbox =
+        process.env
+          .LIQPAY_PUBLIC_KEY
+          ?.startsWith(
+            "sandbox_"
+          );
+
+      const successful =
+        payment.status ===
+          "success" ||
+        (
+          isSandbox &&
+          payment.status ===
+            "sandbox"
+        );
+
+      if (!successful) {
+        await pool.query(
+          `
+          UPDATE payments
+          SET
+            status = $1,
+            transaction_id = $2
+          WHERE id = $3
+          `,
+          [
+            payment.status ||
+              "failed",
+            payment.transaction_id
+              ? String(
+                  payment.transaction_id
+                )
+              : null,
+            paymentId
+          ]
+        );
+
+        return res.send("OK");
+      }
+
+      const client =
+        await pool.connect();
+
+      try {
+        await client.query(
+          "BEGIN"
+        );
+
+        const lockedPayment =
+          await client.query(
+            `
+            SELECT *
+            FROM payments
+            WHERE id = $1
+            FOR UPDATE
+            `,
+            [paymentId]
+          );
+
+        const currentPayment =
+          lockedPayment.rows[0];
+
+        if (
+          !currentPayment ||
+          currentPayment.status ===
+            "success"
+        ) {
+          await client.query(
+            "ROLLBACK"
+          );
+
+          return res.send("OK");
+        }
+
+        await client.query(
+          `
+          UPDATE users
+          SET balance =
+            balance + $1
+          WHERE id = $2
+          `,
+          [
+            currentPayment.amount,
+            currentPayment.user_id
+          ]
+        );
+
+        await client.query(
+          `
+          UPDATE payments
+          SET
+            status = 'success',
+            transaction_id = $1
+          WHERE id = $2
+          `,
+          [
+            payment.transaction_id
+              ? String(
+                  payment.transaction_id
+                )
+              : String(
+                  payment.payment_id ||
+                  orderId
+                ),
+            paymentId
+          ]
+        );
+
+        await client.query(
+          "COMMIT"
+        );
+
+        console.log(
+          `LiqPay: +${currentPayment.amount} грн, user ${currentPayment.user_id}`
+        );
+
+        return res.send("OK");
+
+      } catch (e) {
+        await client.query(
+          "ROLLBACK"
+        );
+
+        throw e;
+
+      } finally {
+        client.release();
+      }
+
+    } catch (e) {
+      console.error(
+        "LiqPay callback error:",
+        e
+      );
+
+      res
+        .status(500)
+        .send(
+          "Server error"
+        );
+    }
+  }
+);
+
+
+/* =========================
+   ГОЛОВНА / АДМІНКА
+========================= */
+
 app.get("/", (req, res) => {
   res.sendFile(
-    path.join(__dirname, "index.html")
+    path.join(
+      __dirname,
+      "index.html"
+    )
   );
 });
-app.get("/admin", auth, async (req, res) => {
-  try {
-    const userResult = await pool.query(
-      `
-      SELECT steam_id
-      FROM users
-      WHERE id = $1
-      `,
-      [req.session.userId]
-    );
 
-    const user = userResult.rows[0];
+app.get(
+  "/admin",
+  auth,
+  async (req, res) => {
+    try {
+      const userResult =
+        await pool.query(
+          `
+          SELECT steam_id
+          FROM users
+          WHERE id = $1
+          `,
+          [
+            req.session.userId
+          ]
+        );
 
-    if (!user || user.steam_id !== "76561199848778920") {
-      return res.status(403).send("Доступ заборонено");
+      const user =
+        userResult.rows[0];
+
+      if (
+        !user ||
+        user.steam_id !==
+          "76561199848778920"
+      ) {
+        return res
+          .status(403)
+          .send(
+            "Доступ заборонено"
+          );
+      }
+
+      res.sendFile(
+        path.join(
+          __dirname,
+          "admin.html"
+        )
+      );
+
+    } catch (e) {
+      console.error(e);
+
+      res
+        .status(500)
+        .send(
+          "Помилка сервера"
+        );
     }
-
-    res.sendFile(
-      path.join(__dirname, "admin.html")
-    );
-
-  } catch (e) {
-    console.error(e);
-    res.status(500).send("Помилка сервера");
   }
-});
+);
+
+
+/* =========================
+   ЗАПУСК
+========================= */
+
 await loadSkinImages();
 await initDatabase();
 
-const PORT = process.env.PORT || 3000;
+const PORT =
+  process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(
-    `CaseZone запущено на порту ${PORT}`
-  );
-});
+app.listen(
+  PORT,
+  () => {
+    console.log(
+      `CaseZone запущено на порту ${PORT}`
+    );
+  }
+);
