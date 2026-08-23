@@ -1338,39 +1338,7 @@ function updateSelectedSkins() {
     `).join("");
 }
 
-    box.innerHTML = skins
-      .slice(0, 30)
-      .map((skin, index) => `
-        <label class="demo-skin">
 
-          <input
-            type="checkbox"
-            value="${index}"
-            data-name="${encodeURIComponent(skin.name)}"
-          >
-
-          <img
-            src="${skin.image || ""}"
-            alt="${skin.name}"
-          >
-
-          <span>
-            ${skin.name}
-          </span>
-
-        </label>
-      `)
-      .join("");
-
-  } catch (e) {
-
-    box.innerHTML = `
-      <div class="skin-empty">
-        Не вдалося завантажити інвентар
-      </div>
-    `;
-  }
-}
 async function submitSelectedDemoSkins() {
   const selected = [
     ...document.querySelectorAll(
