@@ -341,13 +341,7 @@ app.get("/api/cases", (req, res) => {
   res.json(cases);
 });
 
-    console.error(e);
-
-    res.status(500).json({
-      error: "Помилка сервера"
-    });
-  }
-});
+    
 
 app.post("/api/withdraw/:inventoryId", auth, async (req, res) => {
   const client = await pool.connect();
