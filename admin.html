@@ -340,6 +340,61 @@ function escapeHtml(value) {
 
 loadRequests();
 
+async function changeStatus(id, status) {
+
+  const text =
+    status === "approved"
+      ? "прийняти"
+      : "відхилити";
+
+  if (!confirm(
+    `Ви впевнені, що хочете ${text} цю заявку?`
+  )) {
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      `/api/admin/skin-deposits/${id}/status`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          status: status
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Не вдалося змінити статус"
+      );
+    }
+
+    alert(
+      status === "approved"
+        ? "Заявку прийнято ✅"
+        : "Заявку відхилено ❌"
+    );
+
+    loadRequests();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      error.message ||
+      "Помилка сервера"
+    );
+  }
+}
 </script>
 
 </body>
