@@ -366,7 +366,7 @@ app.post("/api/skin-deposit", auth, async (req, res) => {
   try {
     const { skinName, value } = req.body;
 
-    if (!skinName || !Number.isFinite(Number(value))) {
+   if (!skinName || !Number.isFinite(Number(value))) {
       return res.status(400).json({
         error: "Невірні дані"
       });
