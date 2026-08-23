@@ -155,11 +155,16 @@ async function initDatabase() {
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     skin_name TEXT NOT NULL,
     skin_image TEXT,
-    value INTEGER NOT NULL,
+  value NUMERIC(10,2) NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   );
 `);
+    await pool.query(`
+    ALTER TABLE skin_deposit_requests
+    ALTER COLUMN value TYPE NUMERIC(10,2)
+    USING value::numeric;
+  `);
   console.log("PostgreSQL готовий");
 }
 
