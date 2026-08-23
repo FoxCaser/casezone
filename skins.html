@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Pay by Skins — CASEZONE</title>
+
+  <link
+    rel="stylesheet"
+    href="/style.css"
+  >
+</head>
+
+<body>
+
+  <main class="skins-page">
+
+    <header class="skins-header">
+
+      <h1>
+        PAY BY SKINS
+      </h1>
+
+      <div class="skins-subtitle">
+
+        <span>
+          CASEZONE
+        </span>
+
+        <span>
+          DEPOSIT: DEMO
+        </span>
+
+        <span>
+          ORDER TYPE: DEFAULT
+        </span>
+
+      </div>
+
+    </header>
+
+
+    <div class="skins-warning">
+
+      ⚠️ Demo mode. Select skins from the inventory below.
+
+    </div>
+
+
+    <section class="skins-columns">
+
+
+      <!-- LEFT -->
+
+      <div class="skins-inventory-panel">
+
+        <h3>
+          INSERT YOUR TRADE URL
+        </h3>
+
+
+        <input
+          id="steamTradeUrl"
+          class="trade-input"
+          type="text"
+          placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
+        >
+
+
+        <div class="skin-tools">
+
+          <input
+            id="skinSearch"
+            type="text"
+            placeholder="Search your inventory..."
+          >
+
+          <select id="skinSort">
+
+            <option value="price">
+              Highest price
+            </option>
+
+            <option value="name">
+              Name A-Z
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div
+          id="demoInventory"
+          class="skin-grid"
+        >
+
+          Завантаження скінів...
+
+        </div>
+
+      </div>
+
+
+      <!-- RIGHT -->
+
+      <div class="skins-selected-panel">
+
+        <h3>
+
+          SELECTED
+          <span id="selectedCount">
+            0
+          </span>
+
+          ITEMS FOR
+
+          <span id="selectedTotal">
+            0.00
+          </span> ₴
+
+        </h3>
+
+
+        <div
+          id="selectedSkins"
+          class="selected-skins"
+        >
+
+          <div class="selected-empty">
+
+            Select the skins that you want to deposit
+
+          </div>
+
+        </div>
+
+
+        <button
+          id="skinsTopupButton"
+          class="skin-topup-button"
+        >
+          TOP UP
+        </button>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <script src="/skins.js"></script>
+
+</body>
+
+</html>
