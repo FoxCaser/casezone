@@ -1953,23 +1953,48 @@ app.post(
 
 app.get(
   "/api/site-inventory",
+  auth,
   async (req, res) => {
     try {
 
-      const result = await pool.query(
-        `
-        SELECT
-          id,
-          item_name,
-          image,
-          value,
-          status,
-          created_at
-        FROM site_inventory
-        WHERE status = 'available'
-        ORDER BY created_at DESC
-        `
-      );
+      const userResult =
+        await pool.query(
+          `
+          SELECT steam_id
+          FROM users
+          WHERE id = $1
+          `,
+          [req.session.userId]
+        );
+
+      const user =
+        userResult.rows[0];
+
+      // Тільки адміністратор
+      if (
+        !user ||
+        user.steam_id !== "76561199848778920"
+      ) {
+        return res.status(403).json({
+          error: "Доступ заборонено"
+        });
+      }
+
+      const result =
+        await pool.query(
+          `
+          SELECT
+            id,
+            item_name,
+            image,
+            value,
+            status,
+            created_at
+          FROM site_inventory
+          WHERE status = 'available'
+          ORDER BY created_at DESC
+          `
+        );
 
       res.json({
         ok: true,
