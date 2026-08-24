@@ -445,8 +445,10 @@ app.post(
         });
       }
 
+     const image = req.body.image || null;
+      
       const skinImage =
-        skinImages[skinName] || null;
+        image || skinImages[skinName] || null;
 
       const result = await pool.query(
         `
