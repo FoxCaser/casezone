@@ -2356,5 +2356,75 @@ app.get("/api/withdrawals", auth, async (req, res) => {
     });
   }
 });
+app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
+  try {
 
+    const userResult = await pool.query(
+      `
+      SELECT steam_id
+      FROM users
+      WHERE id = $1
+      `,
+      [req.session.userId]
+    );
+
+    const user = userResult.rows[0];
+
+    if (
+      !user ||
+      user.steam_id !== "76561199848778920"
+    ) {
+      return res.status(403).json({
+        error: "Доступ заборонено"
+      });
+    }
+
+    const { status } = req.body;
+
+    if (
+      !["approved", "rejected"].includes(status)
+    ) {
+      return res.status(400).json({
+        error: "Невірний статус"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE withdrawals
+      SET status = $1
+      WHERE id = $2
+        AND status = 'pending'
+      RETURNING id, status
+      `,
+      [
+        status,
+        req.params.id
+      ]
+    );
+
+    if (!result.rows.length) {
+      return res.status(404).json({
+        error:
+          "Заявка не знайдена або вже оброблена"
+      });
+    }
+
+    res.json({
+      ok: true,
+      withdrawal: result.rows[0]
+    });
+
+  } catch (e) {
+
+    console.error(
+      "Withdrawal status error:",
+      e
+    );
+
+    res.status(500).json({
+      error: "Помилка зміни статусу"
+    });
+  }
+});
 start();
