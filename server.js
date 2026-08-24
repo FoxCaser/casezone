@@ -2361,9 +2361,13 @@ app.get("/api/withdrawals", auth, async (req, res) => {
   }
 });
 app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
-  try {
+  const client = await pool.connect();
 
-    const userResult = await pool.query(
+  try {
+    await client.query("BEGIN");
+
+    // Перевіряємо адміністратора
+    const userResult = await client.query(
       `
       SELECT steam_id
       FROM users
@@ -2378,6 +2382,8 @@ app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
       !user ||
       user.steam_id !== "76561199848778920"
     ) {
+      await client.query("ROLLBACK");
+
       return res.status(403).json({
         error: "Доступ заборонено"
       });
@@ -2388,12 +2394,73 @@ app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
     if (
       !["approved", "rejected"].includes(status)
     ) {
+      await client.query("ROLLBACK");
+
       return res.status(400).json({
         error: "Невірний статус"
       });
     }
 
-    const result = await pool.query(
+    // Отримуємо заявку
+    const withdrawalResult = await client.query(
+      `
+      SELECT
+        id,
+        inventory_id,
+        status
+      FROM withdrawals
+      WHERE id = $1
+      FOR UPDATE
+      `,
+      [req.params.id]
+    );
+
+    const withdrawal =
+      withdrawalResult.rows[0];
+
+    if (!withdrawal) {
+      await client.query("ROLLBACK");
+
+      return res.status(404).json({
+        error: "Заявка не знайдена"
+      });
+    }
+
+    if (withdrawal.status !== "pending") {
+      await client.query("ROLLBACK");
+
+      return res.status(400).json({
+        error: "Заявка вже оброблена"
+      });
+    }
+
+    // Якщо адмін приймає вивід
+    if (status === "approved") {
+
+      const inventoryResult =
+        await client.query(
+          `
+          UPDATE inventory
+          SET status = 'withdrawn'
+          WHERE id = $1
+            AND status = 'available'
+          RETURNING id
+          `,
+          [withdrawal.inventory_id]
+        );
+
+      if (!inventoryResult.rows.length) {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          error:
+            "Цей предмет вже недоступний для виводу"
+        });
+      }
+    }
+
+    // Змінюємо статус заявки
+    const result = await client.query(
       `
       UPDATE withdrawals
       SET status = $1
@@ -2408,11 +2475,15 @@ app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
     );
 
     if (!result.rows.length) {
+      await client.query("ROLLBACK");
+
       return res.status(404).json({
         error:
           "Заявка не знайдена або вже оброблена"
       });
     }
+
+    await client.query("COMMIT");
 
     res.json({
       ok: true,
@@ -2420,6 +2491,8 @@ app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
     });
 
   } catch (e) {
+
+    await client.query("ROLLBACK");
 
     console.error(
       "Withdrawal status error:",
@@ -2429,6 +2502,10 @@ app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
     res.status(500).json({
       error: "Помилка зміни статусу"
     });
+
+  } finally {
+    client.release();
   }
 });
+
 start();
