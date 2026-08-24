@@ -211,6 +211,22 @@ async function initDatabase() {
     USING value::numeric;
   `);
 
+    await pool.query(`
+    ALTER TABLE site_inventory
+    ALTER COLUMN value TYPE NUMERIC(10,2)
+    USING value::numeric;
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS steam_inventory_cache (
+      steam_id TEXT PRIMARY KEY,
+      inventory JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  console.log("PostgreSQL готовий");
+}
   console.log("PostgreSQL готовий");
 }
 function auth(req, res, next) {
@@ -2009,7 +2025,37 @@ app.get(
             "Steam-акаунт не підключений"
         });
       }
-const steamUrl =
+const cacheResult = await pool.query(
+  `
+  SELECT inventory, updated_at
+  FROM steam_inventory_cache
+  WHERE steam_id = $1
+  `,
+  [user.steam_id]
+);
+
+const cached = cacheResult.rows[0];
+
+if (cached) {
+
+  const cacheAge =
+    Date.now() -
+    new Date(cached.updated_at).getTime();
+
+  const CACHE_TIME =
+    5 * 60 * 1000;
+
+  if (cacheAge < CACHE_TIME) {
+
+    return res.json({
+      ok: true,
+      items: cached.inventory,
+      cached: true
+    });
+
+  }
+}
+      const steamUrl =
   `https://steamcommunity.com/inventory/${user.steam_id}/730/2?l=english&count=2000`;
 
 const response =
@@ -2095,27 +2141,34 @@ if (!response.ok) {
                 : null
           };
 
-        }).filter(Boolean);
+       }).filter(Boolean);
 
-      res.json({
-        ok: true,
-        items: inventory
-      });
-
-    } catch (e) {
-
-      console.error(
-        "Steam inventory error:",
-        e
-      );
-
-      res.status(500).json({
-        error:
-          "Помилка отримання Steam-інвентарю"
-      });
-    }
-  }
+await pool.query(
+  `
+  INSERT INTO steam_inventory_cache
+    (
+      steam_id,
+      inventory,
+      updated_at
+    )
+  VALUES
+    ($1, $2, NOW())
+  ON CONFLICT (steam_id)
+  DO UPDATE SET
+    inventory = EXCLUDED.inventory,
+    updated_at = NOW()
+  `,
+  [
+    user.steam_id,
+    JSON.stringify(inventory)
+  ]
 );
+
+res.json({
+  ok: true,
+  items: inventory,
+  cached: false
+});
 /* =========================
    ЗАПУСК
 ========================= */
