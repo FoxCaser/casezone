@@ -2009,7 +2009,32 @@ app.get(
             "Steam-акаунт не підключений"
         });
       }
+const steamUrl =
+  `https://steamcommunity.com/inventory/${user.steam_id}/730/2?l=english&count=2000`;
 
+const response =
+  await fetch(steamUrl);
+
+console.log(
+  "STEAM INVENTORY STATUS:",
+  response.status
+);
+
+if (!response.ok) {
+
+  const steamBody =
+    await response.text();
+
+  console.error(
+    "STEAM INVENTORY ERROR:",
+    steamBody
+  );
+
+  return res.status(502).json({
+    error:
+      `Steam повернув помилку ${response.status}`
+  });
+}
      const response =
   await fetch(steamUrl);
 
