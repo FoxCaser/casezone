@@ -2035,10 +2035,8 @@ if (!response.ok) {
       `Steam повернув помилку ${response.status}`
   });
 }
-     const response =
-  await fetch(steamUrl);
 
-console.log(
+      console.log(
   "STEAM INVENTORY STATUS:",
   response.status
 );
