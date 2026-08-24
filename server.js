@@ -7,10 +7,15 @@ import path from "path";
 import { fileURLToPath } from "url";
 import crypto from "crypto";
 import SteamUser from "steam-user";
+import TradeOfferManager from "steam-tradeoffer-manager";
 
 const { Pool } = pg;
 const steamClient = new SteamUser({
   renewRefreshTokens: true
+});
+const tradeManager = new TradeOfferManager({
+  steam: steamClient,
+  language: "en"
 });
 
 steamClient.on("loggedOn", () => {
