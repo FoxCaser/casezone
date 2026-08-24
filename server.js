@@ -6,9 +6,31 @@ import connectPgSimple from "connect-pg-simple";
 import path from "path";
 import { fileURLToPath } from "url";
 import crypto from "crypto";
+import SteamUser from "steam-user";
 
 const { Pool } = pg;
+const steamClient = new SteamUser({
+  renewRefreshTokens: true
+});
 
+steamClient.on("loggedOn", () => {
+  console.log(
+    "Steam бот увійшов:",
+    steamClient.steamID.getSteamID64()
+  );
+});
+
+steamClient.on("error", (err) => {
+  console.error("Steam бот помилка:", err);
+});
+
+if (process.env.STEAM_BOT_REFRESH_TOKEN) {
+  steamClient.logOn({
+    refreshToken: process.env.STEAM_BOT_REFRESH_TOKEN
+  });
+} else {
+  console.error("STEAM_BOT_REFRESH_TOKEN не налаштований");
+}
 const __dirname = path.dirname(
   fileURLToPath(import.meta.url)
 );
