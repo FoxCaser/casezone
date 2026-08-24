@@ -205,13 +205,8 @@ async function initDatabase() {
   ALTER TABLE site_inventory
   ADD COLUMN IF NOT EXISTS assetid TEXT;
 `);
-    await pool.query(`
-    ALTER TABLE site_inventory
-    ALTER COLUMN value TYPE NUMERIC(10,2)
-    USING value::numeric;
-  `);
-
-    await pool.query(`
+ 
+  await pool.query(`
     ALTER TABLE site_inventory
     ALTER COLUMN value TYPE NUMERIC(10,2)
     USING value::numeric;
@@ -2024,151 +2019,221 @@ app.get(
             "Steam-акаунт не підключений"
         });
       }
-const cacheResult = await pool.query(
-  `
-  SELECT inventory, updated_at
-  FROM steam_inventory_cache
-  WHERE steam_id = $1
-  `,
-  [user.steam_id]
-);
 
-const cached = cacheResult.rows[0];
+      /*
+        =========================
+        КЕШ ІНВЕНТАРЮ
+        =========================
+      */
 
-if (cached) {
+      const cacheResult =
+        await pool.query(
+          `
+          SELECT inventory, updated_at
+          FROM steam_inventory_cache
+          WHERE steam_id = $1
+          `,
+          [user.steam_id]
+        );
 
-  const cacheAge =
-    Date.now() -
-    new Date(cached.updated_at).getTime();
+      const cached =
+        cacheResult.rows[0];
 
-  const CACHE_TIME =
-    5 * 60 * 1000;
+      if (cached) {
 
-  if (cacheAge < CACHE_TIME) {
+        const cacheAge =
+          Date.now() -
+          new Date(
+            cached.updated_at
+          ).getTime();
 
-    return res.json({
-      ok: true,
-      items: cached.inventory,
-      cached: true
-    });
+        const CACHE_TIME =
+          5 * 60 * 1000;
 
-  }
-}
-      const steamUrl =
-  `https://steamcommunity.com/inventory/${user.steam_id}/730/2?l=english&count=2000`;
+        if (cacheAge < CACHE_TIME) {
 
-const response =
-  await fetch(steamUrl);
+          console.log(
+            "STEAM INVENTORY: використано кеш"
+          );
 
-console.log(
-  "STEAM INVENTORY STATUS:",
-  response.status
-);
+          return res.json({
+            ok: true,
+            items: cached.inventory,
+            cached: true
+          });
+        }
+      }
 
-if (!response.ok) {
+      /*
+        =========================
+        STEAMWEBAPI
+        =========================
+      */
 
-  const steamBody =
-    await response.text();
+      const apiKey =
+        process.env.STEAMWEBAPI_KEY;
 
-  console.error(
-    "STEAM INVENTORY ERROR:",
-    steamBody
-  );
+      if (!apiKey) {
+        return res.status(500).json({
+          error:
+            "STEAMWEBAPI_KEY не налаштований"
+        });
+      }
 
-  return res.status(502).json({
-    error:
-      `Steam повернув помилку ${response.status}`
-  });
-}
+      const apiUrl =
+        new URL(
+          "https://www.steamwebapi.com/steam/api/inventory"
+        );
+
+      apiUrl.searchParams.set(
+        "steam_id",
+        user.steam_id
+      );
+
+      apiUrl.searchParams.set(
+        "game",
+        "cs2"
+      );
+
+      apiUrl.searchParams.set(
+        "key",
+        apiKey
+      );
+
+      apiUrl.searchParams.set(
+        "currency",
+        "UAH"
+      );
+
+      const response =
+        await fetch(apiUrl);
 
       console.log(
-  "STEAM INVENTORY STATUS:",
-  response.status
-);
+        "STEAMWEBAPI STATUS:",
+        response.status
+      );
 
-if (!response.ok) {
+      if (!response.ok) {
 
-  const steamBody =
-    await response.text();
+        const errorText =
+          await response.text();
 
-  console.error(
-    "STEAM INVENTORY ERROR:",
-    steamBody
-  );
+        console.error(
+          "STEAMWEBAPI ERROR:",
+          errorText
+        );
 
-  return res.status(502).json({
-    error:
-      `Steam повернув помилку ${response.status}`
-  });
-}
+        return res.status(
+          response.status
+        ).json({
+          error:
+            `SteamWebAPI повернув помилку ${response.status}`
+        });
+      }
 
       const data =
         await response.json();
 
-      const descriptions =
-        data.descriptions || [];
+      /*
+        =========================
+        ОБРОБКА ІНВЕНТАРЮ
+        =========================
+      */
 
-      const assets =
-        data.assets || [];
+      const rawItems =
+        Array.isArray(data)
+          ? data
+          : Array.isArray(data.items)
+            ? data.items
+            : Array.isArray(data.inventory)
+              ? data.inventory
+              : [];
 
       const inventory =
-        assets.map(asset => {
+        rawItems
+          .map(item => ({
 
-          const description =
-            descriptions.find(
-              item =>
-                item.classid ===
-                  asset.classid &&
-                item.instanceid ===
-                  asset.instanceid
-            );
+            assetid:
+              item.assetid || "",
 
-          if (!description) {
-            return null;
-          }
+            classid:
+              item.classid || "",
 
-          return {
-            assetid: asset.assetid,
-            classid: asset.classid,
-            instanceid: asset.instanceid,
+            instanceid:
+              item.instanceid || "",
+
             name:
-              description.market_hash_name ||
-              description.name,
+              item.marketname ||
+              item.markethashname ||
+              item.name ||
+              "Unknown skin",
+
             image:
-              description.icon_url
-                ? `https://steamcommunity-a.akamaihd.net/economy/image/${description.icon_url}`
-                : null
-          };
+              item.image ||
+              "",
 
-       }).filter(Boolean);
+            price:
+              Number(
+                item.pricereal ??
+                item.pricelatest ??
+                item.price ??
+                0
+              ),
 
-await pool.query(
-  `
-  INSERT INTO steam_inventory_cache
-    (
-      steam_id,
-      inventory,
-      updated_at
-    )
-  VALUES
-    ($1, $2, NOW())
-  ON CONFLICT (steam_id)
-  DO UPDATE SET
-    inventory = EXCLUDED.inventory,
-    updated_at = NOW()
-  `,
-  [
-    user.steam_id,
-    JSON.stringify(inventory)
-  ]
-);
+            tradable:
+              item.tradable !== false
 
-res.json({
-  ok: true,
-  items: inventory,
-  cached: false
-});
-          } catch (e) {
+          }))
+          .filter(
+            item => item.assetid
+          );
+
+      console.log(
+        "STEAM INVENTORY ITEMS:",
+        inventory.length
+      );
+
+      /*
+        =========================
+        ЗБЕРІГАЄМО В КЕШ
+        =========================
+      */
+
+      await pool.query(
+        `
+        INSERT INTO steam_inventory_cache
+          (
+            steam_id,
+            inventory,
+            updated_at
+          )
+        VALUES
+          ($1, $2, NOW())
+
+        ON CONFLICT (steam_id)
+        DO UPDATE SET
+          inventory = EXCLUDED.inventory,
+          updated_at = NOW()
+        `,
+        [
+          user.steam_id,
+          JSON.stringify(inventory)
+        ]
+      );
+
+      /*
+        =========================
+        ВІДПОВІДЬ
+        =========================
+      */
+
+      res.json({
+        ok: true,
+        items: inventory,
+        cached: false
+      });
+
+    } catch (e) {
 
       console.error(
         "Steam inventory error:",
