@@ -349,16 +349,13 @@ document.querySelector("#skinsTopupButton")?.addEventListener(
 
               credentials: "include",
 
-              body: JSON.stringify({
-                skinName: skin.name,
-                value: Number(
-                  skin.price
-                ),
-                assetid: skin.assetid,
-                tradeUrl: tradeUrl
-              })
-            }
-          );
+            body: JSON.stringify({
+  skinName: skin.name,
+  image: skin.image || "",
+  value: Number(skin.price),
+  assetid: skin.assetid,
+  tradeUrl: tradeUrl
+})
 
         if (!response.ok) {
 
