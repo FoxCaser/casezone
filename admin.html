@@ -168,10 +168,56 @@
     class="requests">
     Завантаження...
   </div>
+  <hr style="margin:40px 0">
+
+<div class="admin-info">
+  <b>📦 Інвентар сайту</b>
+</div>
+
+<button
+  class="refresh"
+  onclick="loadSiteInventory()">
+  🔄 Оновити інвентар
+</button>
+
+<div
+  id="siteInventory"
+  class="requests">
+  Завантаження...
+</div>
 
 <script>
+  async function loadSiteInventory() {
+  const container =
+    document.querySelector("#siteInventory");
 
-async function loadRequests() {
+  const response =
+    await fetch("/api/site-inventory", {
+      credentials: "include"
+    });
+
+  const data =
+    await response.json();
+
+  container.innerHTML =
+    data.items.map(item => `
+      <div class="request">
+        <img
+          src="${item.image || ""}"
+          style="width:120px;height:100px;object-fit:contain"
+        >
+
+        <h3>${item.item_name}</h3>
+
+        <p>💰 ${Number(item.value).toFixed(2)} ₴</p>
+
+        <p>📌 ${item.status}</p>
+      </div>
+    `).join("");
+}
+
+
+  async function loadRequests() {
 
   const container =
     document.querySelector("#requests");
@@ -395,6 +441,7 @@ async function changeStatus(id, status) {
     );
   }
 }
+  loadSiteInventory();
 </script>
 
 </body>
