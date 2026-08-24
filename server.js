@@ -819,6 +819,7 @@ app.post(
           FROM inventory
           WHERE id = $1
             AND user_id = $2
+            AND status = 'available'
           FOR UPDATE
           `,
           [
