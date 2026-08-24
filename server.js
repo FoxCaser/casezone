@@ -197,6 +197,11 @@ async function initDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
+    await pool.query(`
+    ALTER TABLE site_inventory
+    ALTER COLUMN value TYPE NUMERIC(10,2)
+    USING value::numeric;
+  `);
 
   console.log("PostgreSQL готовий");
 }
