@@ -2310,4 +2310,51 @@ async function start() {
   }
 }
 
+app.get("/api/withdrawals", auth, async (req, res) => {
+  try {
+    const userResult = await pool.query(
+      `
+      SELECT steam_id
+      FROM users
+      WHERE id = $1
+      `,
+      [req.session.userId]
+    );
+
+    const user = userResult.rows[0];
+
+    if (
+      !user ||
+      user.steam_id !== "76561199848778920"
+    ) {
+      return res.status(403).json({
+        error: "Доступ заборонено"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      SELECT
+        id,
+        steam_id,
+        item_name,
+        value,
+        status,
+        created_at
+      FROM withdrawals
+      ORDER BY id DESC
+      `
+    );
+
+    res.json(result.rows);
+
+  } catch (e) {
+    console.error("Withdrawals error:", e);
+
+    res.status(500).json({
+      error: "Помилка отримання заявок"
+    });
+  }
+});
+
 start();
