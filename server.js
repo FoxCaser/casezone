@@ -675,6 +675,7 @@ app.get(
           created_at
         FROM inventory
         WHERE user_id = $1
+        AND status = 'available'
         ORDER BY id DESC
         `,
         [req.session.userId]
