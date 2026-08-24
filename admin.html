@@ -185,8 +185,172 @@
   class="requests">
   Завантаження...
 </div>
+<hr style="margin:40px 0">
 
+<div class="admin-info">
+  <b>🎁 Заявки на вивід скінів</b>
+</div>
+
+<button
+  class="refresh"
+  onclick="loadWithdrawals()">
+  🔄 Оновити заявки
+</button>
+
+<div
+  id="withdrawals"
+  class="requests">
+  Завантаження...
+</div>
 <script>
+  async function loadWithdrawals() {
+  const container =
+    document.querySelector("#withdrawals");
+
+  container.innerHTML =
+    "Завантаження...";
+
+  try {
+    const response =
+      await fetch(
+        "/api/withdrawals",
+        {
+          credentials: "include"
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Не вдалося отримати заявки"
+      );
+    }
+
+    if (!data.length) {
+      container.innerHTML =
+        "Заявок на вивід немає.";
+      return;
+    }
+
+    container.innerHTML =
+      data.map(item => `
+        <div class="request">
+
+          <h3>
+            🎁 ${item.item_name}
+          </h3>
+
+          <p>
+            👤 Steam ID:
+            ${item.steam_id}
+          </p>
+
+          <p>
+            💰 ${Number(item.value).toFixed(2)} ₴
+          </p>
+
+          <p>
+            📌 Статус:
+            ${item.status}
+          </p>
+
+          <p>
+            🆔 ID заявки:
+            ${item.id}
+          </p>
+
+          ${
+            item.status === "pending"
+              ? `
+                <button
+                  class="refresh"
+                  onclick="changeWithdrawalStatus(${item.id}, 'approved')">
+                  ✅ Прийняти
+                </button>
+
+                <button
+                  class="refresh"
+                  onclick="changeWithdrawalStatus(${item.id}, 'rejected')">
+                  ❌ Відхилити
+                </button>
+              `
+              : `
+                <p>
+                  Заявку вже оброблено
+                </p>
+              `
+          }
+
+        </div>
+      `).join("");
+
+  } catch (error) {
+
+    console.error(error);
+
+    container.innerHTML =
+      `<p>${error.message}</p>`;
+  }
+}
+
+
+async function changeWithdrawalStatus(
+  id,
+  status
+) {
+
+  try {
+
+    const response =
+      await fetch(
+        `/api/withdrawals/${id}/status`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          credentials: "include",
+
+          body: JSON.stringify({
+            status: status
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Помилка зміни статусу"
+      );
+    }
+
+    alert(
+      status === "approved"
+        ? "Вивід прийнято ✅"
+        : "Вивід відхилено ❌"
+    );
+
+    loadWithdrawals();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      error.message ||
+      "Помилка сервера"
+    );
+  }
+}
   async function loadSiteInventory() {
   const container =
     document.querySelector("#siteInventory");
