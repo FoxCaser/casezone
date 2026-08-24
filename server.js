@@ -182,6 +182,10 @@ async function initDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
+    await pool.query(`
+    ALTER TABLE skin_deposit_requests
+    ADD COLUMN IF NOT EXISTS assetid TEXT;
+  `);
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS site_inventory (
@@ -413,11 +417,11 @@ app.post(
   async (req, res) => {
     try {
 
-      const {
-        skinName,
-        value
-      } = req.body;
-
+    const {
+  skinName,
+  value,
+  assetid
+} = req.body;
       if (
         !skinName ||
         !Number.isFinite(Number(value))
@@ -433,14 +437,15 @@ app.post(
       const result = await pool.query(
         `
         INSERT INTO skin_deposit_requests
-          (
-            user_id,
-            skin_name,
-            skin_image,
-            value
-          )
-        VALUES
-          ($1, $2, $3, $4)
+  (
+    user_id,
+    skin_name,
+    skin_image,
+    value,
+    assetid
+  )
+VALUES
+  ($1, $2, $3, $4, $5)
         RETURNING
           id,
           skin_name,
@@ -448,14 +453,14 @@ app.post(
           status,
           created_at
         `,
-        [
-          req.session.userId,
-          skinName,
-          skinImage,
-          Number(value)
-        ]
-      );
-
+       [
+  req.session.userId,
+  skinName,
+  skinImage,
+  Number(value),
+  assetid
+]
+   );
       res.json({
         ok: true,
         request: result.rows[0]
