@@ -1929,6 +1929,45 @@ app.post(
 );
 
 
+app.get(
+  "/api/site-inventory",
+  async (req, res) => {
+    try {
+
+      const result = await pool.query(
+        `
+        SELECT
+          id,
+          item_name,
+          image,
+          value,
+          status,
+          created_at
+        FROM site_inventory
+        WHERE status = 'available'
+        ORDER BY created_at DESC
+        `
+      );
+
+      res.json({
+        ok: true,
+        items: result.rows
+      });
+
+    } catch (e) {
+
+      console.error(
+        "Site inventory error:",
+        e
+      );
+
+      res.status(500).json({
+        error: "Помилка сервера"
+      });
+    }
+  }
+);
+
 /* =========================
    ЗАПУСК
 ========================= */
