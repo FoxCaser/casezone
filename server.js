@@ -227,8 +227,7 @@ async function initDatabase() {
 
   console.log("PostgreSQL готовий");
 }
-  console.log("PostgreSQL готовий");
-}
+
 function auth(req, res, next) {
   if (!req.session.userId) {
     return res.status(401).json({
