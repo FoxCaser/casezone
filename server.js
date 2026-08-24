@@ -201,6 +201,10 @@ async function initDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
+  await pool.query(`
+  ALTER TABLE site_inventory
+  ADD COLUMN IF NOT EXISTS assetid TEXT;
+`);
     await pool.query(`
     ALTER TABLE site_inventory
     ALTER COLUMN value TYPE NUMERIC(10,2)
@@ -1779,20 +1783,22 @@ app.post(
         );
         await client.query(
   `
-  INSERT INTO site_inventory (
-    item_name,
-    image,
-    value,
-    source_user_id,
-    deposit_request_id,
-    status
-  )
+INSERT INTO site_inventory (
+  item_name,
+  image,
+  value,
+  source_user_id,
+  deposit_request_id,
+  assetid,
+  status
+)
   VALUES (
     $1,
     $2,
     $3,
     $4,
     $5,
+    $6,
     'available'
   )
   `,
@@ -1801,7 +1807,8 @@ app.post(
     request.skin_image,
     Number(request.value),
     request.user_id,
-    request.id
+    request.id,
+    request.assetid
   ]
 );
 
