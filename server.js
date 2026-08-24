@@ -1772,6 +1772,33 @@ app.post(
             request.user_id
           ]
         );
+        await client.query(
+  `
+  INSERT INTO site_inventory (
+    item_name,
+    image,
+    value,
+    source_user_id,
+    deposit_request_id,
+    status
+  )
+  VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    'available'
+  )
+  `,
+  [
+    request.skin_name,
+    request.skin_image,
+    Number(request.value),
+    request.user_id,
+    request.id
+  ]
+);
 
 
         // 2. Передаємо
