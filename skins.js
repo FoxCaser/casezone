@@ -356,7 +356,8 @@ document.querySelector("#skinsTopupButton")?.addEventListener(
   assetid: skin.assetid,
   tradeUrl: tradeUrl
 })
-
+              }
+            );
         if (!response.ok) {
 
           const data =
