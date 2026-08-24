@@ -38,6 +38,7 @@ async function loadSkins() {
       name: item.item_name || "Unknown skin",
       image: item.image || "",
       price: Number(item.value) || 0
+      assetid: item.assetid
     }));
 
     selectedDemoSkins = [];
@@ -288,12 +289,12 @@ document.querySelector("#skinsTopupButton")?.addEventListener(
 
           credentials: "include",
 
-          body: JSON.stringify({
-            skinName: skin.name,
-            value: Number(skin.price)
-          })
-        });
-
+        body: JSON.stringify({
+  skinName: skin.name,
+  value: Number(skin.price),
+  assetid: skin.assetid
+})
+});
         if (!response.ok) {
           throw new Error("Не вдалося створити заявку");
         }
