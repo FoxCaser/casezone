@@ -122,6 +122,10 @@ async function initDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
+  await pool.query(`
+  ALTER TABLE inventory
+  ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'available';
+`);
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS openings (
