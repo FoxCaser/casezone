@@ -2168,6 +2168,20 @@ res.json({
   items: inventory,
   cached: false
 });
+          } catch (e) {
+
+      console.error(
+        "Steam inventory error:",
+        e
+      );
+
+      res.status(500).json({
+        error:
+          "Помилка отримання Steam-інвентарю"
+      });
+    }
+  }
+);
 /* =========================
    ЗАПУСК
 ========================= */
