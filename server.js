@@ -1969,6 +1969,108 @@ app.get(
 );
 
 /* =========================
+   STEAM: ІНВЕНТАР КОРИСТУВАЧА
+========================= */
+
+app.get(
+  "/api/my-steam-inventory",
+  auth,
+  async (req, res) => {
+    try {
+
+      const userResult =
+        await pool.query(
+          `
+          SELECT steam_id
+          FROM users
+          WHERE id = $1
+          `,
+          [req.session.userId]
+        );
+
+      const user =
+        userResult.rows[0];
+
+      if (!user || !user.steam_id) {
+        return res.status(400).json({
+          error:
+            "Steam-акаунт не підключений"
+        });
+      }
+
+      const steamUrl =
+        `https://steamcommunity.com/inventory/${user.steam_id}/730/2?l=english&count=2000`;
+
+      const response =
+        await fetch(steamUrl);
+
+      if (!response.ok) {
+        return res.status(502).json({
+          error:
+            "Не вдалося отримати Steam-інвентар"
+        });
+      }
+
+      const data =
+        await response.json();
+
+      const descriptions =
+        data.descriptions || [];
+
+      const assets =
+        data.assets || [];
+
+      const inventory =
+        assets.map(asset => {
+
+          const description =
+            descriptions.find(
+              item =>
+                item.classid ===
+                  asset.classid &&
+                item.instanceid ===
+                  asset.instanceid
+            );
+
+          if (!description) {
+            return null;
+          }
+
+          return {
+            assetid: asset.assetid,
+            classid: asset.classid,
+            instanceid: asset.instanceid,
+            name:
+              description.market_hash_name ||
+              description.name,
+            image:
+              description.icon_url
+                ? `https://steamcommunity-a.akamaihd.net/economy/image/${description.icon_url}`
+                : null
+          };
+
+        }).filter(Boolean);
+
+      res.json({
+        ok: true,
+        items: inventory
+      });
+
+    } catch (e) {
+
+      console.error(
+        "Steam inventory error:",
+        e
+      );
+
+      res.status(500).json({
+        error:
+          "Помилка отримання Steam-інвентарю"
+      });
+    }
+  }
+);
+/* =========================
    ЗАПУСК
 ========================= */
 
