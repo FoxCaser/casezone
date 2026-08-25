@@ -762,7 +762,7 @@ function getUpgradeCatalog() {
       if (
         !existing ||
         numericValue >
-          Number(existing.value)
+        Number(existing.value)
       ) {
 
         unique.set(
@@ -770,8 +770,7 @@ function getUpgradeCatalog() {
           {
             name,
             rarity,
-            value:
-              numericValue,
+            value:numericValue,
             image:
               skinImages[name] || null
           }
@@ -801,59 +800,7 @@ app.get(
 
 
 /* =========================
-   UPGRADE HISTORY
-========================= */
-
-app.get(
-  "/api/upgrade-history",
-  auth,
-  async (req,res) => {
-
-    try {
-
-      const result =
-        await pool.query(
-          `
-          SELECT
-            id,
-            source_name,
-            source_value,
-            target_name,
-            target_value,
-            chance,
-            success,
-            created_at
-          FROM upgrades
-          WHERE user_id = $1
-          ORDER BY id DESC
-          LIMIT 30
-          `,
-          [req.session.userId]
-        );
-
-      res.json({
-        upgrades:
-          result.rows
-      });
-
-    } catch (e) {
-
-      console.error(
-        "Upgrade history error:",
-        e
-      );
-
-      res.status(500).json({
-        error:
-          "Не вдалося завантажити історію"
-      });
-    }
-  }
-);
-
-
-/* =========================
-   EXECUTE MULTI UPGRADE
+   EXECUTE SELECTED TARGET UPGRADE
 ========================= */
 
 app.post(
@@ -875,9 +822,14 @@ app.post(
               .filter(Boolean)
           : [];
 
+      const targetName =
+        String(
+          req.body.targetName || ""
+        ).trim();
+
       const mode =
         String(
-          req.body.mode || "10x"
+          req.body.mode || "2x"
         );
 
       if (
@@ -889,39 +841,49 @@ app.post(
           .status(400)
           .json({
             error:
-              "Виберіть від 1 до 5 скінів"
+              "Виберіть від 1 до 5 предметів"
           });
       }
 
-      const modeMap = {
-        "2x": {
-          multiplier:2,
-          chance:45
-        },
-        "5x": {
-          multiplier:5,
-          chance:18
-        },
-        "10x": {
-          multiplier:10,
-          chance:9
-        },
-        "75": {
-          multiplier:1.2,
-          chance:75
-        }
-      };
-
-      const selectedMode =
-        modeMap[mode];
-
-      if (!selectedMode) {
+      if (!targetName) {
 
         return res
           .status(400)
           .json({
             error:
-              "Невідомий режим апгрейду"
+              "Виберіть предмет для апгрейду"
+          });
+      }
+
+      const modeRanges = {
+        "2x": {
+          min:2,
+          max:3
+        },
+        "5x": {
+          min:5,
+          max:7
+        },
+        "10x": {
+          min:10,
+          max:15
+        },
+        "75": {
+          min:1.15,
+          max:1.35
+        }
+      };
+
+      const modeRange =
+        modeRanges[mode];
+
+      if (!modeRange) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Невідомий режим"
           });
       }
 
@@ -963,7 +925,7 @@ app.post(
           .status(400)
           .json({
             error:
-              "Один із вибраних скінів уже недоступний"
+              "Один із предметів уже недоступний"
           });
       }
 
@@ -978,19 +940,44 @@ app.post(
           0
         );
 
-      const desiredValue =
-        sourceValue *
-        selectedMode.multiplier;
-
       const catalog =
-        getUpgradeCatalog()
-          .filter(
-            item =>
-              Number(item.value) >
-              sourceValue
-          );
+        getUpgradeCatalog();
 
-      if (!catalog.length) {
+      const target =
+        catalog.find(
+          item =>
+            item.name ===
+            targetName
+        );
+
+      if (!target) {
+
+        await client.query(
+          "ROLLBACK"
+        );
+
+        return res
+          .status(404)
+          .json({
+            error:
+              "Цільовий предмет не знайдено"
+          });
+      }
+
+      const minValue =
+        sourceValue *
+        modeRange.min;
+
+      const maxValue =
+        sourceValue *
+        modeRange.max;
+
+      if (
+        Number(target.value) <
+          minValue ||
+        Number(target.value) >
+          maxValue
+      ) {
 
         await client.query(
           "ROLLBACK"
@@ -1000,45 +987,20 @@ app.post(
           .status(400)
           .json({
             error:
-              "Немає доступного скіна для апгрейду"
+              "Цей предмет не підходить для вибраного режиму"
           });
       }
 
-      const target =
-        [...catalog]
-          .sort(
-            (a,b) =>
-              Math.abs(
-                Number(a.value) -
-                desiredValue
-              ) -
-              Math.abs(
-                Number(b.value) -
-                desiredValue
-              )
-          )[0];
-
-      const rawChance =
-        sourceValue /
-        Number(target.value) *
-        90;
-
       const chance =
-        mode === "75"
-          ? Math.min(
-              75,
-              Math.max(
-                1,
-                rawChance
-              )
-            )
-          : Math.min(
-              selectedMode.chance,
-              Math.max(
-                1,
-                rawChance
-              )
-            );
+        Math.max(
+          1,
+          Math.min(
+            75,
+            sourceValue /
+            Number(target.value) *
+            90
+          )
+        );
 
       const roll =
         crypto.randomInt(
@@ -1097,43 +1059,6 @@ app.post(
       }
 
       await client.query(
-        `
-        INSERT INTO upgrades
-          (
-            user_id,
-            source_inventory_id,
-            source_name,
-            source_value,
-            target_name,
-            target_rarity,
-            target_value,
-            chance,
-            success
-          )
-        VALUES
-          (
-            $1,$2,$3,$4,$5,$6,$7,$8,$9
-          )
-        `,
-        [
-          req.session.userId,
-          inventoryIds[0],
-          sources
-            .map(
-              item =>
-                item.item_name
-            )
-            .join(" + "),
-          sourceValue,
-          target.name,
-          target.rarity,
-          Number(target.value),
-          chance / 100,
-          success
-        ]
-      );
-
-      await client.query(
         "COMMIT"
       );
 
@@ -1144,8 +1069,7 @@ app.post(
         sourceValue,
         target: {
           ...target,
-          inventoryId:
-            newItemId
+          inventoryId:newItemId
         }
       });
 
@@ -1156,7 +1080,7 @@ app.post(
       );
 
       console.error(
-        "Multi upgrade error:",
+        "Upgrade error:",
         e
       );
 
