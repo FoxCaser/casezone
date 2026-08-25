@@ -138,6 +138,11 @@ async function initDatabase() {
   `);
 
   await pool.query(`
+    ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS trade_url TEXT;
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS inventory (
       id SERIAL PRIMARY KEY,
       user_id INTEGER NOT NULL
@@ -152,6 +157,11 @@ async function initDatabase() {
   await pool.query(`
   ALTER TABLE inventory
   ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'available';
+`);
+
+  await pool.query(`
+  ALTER TABLE inventory
+  ADD COLUMN IF NOT EXISTS assetid TEXT;
 `);
 
   await pool.query(`
@@ -184,6 +194,16 @@ async function initDatabase() {
       status TEXT NOT NULL DEFAULT 'pending',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+  `);
+
+  await pool.query(`
+    ALTER TABLE withdrawals
+    ADD COLUMN IF NOT EXISTS trade_offer_id TEXT;
+  `);
+
+  await pool.query(`
+    ALTER TABLE withdrawals
+    ADD COLUMN IF NOT EXISTS trade_url TEXT;
   `);
 
   await pool.query(`
@@ -650,7 +670,7 @@ app.post(
           WHERE id = $1
           `,
           [req.session.userId]
-        );
+                );
 
       await client.query("COMMIT");
 
@@ -828,6 +848,40 @@ app.post(
 );
 
 
+app.post("/api/trade-url", auth, async (req, res) => {
+  try {
+    const tradeUrl = String(req.body.tradeUrl || "").trim();
+
+    if (!tradeUrl || !tradeUrl.startsWith("https://steamcommunity.com/tradeoffer/new/?")) {
+      return res.status(400).json({
+        error: "Невірне Trade URL"
+      });
+    }
+
+    const url = new URL(tradeUrl);
+
+    if (url.searchParams.get("partner") === null) {
+      return res.status(400).json({
+        error: "У Trade URL немає partner"
+      });
+    }
+
+    await pool.query(
+      `UPDATE users SET trade_url = $1 WHERE id = $2`,
+      [tradeUrl, req.session.userId]
+    );
+
+    res.json({
+      ok: true
+    });
+  } catch (e) {
+    console.error("Trade URL error:", e);
+    res.status(400).json({
+      error: "Невірне Trade URL"
+    });
+  }
+});
+
 app.post(
   "/api/withdraw/:inventoryId",
   auth,
@@ -871,7 +925,7 @@ app.post(
       const userResult =
         await client.query(
           `
-          SELECT steam_id
+          SELECT steam_id, trade_url
           FROM users
           WHERE id = $1
           `,
@@ -900,10 +954,11 @@ app.post(
               inventory_id,
               steam_id,
               item_name,
-              value
+              value,
+              trade_url
             )
           VALUES
-            ($1, $2, $3, $4, $5)
+            ($1, $2, $3, $4, $5, $6)
           RETURNING id
           `,
           [
@@ -911,7 +966,8 @@ app.post(
             item.id,
             user.steam_id,
             item.item_name,
-            item.value
+            item.value,
+            user.trade_url || null
           ]
         );
 
@@ -1286,7 +1342,7 @@ app.post(
       const {
         data,
         signature
-      } = req.body;
+         } = req.body;
 
       if (!data || !signature) {
         return res
@@ -1958,7 +2014,7 @@ app.get(
 
       console.error(
         "Current user error:",
-        e
+             e
       );
 
       res.status(500).json({
@@ -2373,6 +2429,7 @@ app.get("/api/withdrawals", auth, async (req, res) => {
         item_name,
         value,
         status,
+        trade_offer_id,
         created_at
       FROM withdrawals
       ORDER BY id DESC
@@ -2395,8 +2452,7 @@ app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
   try {
     await client.query("BEGIN");
 
-    // Перевіряємо адміністратора
-    const userResult = await client.query(
+    const adminResult = await client.query(
       `
       SELECT steam_id
       FROM users
@@ -2405,14 +2461,10 @@ app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
       [req.session.userId]
     );
 
-    const user = userResult.rows[0];
+    const admin = adminResult.rows[0];
 
-    if (
-      !user ||
-      user.steam_id !== "76561199848778920"
-    ) {
+    if (!admin || admin.steam_id !== "76561199848778920") {
       await client.query("ROLLBACK");
-
       return res.status(403).json({
         error: "Доступ заборонено"
       });
@@ -2420,36 +2472,38 @@ app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
 
     const { status } = req.body;
 
-    if (
-      !["approved", "rejected"].includes(status)
-    ) {
+    if (!["approved", "rejected"].includes(status)) {
       await client.query("ROLLBACK");
-
       return res.status(400).json({
         error: "Невірний статус"
       });
     }
 
-    // Отримуємо заявку
     const withdrawalResult = await client.query(
       `
       SELECT
-        id,
-        inventory_id,
-        status
-      FROM withdrawals
-      WHERE id = $1
-      FOR UPDATE
+        w.id,
+        w.inventory_id,
+        w.user_id,
+        w.steam_id,
+        w.item_name,
+        w.value,
+        w.status,
+        w.trade_url,
+        w.trade_offer_id,
+        i.status AS inventory_status
+      FROM withdrawals w
+      JOIN inventory i ON i.id = w.inventory_id
+      WHERE w.id = $1
+      FOR UPDATE OF w, i
       `,
       [req.params.id]
     );
 
-    const withdrawal =
-      withdrawalResult.rows[0];
+    const withdrawal = withdrawalResult.rows[0];
 
     if (!withdrawal) {
       await client.query("ROLLBACK");
-
       return res.status(404).json({
         error: "Заявка не знайдена"
       });
@@ -2457,58 +2511,152 @@ app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
 
     if (withdrawal.status !== "pending") {
       await client.query("ROLLBACK");
-
       return res.status(400).json({
         error: "Заявка вже оброблена"
       });
     }
 
-    // Якщо адмін приймає вивід
-    if (status === "approved") {
+    if (status === "rejected") {
+      const result = await client.query(
+        `
+        UPDATE withdrawals
+        SET status = 'rejected'
+        WHERE id = $1 AND status = 'pending'
+        RETURNING id, status
+        `,
+        [req.params.id]
+      );
 
-      const inventoryResult =
-        await client.query(
-          `
-          UPDATE inventory
-          SET status = 'withdrawn'
-          WHERE id = $1
-            AND status = 'available'
-          RETURNING id
-          `,
-          [withdrawal.inventory_id]
-        );
+      await client.query("COMMIT");
 
-      if (!inventoryResult.rows.length) {
-        await client.query("ROLLBACK");
-
-        return res.status(400).json({
-          error:
-            "Цей предмет вже недоступний для виводу"
-        });
-      }
+      return res.json({
+        ok: true,
+        withdrawal: result.rows[0]
+      });
     }
 
-    // Змінюємо статус заявки
+    if (withdrawal.inventory_status !== "available") {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        error: "Цей предмет вже недоступний для виводу"
+      });
+    }
+
+    const tradeUrl = withdrawal.trade_url;
+
+    if (!tradeUrl) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        error: "У користувача не збережено Steam Trade URL"
+      });
+    }
+
+    let partner;
+
+    try {
+      const parsed = new URL(tradeUrl);
+      partner = tradeUrl;
+
+      if (
+        parsed.origin !== "https://steamcommunity.com" ||
+        parsed.pathname !== "/tradeoffer/new/" ||
+        !parsed.searchParams.get("partner")
+      ) {
+        throw new Error("invalid trade url");
+      }
+    } catch {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        error: "Невірне Steam Trade URL користувача"
+      });
+    }
+
+    // Отримуємо актуальний інвентар бота.
+    const botItems = await new Promise((resolve, reject) => {
+      tradeManager.getInventoryContents(
+        730,
+        2,
+        true,
+        (err, inventory) => {
+          if (err) return reject(err);
+          resolve(inventory || []);
+        }
+      );
+    });
+
+    const wantedName = String(withdrawal.item_name || "").trim();
+
+    const botItem = botItems.find(item => {
+      const names = [
+        item.market_hash_name,
+        item.marketHashName,
+        item.market_name,
+        item.name
+      ]
+        .filter(Boolean)
+        .map(String);
+
+      return (
+        item.tradable !== false &&
+        names.some(name => name === wantedName)
+      );
+    });
+
+    if (!botItem) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        error:
+          `Скін "${wantedName}" не знайдений у Steam-інвентарі бота`
+      });
+    }
+
+    const offer = tradeManager.createOffer(partner);
+
+    offer.addMyItem({
+      appid: 730,
+      contextid: "2",
+      assetid: String(botItem.assetid)
+    });
+
+    const tradeOfferId = await new Promise((resolve, reject) => {
+      offer.send((err, status) => {
+        if (err) return reject(err);
+        resolve(offer.id || status || null);
+      });
+    });
+
+    if (!tradeOfferId) {
+      await client.query("ROLLBACK");
+      return res.status(500).json({
+        error: "Steam не повернув ID Trade Offer"
+      });
+    }
+
+    await client.query(
+      `
+      UPDATE inventory
+      SET status = 'withdrawn'
+      WHERE id = $1 AND status = 'available'
+      `,
+      [withdrawal.inventory_id]
+    );
+
     const result = await client.query(
       `
       UPDATE withdrawals
-      SET status = $1
-      WHERE id = $2
-        AND status = 'pending'
-      RETURNING id, status
+      SET
+        status = 'approved',
+        trade_offer_id = $1
+      WHERE id = $2 AND status = 'pending'
+      RETURNING id, status, trade_offer_id
       `,
-      [
-        status,
-        req.params.id
-      ]
+      [String(tradeOfferId), req.params.id]
     );
 
     if (!result.rows.length) {
       await client.query("ROLLBACK");
-
-      return res.status(404).json({
-        error:
-          "Заявка не знайдена або вже оброблена"
+      return res.status(409).json({
+        error: "Заявка вже була оброблена"
       });
     }
 
@@ -2516,22 +2664,23 @@ app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
 
     res.json({
       ok: true,
-      withdrawal: result.rows[0]
+      withdrawal: result.rows[0],
+      tradeOfferId: String(tradeOfferId)
     });
-
   } catch (e) {
-
-    await client.query("ROLLBACK");
+    try {
+      await client.query("ROLLBACK");
+    } catch {}
 
     console.error(
-      "Withdrawal status error:",
+      "Withdrawal trade error:",
       e
     );
 
     res.status(500).json({
-      error: "Помилка зміни статусу"
+      error:
+        e?.message || "Помилка створення Steam Trade Offer"
     });
-
   } finally {
     client.release();
   }
