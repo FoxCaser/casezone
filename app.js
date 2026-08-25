@@ -1605,6 +1605,50 @@ profileTabs.forEach(
     );
 
   }
+  );
+  /* =========================
+   ЗБЕРЕЖЕННЯ STEAM TRADE URL
+========================= */
+
+saveTradeUrl?.addEventListener(
+  "click",
+  async () => {
+
+    const tradeUrl =
+      steamTradeUrl.value.trim();
+
+    tradeUrlStatus.textContent = "";
+
+    if (!tradeUrl) {
+      tradeUrlStatus.textContent =
+        "Вставте Steam Trade URL";
+      return;
+    }
+
+    try {
+
+      await api(
+        "/api/trade-url",
+        {
+          method: "POST",
+
+          body: JSON.stringify({
+            tradeUrl
+          })
+        }
+      );
+
+      tradeUrlStatus.textContent =
+        "✅ Trade URL збережено";
+
+    } catch (e) {
+
+      tradeUrlStatus.textContent =
+        e.message ||
+        "Не вдалося зберегти Trade URL";
+
+    }
+  }
 );
 async function initApp() {
   try {
