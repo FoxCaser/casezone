@@ -3493,15 +3493,16 @@ async function initApp() {
 
 
 /* =========================
-   UPGRADE PAGE V2
+   UPGRADE PAGE — FINAL
 ========================= */
 
 let upgradeInventoryItems = [];
 let upgradeTargetItems = [];
 let selectedUpgradeSources = [];
 let selectedUpgradeTarget = null;
-let upgradeMode = "10x";
+let upgradeMode = "2x";
 let upgradeBusy = false;
+let upgradePointerAngle = 0;
 
 
 const homeSections = () => [
@@ -3562,7 +3563,6 @@ async function showUpgradePage() {
     .add("active");
 
   await loadUpgradeData();
-  await loadUpgradeHistory();
 }
 
 
@@ -3592,71 +3592,83 @@ function upgradeSourceTotal() {
 }
 
 
-function upgradeModeConfig() {
+function upgradeModeData() {
 
-  const map = {
+  const modes = {
     "2x": {
-      multiplier:2,
-      label:"2x"
+      label:"2x",
+      min:2,
+      max:3
     },
+
     "5x": {
-      multiplier:5,
-      label:"5x"
+      label:"5x",
+      min:5,
+      max:7
     },
+
     "10x": {
-      multiplier:10,
-      label:"10x"
+      label:"10x",
+      min:10,
+      max:15
     },
+
     "75": {
-      multiplier:1.2,
-      label:"75%"
+      label:"75%",
+      min:1.15,
+      max:1.35
     }
   };
 
-  return map[upgradeMode];
+  return modes[upgradeMode];
 }
 
 
-function getBestUpgradeTarget() {
+function getUpgradeTargetRange() {
 
   const total =
     upgradeSourceTotal();
 
+  const mode =
+    upgradeModeData();
+
   if (!total) {
-    return null;
+    return {
+      min:0,
+      max:0
+    };
   }
 
-  const config =
-    upgradeModeConfig();
+  return {
+    min:
+      total *
+      mode.min,
 
-  const desired =
-    total *
-    config.multiplier;
+    max:
+      total *
+      mode.max
+  };
+}
 
-  const eligible =
-    upgradeTargetItems
-      .filter(
-        item =>
-          Number(item.value) >
-          total
-      );
 
-  if (!eligible.length) {
-    return null;
+function getEligibleUpgradeTargets() {
+
+  const {
+    min,
+    max
+  } =
+    getUpgradeTargetRange();
+
+  if (!min) {
+    return [];
   }
 
-  return [...eligible]
-    .sort(
-      (a,b) =>
-        Math.abs(
-          Number(a.value) -
-          desired
-        ) -
-        Math.abs(
-          Number(b.value) -
-          desired
-        )
-    )[0];
+  return upgradeTargetItems
+    .filter(
+      item =>
+        Number(item.value) >= min &&
+        Number(item.value) <= max
+    );
 }
 
 
@@ -3665,42 +3677,32 @@ function calculateUpgradeChance() {
   const total =
     upgradeSourceTotal();
 
-  const target =
-    selectedUpgradeTarget;
-
   if (
     !total ||
-    !target
+    !selectedUpgradeTarget
   ) {
     return 0;
   }
 
-  const raw =
-    total /
-    Number(target.value) *
-    90;
-
-  if (upgradeMode === "75") {
-    return Math.max(
-      1,
-      Math.min(
-        75,
-        raw
-      )
+  const targetValue =
+    Number(
+      selectedUpgradeTarget.value
     );
-  }
 
-  const caps = {
-    "2x":45,
-    "5x":18,
-    "10x":9
-  };
+  if (
+    !targetValue ||
+    targetValue <= total
+  ) {
+    return 0;
+  }
 
   return Math.max(
     1,
     Math.min(
-      caps[upgradeMode] || 75,
-      raw
+      75,
+      total /
+      targetValue *
+      90
     )
   );
 }
@@ -3708,12 +3710,20 @@ function calculateUpgradeChance() {
 
 async function loadUpgradeData() {
 
-  const grid =
+  const ownGrid =
     $("#upgradeInventoryGrid");
 
-  if (grid) {
-    grid.innerHTML =
+  const targetGrid =
+    $("#upgradeTargetGrid");
+
+  if (ownGrid) {
+    ownGrid.innerHTML =
       `<div class="upgrade-loading">Завантаження...</div>`;
+  }
+
+  if (targetGrid) {
+    targetGrid.innerHTML =
+      `<div class="upgrade-loading">Оберіть свої предмети.</div>`;
   }
 
   try {
@@ -3735,11 +3745,6 @@ async function loadUpgradeData() {
       skins = skinList;
     }
 
-    /*
-      Тут показуємо тільки ті предмети,
-      які реально лежать в інвентарі
-      та можуть бути використані.
-    */
     upgradeInventoryItems =
       inventory
         .filter(
@@ -3757,40 +3762,127 @@ async function loadUpgradeData() {
         );
 
     upgradeTargetItems =
-      targets.filter(
-        item =>
-          Number(item.value) > 0
-      );
+      targets
+        .filter(
+          item =>
+            Number(item.value) > 0
+        );
 
     selectedUpgradeSources =
-      selectedUpgradeSources.filter(
-        selected =>
-          upgradeInventoryItems.some(
-            item =>
-              String(item.id) ===
-              String(selected.id)
-          )
-      );
+      selectedUpgradeSources
+        .filter(
+          selected =>
+            upgradeInventoryItems
+              .some(
+                item =>
+                  String(item.id) ===
+                  String(selected.id)
+              )
+        );
 
-    selectedUpgradeTarget =
-      getBestUpgradeTarget();
+    if (
+      selectedUpgradeTarget &&
+      !getEligibleUpgradeTargets()
+        .some(
+          item =>
+            item.name ===
+            selectedUpgradeTarget.name
+        )
+    ) {
+      selectedUpgradeTarget = null;
+    }
 
-    renderUpgradeInventory();
     renderSelectedUpgradeSkins();
+    renderUpgradeInventory();
+    renderUpgradeTargets();
     refreshUpgradeSelection();
 
   } catch (e) {
 
     console.error(
-      "Upgrade data error:",
+      "Upgrade load error:",
       e
     );
 
-    if (grid) {
-      grid.innerHTML =
+    if (ownGrid) {
+      ownGrid.innerHTML =
         `<div class="upgrade-loading">Не вдалося завантажити інвентар.</div>`;
     }
   }
+}
+
+
+function renderSelectedUpgradeSkins() {
+
+  const box =
+    $("#upgradeSelectedSkins");
+
+  if (!box) {
+    return;
+  }
+
+  const cards =
+    selectedUpgradeSources
+      .map(
+        item => `
+          <div class="upgrade-selected-card">
+
+            <span class="selected-price">
+              ${Number(item.value).toFixed(2)} ₴
+            </span>
+
+            <button
+              type="button"
+              class="selected-remove"
+              onclick="
+                removeUpgradeSource(
+                  ${Number(item.id)}
+                )
+              "
+            >
+              ×
+            </button>
+
+            <img
+              src="${item.image || ""}"
+              alt="${item.item_name}"
+            >
+
+            <strong>
+              ${item.item_name}
+            </strong>
+
+          </div>
+        `
+      );
+
+  while (
+    cards.length < 5
+  ) {
+
+    cards.push(`
+      <button
+        type="button"
+        class="upgrade-add-slot-final"
+        onclick="
+          document
+            .getElementById(
+              'upgradeInventoryGrid'
+            )
+            ?.scrollIntoView({
+              behavior:'smooth',
+              block:'center'
+            })
+        "
+      >
+        <span>＋</span>
+        <small>ДОДАТИ СКІН</small>
+      </button>
+    `);
+  }
+
+  box.innerHTML =
+    cards.join("");
 }
 
 
@@ -3826,14 +3918,15 @@ function renderUpgradeInventory() {
       );
 
   list =
-    [...list].sort(
-      (a,b) =>
-        sort === "asc"
-          ? Number(a.value) -
-            Number(b.value)
-          : Number(b.value) -
-            Number(a.value)
-    );
+    [...list]
+      .sort(
+        (a,b) =>
+          sort === "asc"
+            ? Number(a.value) -
+              Number(b.value)
+            : Number(b.value) -
+              Number(a.value)
+      );
 
   $("#upgradeInventoryCount")
     .textContent =
@@ -3843,7 +3936,7 @@ function renderUpgradeInventory() {
 
     box.innerHTML = `
       <div class="upgrade-loading">
-        Немає доступних скінів для апгрейду.
+        Немає предметів для апгрейду.
       </div>
     `;
 
@@ -3853,11 +3946,6 @@ function renderUpgradeInventory() {
   box.innerHTML =
     list.map(item => {
 
-      const rarityColor =
-        getDropRarityColor(
-          item.rarity
-        );
-
       const selected =
         selectedUpgradeSources
           .some(
@@ -3866,11 +3954,16 @@ function renderUpgradeInventory() {
               String(item.id)
           );
 
+      const rarityColor =
+        getDropRarityColor(
+          item.rarity
+        );
+
       return `
         <button
           type="button"
           class="
-            upgrade-item
+            upgrade-item-final
             ${selected ? "selected" : ""}
           "
           onclick="
@@ -3880,7 +3973,7 @@ function renderUpgradeInventory() {
           "
         >
 
-          <span class="upgrade-item-price">
+          <span class="item-price">
             ${Number(item.value).toFixed(2)} ₴
           </span>
 
@@ -3889,12 +3982,12 @@ function renderUpgradeInventory() {
             alt="${item.item_name}"
           >
 
-          <div class="upgrade-item-name">
+          <div class="item-name">
             ${item.item_name}
           </div>
 
           <div
-            class="upgrade-item-rarity"
+            class="item-rarity"
             style="color:${rarityColor};"
           >
             ${item.rarity}
@@ -3906,85 +3999,134 @@ function renderUpgradeInventory() {
 }
 
 
-function renderSelectedUpgradeSkins() {
+function renderUpgradeTargets() {
 
   const box =
-    $("#upgradeSelectedSkins");
+    $("#upgradeTargetGrid");
 
   if (!box) {
     return;
   }
 
-  const cards =
-    selectedUpgradeSources
-      .map(
-        item => `
-          <div class="upgrade-selected-mini">
+  const eligible =
+    getEligibleUpgradeTargets();
 
-            <span class="mini-price">
-              ${Number(item.value).toFixed(2)} ₴
-            </span>
+  const query =
+    String(
+      $("#upgradeTargetSearch")
+        ?.value || ""
+    )
+      .trim()
+      .toLowerCase();
 
-            <button
-              type="button"
-              class="mini-remove"
-              onclick="
-                removeUpgradeSource(
-                  ${Number(item.id)}
-                )
-              "
-            >
-              ×
-            </button>
+  const sort =
+    $("#upgradeTargetSort")
+      ?.value || "asc";
 
-            <img
-              src="${item.image || ""}"
-              alt="${item.item_name}"
-            >
-
-            <strong>
-              ${item.item_name}
-            </strong>
-
-          </div>
-        `
+  let list =
+    eligible
+      .filter(
+        item =>
+          !query ||
+          item.name
+            .toLowerCase()
+            .includes(query)
       );
 
-  if (
-    selectedUpgradeSources.length < 5
-  ) {
+  list =
+    [...list]
+      .sort(
+        (a,b) =>
+          sort === "desc"
+            ? Number(b.value) -
+              Number(a.value)
+            : Number(a.value) -
+              Number(b.value)
+      );
 
-    cards.push(`
-      <button
-        type="button"
-        class="upgrade-add-slot"
-        onclick="
-          document
-            .getElementById(
-              'upgradeInventoryGrid'
-            )
-            ?.scrollIntoView({
-              behavior:'smooth',
-              block:'center'
-            })
-        "
-      >
-        <span>＋</span>
-        <small>
-          ДОДАТИ СКІН
-        </small>
-      </button>
-    `);
+  $("#upgradeTargetCount")
+    .textContent =
+      String(list.length);
+
+  if (!upgradeSourceTotal()) {
+
+    box.innerHTML = `
+      <div class="upgrade-loading">
+        Спочатку виберіть свої предмети зліва.
+      </div>
+    `;
+
+    return;
+  }
+
+  if (!list.length) {
+
+    box.innerHTML = `
+      <div class="upgrade-loading">
+        Для цього режиму немає доступних предметів.
+      </div>
+    `;
+
+    return;
   }
 
   box.innerHTML =
-    cards.join("");
+    list.map(item => {
+
+      const selected =
+        selectedUpgradeTarget?.name ===
+        item.name;
+
+      const rarityColor =
+        getDropRarityColor(
+          item.rarity
+        );
+
+      return `
+        <button
+          type="button"
+          class="
+            upgrade-item-final
+            ${selected ? "selected" : ""}
+          "
+          onclick='chooseUpgradeTarget(
+            ${JSON.stringify(item.name)}
+          )'
+        >
+
+          <span class="item-price">
+            ${Number(item.value).toFixed(2)} ₴
+          </span>
+
+          <img
+            src="${item.image || ""}"
+            alt="${item.name}"
+          >
+
+          <div class="item-name">
+            ${item.name}
+          </div>
+
+          <div
+            class="item-rarity"
+            style="color:${rarityColor};"
+          >
+            ${item.rarity}
+          </div>
+
+        </button>
+      `;
+    }).join("");
 }
 
 
 function toggleUpgradeSource(id) {
 
-  const existingIndex =
+  if (upgradeBusy) {
+    return;
+  }
+
+  const index =
     selectedUpgradeSources
       .findIndex(
         item =>
@@ -3992,13 +4134,11 @@ function toggleUpgradeSource(id) {
           Number(id)
       );
 
-  if (
-    existingIndex >= 0
-  ) {
+  if (index >= 0) {
 
     selectedUpgradeSources
       .splice(
-        existingIndex,
+        index,
         1
       );
 
@@ -4009,7 +4149,7 @@ function toggleUpgradeSource(id) {
     ) {
 
       alert(
-        "На один апгрейд можна поставити максимум 5 скінів."
+        "Максимум 5 предметів на один апгрейд."
       );
 
       return;
@@ -4029,16 +4169,20 @@ function toggleUpgradeSource(id) {
     }
   }
 
-  selectedUpgradeTarget =
-    getBestUpgradeTarget();
+  selectedUpgradeTarget = null;
 
-  renderUpgradeInventory();
   renderSelectedUpgradeSkins();
+  renderUpgradeInventory();
+  renderUpgradeTargets();
   refreshUpgradeSelection();
 }
 
 
 function removeUpgradeSource(id) {
+
+  if (upgradeBusy) {
+    return;
+  }
 
   selectedUpgradeSources =
     selectedUpgradeSources
@@ -4048,13 +4192,50 @@ function removeUpgradeSource(id) {
           Number(id)
       );
 
-  selectedUpgradeTarget =
-    getBestUpgradeTarget();
+  selectedUpgradeTarget = null;
 
-  renderUpgradeInventory();
   renderSelectedUpgradeSkins();
+  renderUpgradeInventory();
+  renderUpgradeTargets();
   refreshUpgradeSelection();
 }
+
+
+function chooseUpgradeTarget(name) {
+
+  if (upgradeBusy) {
+    return;
+  }
+
+  selectedUpgradeTarget =
+    getEligibleUpgradeTargets()
+      .find(
+        item =>
+          item.name === name
+      ) || null;
+
+  renderUpgradeTargets();
+  refreshUpgradeSelection();
+}
+
+
+$("#changeUpgradeTargetBtn")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      selectedUpgradeTarget = null;
+
+      renderUpgradeTargets();
+      refreshUpgradeSelection();
+
+      $("#upgradeTargetsPanel")
+        ?.scrollIntoView({
+          behavior:"smooth",
+          block:"center"
+        });
+    }
+  );
 
 
 $("#clearUpgradeSelection")
@@ -4062,11 +4243,16 @@ $("#clearUpgradeSelection")
     "click",
     () => {
 
+      if (upgradeBusy) {
+        return;
+      }
+
       selectedUpgradeSources = [];
       selectedUpgradeTarget = null;
 
-      renderUpgradeInventory();
       renderSelectedUpgradeSkins();
+      renderUpgradeInventory();
+      renderUpgradeTargets();
       refreshUpgradeSelection();
     }
   );
@@ -4097,9 +4283,9 @@ $$(".upgrade-preset-btn")
           button.classList
             .add("active");
 
-          selectedUpgradeTarget =
-            getBestUpgradeTarget();
+          selectedUpgradeTarget = null;
 
+          renderUpgradeTargets();
           refreshUpgradeSelection();
         }
       );
@@ -4117,11 +4303,11 @@ function refreshUpgradeSelection() {
 
   $("#upgradeSelectedCount")
     .textContent =
-      `(${count}/5)`;
+      `${count}/5`;
 
   $("#upgradeSelectedCountBottom")
     .textContent =
-      `${count} / 5`;
+      `${count}/5`;
 
   $("#upgradeSelectedTotal")
     .textContent =
@@ -4131,8 +4317,17 @@ function refreshUpgradeSelection() {
     .textContent =
       total.toFixed(2) + " ₴";
 
-  selectedUpgradeTarget =
-    getBestUpgradeTarget();
+  const {
+    min,
+    max
+  } =
+    getUpgradeTargetRange();
+
+  $("#upgradeTargetRangeText")
+    .textContent =
+      total
+        ? `Доступні цілі: ${min.toFixed(2)} ₴ — ${max.toFixed(2)} ₴`
+        : "Оберіть свої предмети";
 
   const target =
     selectedUpgradeTarget;
@@ -4178,7 +4373,9 @@ function refreshUpgradeSelection() {
 
     $("#upgradeTargetRange")
       .textContent =
-        `≈ ${Number(target.value).toFixed(2)} ₴`;
+        Number(
+          target.value
+        ).toFixed(2) + " ₴";
 
   } else {
 
@@ -4206,19 +4403,18 @@ function refreshUpgradeSelection() {
       chance
         ? (
             chance >= 50
-              ? "Високий шанс"
+              ? "ВИСОКИЙ ШАНС"
               : chance >= 20
-                ? "Середній шанс"
-                : "Ризиковий шанс"
+                ? "СЕРЕДНІЙ ШАНС"
+                : "РИЗИКОВИЙ ШАНС"
           )
-        : "Вибери скіни";
-
-  const config =
-    upgradeModeConfig();
+        : "ВИБЕРИ ПРЕДМЕТИ";
 
   $("#upgradeMultiplier")
     .textContent =
-      config.label;
+      upgradeMode === "75"
+        ? "75%"
+        : upgradeMode;
 
   const button =
     $("#upgradeActionBtn");
@@ -4233,8 +4429,8 @@ function refreshUpgradeSelection() {
   $("#upgradeActionNote")
     .textContent =
       target
-        ? `Ціль: ${target.name} • ${Number(target.value).toFixed(2)} ₴`
-        : "Оберіть скіни з інвентарю";
+        ? `Ціль: ${target.name} • шанс ${chance.toFixed(2)}%`
+        : "Оберіть свої предмети та ціль справа";
 }
 
 
@@ -4252,6 +4448,20 @@ $("#upgradeInventorySort")
   );
 
 
+$("#upgradeTargetSearch")
+  ?.addEventListener(
+    "input",
+    renderUpgradeTargets
+  );
+
+
+$("#upgradeTargetSort")
+  ?.addEventListener(
+    "change",
+    renderUpgradeTargets
+  );
+
+
 $("#upgradeActionBtn")
   ?.addEventListener(
     "click",
@@ -4259,16 +4469,104 @@ $("#upgradeActionBtn")
   );
 
 
-function setUpgradeWheelSpinning(
-  spinning
+function animateUpgradePointer(
+  success,
+  chance
 ) {
 
-  $("#upgradeWheel")
-    ?.classList
-    .toggle(
-      "spinning",
-      spinning
+  const pointer =
+    $("#upgradePointer");
+
+  if (!pointer) {
+    return Promise.resolve();
+  }
+
+  /*
+    Повільно робимо 3 повних оберти.
+    Потім зупиняємо стрілку:
+    - при успіху ближче до сектора шансу,
+    - при невдачі — поза ним.
+  */
+
+  const successArc =
+    Math.max(
+      6,
+      Math.min(
+        270,
+        chance * 3.6
+      )
     );
+
+  let finalLocalAngle;
+
+  if (success) {
+
+    finalLocalAngle =
+      Math.max(
+        4,
+        Math.min(
+          successArc - 4,
+          successArc * .55
+        )
+      );
+
+  } else {
+
+    finalLocalAngle =
+      Math.min(
+        350,
+        successArc +
+        Math.max(
+          20,
+          (360 - successArc) * .45
+        )
+      );
+  }
+
+  const start =
+    upgradePointerAngle;
+
+  const end =
+    start +
+    1080 +
+    finalLocalAngle;
+
+  return new Promise(
+    resolve => {
+
+      const animation =
+        pointer.animate(
+          [
+            {
+              transform:
+                `rotate(${start}deg)`
+            },
+            {
+              transform:
+                `rotate(${end}deg)`
+            }
+          ],
+          {
+            duration:3600,
+            easing:
+              "cubic-bezier(.12,.72,.18,1)",
+            fill:"forwards"
+          }
+        );
+
+      animation.onfinish =
+        () => {
+
+          upgradePointerAngle =
+            end % 360;
+
+          pointer.style.transform =
+            `rotate(${upgradePointerAngle}deg)`;
+
+          resolve();
+        };
+    }
+  );
 }
 
 
@@ -4291,12 +4589,10 @@ async function executeUpgrade() {
   button.textContent =
     "АПГРЕЙД...";
 
-  setUpgradeWheelSpinning(true);
-
   try {
 
-    const requestPromise =
-      api(
+    const result =
+      await api(
         "/api/upgrade",
         {
           method:"POST",
@@ -4310,32 +4606,19 @@ async function executeUpgrade() {
                       Number(item.id)
                   ),
 
+              targetName:
+                selectedUpgradeTarget.name,
+
               mode:
                 upgradeMode
             })
         }
       );
 
-    /*
-      Колесо крутиться мінімум 2.4 сек,
-      щоб результат не з'являвся миттєво.
-    */
-    const [
-      result
-    ] =
-      await Promise.all([
-        requestPromise,
-
-        new Promise(
-          resolve =>
-            setTimeout(
-              resolve,
-              2400
-            )
-        )
-      ]);
-
-    setUpgradeWheelSpinning(false);
+    await animateUpgradePointer(
+      result.success,
+      Number(result.chance)
+    );
 
     showUpgradeResult(
       result
@@ -4346,11 +4629,8 @@ async function executeUpgrade() {
 
     await refresh();
     await loadUpgradeData();
-    await loadUpgradeHistory();
 
   } catch (e) {
-
-    setUpgradeWheelSpinning(false);
 
     alert(
       e.message ||
@@ -4438,15 +4718,13 @@ function showUpgradeResult(result) {
         ${
           result.success
             ? `Ти отримав ${result.target.name} за ${Number(result.target.value).toFixed(2)} ₴`
-            : "Використані скіни втрачено."
+            : "Використані предмети втрачено."
         }
       </p>
 
       <p>
         Шанс:
         ${Number(result.chance).toFixed(2)}%
-        • Режим:
-        ${result.mode === "75" ? "75%" : result.mode}
       </p>
 
       <button
@@ -4470,98 +4748,6 @@ function showUpgradeResult(result) {
       overlay
     );
 }
-
-
-async function loadUpgradeHistory() {
-
-  const box =
-    $("#upgradeHistoryList");
-
-  if (!box) {
-    return;
-  }
-
-  try {
-
-    const data =
-      await api(
-        "/api/upgrade-history"
-      );
-
-    const list =
-      data.upgrades || [];
-
-    if (!list.length) {
-
-      box.innerHTML = `
-        <div class="upgrade-loading">
-          У вас ще немає апгрейдів.
-        </div>
-      `;
-
-      return;
-    }
-
-    box.innerHTML =
-      list.map(item => {
-
-        const chanceValue =
-          Number(item.chance || 0) *
-          100;
-
-        return `
-          <div class="upgrade-history-row">
-
-            <span>
-              ${item.source_name}
-              <small class="history-muted">
-                • ${Number(item.source_value).toFixed(2)} ₴
-              </small>
-            </span>
-
-            <strong class="${
-              item.success
-                ? "success"
-                : "fail"
-            }">
-              ${
-                item.success
-                  ? "УСПІХ"
-                  : "НЕВДАЧА"
-              }
-            </strong>
-
-            <span>
-              ${item.target_name}
-              <small class="history-muted">
-                • ${Number(item.target_value).toFixed(2)} ₴
-              </small>
-            </span>
-
-            <span class="history-muted">
-              ${chanceValue.toFixed(1)}%
-            </span>
-
-          </div>
-        `;
-      }).join("");
-
-  } catch (e) {
-
-    box.innerHTML = `
-      <div class="upgrade-loading">
-        Не вдалося завантажити історію.
-      </div>
-    `;
-  }
-}
-
-
-$("#upgradeHistoryRefresh")
-  ?.addEventListener(
-    "click",
-    loadUpgradeHistory
-  );
 
 
 initApp();
