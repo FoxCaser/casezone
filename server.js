@@ -481,11 +481,11 @@ app.post(
   auth,
   async (req, res) => {
     try {
-const {
+
+    const {
   skinName,
   value,
-  assetid,
-  tradeUrl
+  assetid
 } = req.body;
       if (
         !skinName ||
@@ -500,16 +500,7 @@ const {
       
       const skinImage =
         image || skinImages[skinName] || null;
-if (tradeUrl) {
-  await pool.query(
-    `
-    UPDATE users
-    SET trade_url = $1
-    WHERE id = $2
-    `,
-    [tradeUrl, req.session.userId]
-  );
-}
+
       const result = await pool.query(
         `
         INSERT INTO skin_deposit_requests
@@ -1985,43 +1976,146 @@ INSERT INTO site_inventory (
   }
 );
 /* =========================
+   STEAM PROFILE DATA
+========================= */
+
+async function getSteamProfileData(
+  steamId
+) {
+
+  if (!steamId) {
+    return {
+      avatar_url: null,
+      steam_name: null
+    };
+  }
+
+  try {
+
+    const controller =
+      new AbortController();
+
+    const timeout =
+      setTimeout(
+        () => controller.abort(),
+        4500
+      );
+
+    const response =
+      await fetch(
+        `https://steamcommunity.com/profiles/${steamId}?xml=1`,
+        {
+          signal:
+            controller.signal,
+
+          headers: {
+            "User-Agent":
+              "CaseZone/1.0"
+          }
+        }
+      );
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      return {
+        avatar_url: null,
+        steam_name: null
+      };
+    }
+
+    const xml =
+      await response.text();
+
+    const avatarMatch =
+      xml.match(
+        /<avatarFull><!\[CDATA\[(.*?)\]\]><\/avatarFull>/i
+      );
+
+    const nameMatch =
+      xml.match(
+        /<steamID><!\[CDATA\[(.*?)\]\]><\/steamID>/i
+      );
+
+    return {
+      avatar_url:
+        avatarMatch?.[1] || null,
+
+      steam_name:
+        nameMatch?.[1] || null
+    };
+
+  } catch (e) {
+
+    console.error(
+      "Steam profile load error:",
+      e.message
+    );
+
+    return {
+      avatar_url: null,
+      steam_name: null
+    };
+  }
+}
+
+
+/* =========================
    API: ПОТОЧНИЙ КОРИСТУВАЧ
 ========================= */
 
 app.get(
   "/api/me",
+  auth,
   async (req, res) => {
-
-    if (!req.session.userId) {
-      return res.status(401).json({
-        error: "Не авторизовано"
-      });
-    }
 
     try {
 
-      const result = await pool.query(
-        `
-        SELECT
-          id,
-          username,
-          balance,
-          trade_url
-        FROM users
-        WHERE id = $1
-        `,
-        [req.session.userId]
-      );
+      const result =
+        await pool.query(
+          `
+          SELECT
+            id,
+            username,
+            steam_id,
+            trade_url,
+            balance
+          FROM users
+          WHERE id = $1
+          `,
+          [req.session.userId]
+        );
 
       if (!result.rows.length) {
-        return res.status(404).json({
-          error: "Користувача не знайдено"
-        });
+
+        return res
+          .status(404)
+          .json({
+            error:
+              "Користувача не знайдено"
+          });
       }
+
+      const user =
+        result.rows[0];
+
+      const steamProfile =
+        await getSteamProfileData(
+          user.steam_id
+        );
 
       res.json({
         ok: true,
-        user: result.rows[0]
+
+        user: {
+          ...user,
+
+          avatar_url:
+            steamProfile.avatar_url,
+
+          steam_name:
+            steamProfile.steam_name
+        }
       });
 
     } catch (e) {
@@ -2032,101 +2126,14 @@ app.get(
       );
 
       res.status(500).json({
-        error: "Помилка сервера"
+        error:
+          "Помилка сервера"
       });
     }
   }
 );
-/* =========================
-   API: ІСТОРІЯ ПОПОВНЕНЬ
-========================= */
 
-app.get(
-  "/api/deposit-history",
-  auth,
-  async (req, res) => {
 
-    try {
-
-      const result = await pool.query(
-        `
-        SELECT
-          id,
-          skin_name,
-          skin_image,
-          value,
-          status,
-          created_at
-        FROM skin_deposit_requests
-        WHERE user_id = $1
-        ORDER BY created_at DESC
-        `,
-        [req.session.userId]
-      );
-
-      res.json({
-        ok: true,
-        deposits: result.rows
-      });
-
-    } catch (e) {
-
-      console.error(
-        "Deposit history error:",
-        e
-      );
-
-      res.status(500).json({
-        error: "Помилка сервера"
-      });
-    }
-  }
-);
-/* =========================
-   API: ІСТОРІЯ ВИВОДУ
-========================= */
-
-app.get(
-  "/api/withdraw-history",
-  auth,
-  async (req, res) => {
-
-    try {
-
-      const result = await pool.query(
-        `
-      SELECT
-  id,
-  item_name,
-  value,
-  status,
-  trade_offer_id
-FROM withdrawals
-WHERE user_id = $1
-ORDER BY id DESC
-        `,
-        [req.session.userId]
-      );
-
-      res.json({
-        ok: true,
-        withdrawals: result.rows
-      });
-
-    } catch (e) {
-
-      console.error(
-        "Withdraw history error:",
-        e
-      );
-
-      res.status(500).json({
-        error: "Помилка сервера"
-      });
-
-    }
-  }
-);
 /* =========================
    API: ВИХІД
 ========================= */
