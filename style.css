@@ -2755,3 +2755,53 @@ a {
     border-radius: 11px;
   }
 }
+
+
+/* =========================================================
+   CASEZONE — SHARPER TEXT
+========================================================= */
+
+body,
+button,
+input,
+select,
+textarea {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+
+.cz-logo-text strong,
+.cz-nav-link,
+.cz-deposit-btn,
+.cz-auth-btn,
+.cz-profile-btn,
+.hero-open-btn,
+.cz-hero h1,
+.side-card-title h3,
+.top-card-head h3,
+.benefit-item strong,
+.cases-section .cz-section-title h2,
+.case h3,
+.case-card h3,
+.cz-case-grid > div h3,
+.case-card button,
+.section-kicker {
+  font-weight: 800 !important;
+  text-shadow: 0 0 0.01px currentColor;
+}
+
+.cz-hero .sub,
+.benefit-item span,
+.dashboard-side-card .live-placeholder span,
+.dashboard-side-card .top-empty span,
+.cz-logo-text small {
+  font-weight: 500 !important;
+  color: #b8b8b8 !important;
+}
+
+.dashboard-side-card .live-placeholder strong,
+.eyebrow,
+.cz-balance span {
+  font-weight: 900 !important;
+}
