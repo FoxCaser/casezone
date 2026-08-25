@@ -2006,7 +2006,7 @@ app.get(
           id,
           username,
           balance,
-          steam_trade_url
+          trade_url
         FROM users
         WHERE id = $1
         `,
