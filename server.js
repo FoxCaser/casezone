@@ -727,7 +727,7 @@ app.post(
 );
 
 /* =========================
-   UPGRADE TARGET CATALOG
+   UPGRADE CATALOG
 ========================= */
 
 function getUpgradeCatalog() {
@@ -746,9 +746,12 @@ function getUpgradeCatalog() {
         value
       ] = item;
 
+      const numericValue =
+        Number(value);
+
       if (
         !name ||
-        !Number(value)
+        !numericValue
       ) {
         continue;
       }
@@ -758,7 +761,7 @@ function getUpgradeCatalog() {
 
       if (
         !existing ||
-        Number(value) >
+        numericValue >
           Number(existing.value)
       ) {
 
@@ -768,7 +771,7 @@ function getUpgradeCatalog() {
             name,
             rarity,
             value:
-              Number(value),
+              numericValue,
             image:
               skinImages[name] || null
           }
@@ -779,7 +782,7 @@ function getUpgradeCatalog() {
 
   return [...unique.values()]
     .sort(
-      (a, b) =>
+      (a,b) =>
         a.value - b.value
     );
 }
@@ -788,7 +791,7 @@ function getUpgradeCatalog() {
 app.get(
   "/api/upgrade-targets",
   auth,
-  (req, res) => {
+  (req,res) => {
 
     res.json(
       getUpgradeCatalog()
@@ -804,7 +807,7 @@ app.get(
 app.get(
   "/api/upgrade-history",
   auth,
-  async (req, res) => {
+  async (req,res) => {
 
     try {
 
@@ -850,59 +853,75 @@ app.get(
 
 
 /* =========================
-   EXECUTE UPGRADE
+   EXECUTE MULTI UPGRADE
 ========================= */
 
 app.post(
   "/api/upgrade",
   auth,
-  async (req, res) => {
+  async (req,res) => {
 
     const client =
       await pool.connect();
 
     try {
 
-      const inventoryId =
-        Number(
-          req.body.inventoryId
+      const inventoryIds =
+        Array.isArray(
+          req.body.inventoryIds
+        )
+          ? req.body.inventoryIds
+              .map(Number)
+              .filter(Boolean)
+          : [];
+
+      const mode =
+        String(
+          req.body.mode || "10x"
         );
 
-      const targetName =
-        String(
-          req.body.targetName || ""
-        ).trim();
-
       if (
-        !inventoryId ||
-        !targetName
+        !inventoryIds.length ||
+        inventoryIds.length > 5
       ) {
 
         return res
           .status(400)
           .json({
             error:
-              "Виберіть обидва предмети"
+              "Виберіть від 1 до 5 скінів"
           });
       }
 
-      const catalog =
-        getUpgradeCatalog();
+      const modeMap = {
+        "2x": {
+          multiplier:2,
+          chance:45
+        },
+        "5x": {
+          multiplier:5,
+          chance:18
+        },
+        "10x": {
+          multiplier:10,
+          chance:9
+        },
+        "75": {
+          multiplier:1.2,
+          chance:75
+        }
+      };
 
-      const target =
-        catalog.find(
-          item =>
-            item.name ===
-            targetName
-        );
+      const selectedMode =
+        modeMap[mode];
 
-      if (!target) {
+      if (!selectedMode) {
 
         return res
-          .status(404)
+          .status(400)
           .json({
             error:
-              "Цільовий предмет не знайдено"
+              "Невідомий режим апгрейду"
           });
       }
 
@@ -920,37 +939,20 @@ app.post(
             value,
             status
           FROM inventory
-          WHERE id = $1
-            AND user_id = $2
+          WHERE user_id = $1
+            AND id = ANY($2::int[])
             AND status = 'available'
           FOR UPDATE
           `,
           [
-            inventoryId,
-            req.session.userId
+            req.session.userId,
+            inventoryIds
           ]
         );
 
-      const source =
-        sourceResult.rows[0];
-
-      if (!source) {
-
-        await client.query(
-          "ROLLBACK"
-        );
-
-        return res
-          .status(404)
-          .json({
-            error:
-              "Предмет уже недоступний"
-          });
-      }
-
       if (
-        Number(target.value) <=
-        Number(source.value)
+        sourceResult.rows.length !==
+        inventoryIds.length
       ) {
 
         await client.query(
@@ -961,36 +963,88 @@ app.post(
           .status(400)
           .json({
             error:
-              "Ціль повинна бути дорожчою"
+              "Один із вибраних скінів уже недоступний"
           });
       }
 
-      /*
-        90% RTP для апгрейду:
-        chance =
-        source / target * 0.90
+      const sources =
+        sourceResult.rows;
 
-        Максимум 75%,
-        мінімум 1%.
-      */
+      const sourceValue =
+        sources.reduce(
+          (sum,item) =>
+            sum +
+            Number(item.value),
+          0
+        );
+
+      const desiredValue =
+        sourceValue *
+        selectedMode.multiplier;
+
+      const catalog =
+        getUpgradeCatalog()
+          .filter(
+            item =>
+              Number(item.value) >
+              sourceValue
+          );
+
+      if (!catalog.length) {
+
+        await client.query(
+          "ROLLBACK"
+        );
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Немає доступного скіна для апгрейду"
+          });
+      }
+
+      const target =
+        [...catalog]
+          .sort(
+            (a,b) =>
+              Math.abs(
+                Number(a.value) -
+                desiredValue
+              ) -
+              Math.abs(
+                Number(b.value) -
+                desiredValue
+              )
+          )[0];
+
+      const rawChance =
+        sourceValue /
+        Number(target.value) *
+        90;
 
       const chance =
-        Math.max(
-          0.01,
-          Math.min(
-            0.75,
-            (
-              Number(source.value) /
-              Number(target.value)
-            ) * 0.90
-          )
-        );
+        mode === "75"
+          ? Math.min(
+              75,
+              Math.max(
+                1,
+                rawChance
+              )
+            )
+          : Math.min(
+              selectedMode.chance,
+              Math.max(
+                1,
+                rawChance
+              )
+            );
 
       const roll =
         crypto.randomInt(
           0,
           1000000
-        ) / 1000000;
+        ) / 1000000 * 100;
 
       const success =
         roll < chance;
@@ -1000,9 +1054,13 @@ app.post(
         UPDATE inventory
         SET status =
           'used_upgrade'
-        WHERE id = $1
+        WHERE user_id = $1
+          AND id = ANY($2::int[])
         `,
-        [source.id]
+        [
+          req.session.userId,
+          inventoryIds
+        ]
       );
 
       let newItemId = null;
@@ -1022,11 +1080,7 @@ app.post(
               )
             VALUES
               (
-                $1,
-                $2,
-                $3,
-                $4,
-                'available'
+                $1,$2,$3,$4,'available'
               )
             RETURNING id
             `,
@@ -1034,7 +1088,7 @@ app.post(
               req.session.userId,
               target.name,
               target.rarity,
-              target.value
+              Number(target.value)
             ]
           );
 
@@ -1063,13 +1117,18 @@ app.post(
         `,
         [
           req.session.userId,
-          source.id,
-          source.item_name,
-          Number(source.value),
+          inventoryIds[0],
+          sources
+            .map(
+              item =>
+                item.item_name
+            )
+            .join(" + "),
+          sourceValue,
           target.name,
           target.rarity,
           Number(target.value),
-          chance,
+          chance / 100,
           success
         ]
       );
@@ -1080,8 +1139,9 @@ app.post(
 
       res.json({
         success,
-        chance:
-          chance * 100,
+        chance,
+        mode,
+        sourceValue,
         target: {
           ...target,
           inventoryId:
@@ -1096,7 +1156,7 @@ app.post(
       );
 
       console.error(
-        "Upgrade error:",
+        "Multi upgrade error:",
         e
       );
 
