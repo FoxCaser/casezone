@@ -186,6 +186,57 @@ function getCaseTheme(index) {
    RENDER CASES
 ========================= */
 
+/* =========================
+   CASE ARTWORK
+========================= */
+
+function getCaseArtwork(c, index) {
+
+  const name =
+    String(c?.name || "")
+      .trim()
+      .toUpperCase();
+
+  const byName = {
+    "RED CASE": "/red-case.jpg",
+    "EPIC CASE": "/epic-case.jpg",
+    "LEGEND CASE": "/legend-case.jpg",
+    "BRONZE CASE": "/bronze-case.jpg",
+    "SILVER CASE": "/silver-case.jpg",
+    "GOLD CASE": "/gold-case.jpg",
+    "FIRE CASE": "/fire-case.jpg",
+    "DRAGON CASE": "/dragon-case.jpg",
+    "KNIFE CASE": "/knife-case.jpg",
+    "PREMIUM CASE": "/premium-case.jpg",
+    "BLACK MARKET": "/black-market.jpg",
+    "ULTIMATE CASE": "/ultimate-case.jpg"
+  };
+
+  if (byName[name]) {
+    return byName[name];
+  }
+
+  const fallback = [
+    "/red-case.jpg",
+    "/epic-case.jpg",
+    "/legend-case.jpg",
+    "/bronze-case.jpg",
+    "/silver-case.jpg",
+    "/gold-case.jpg",
+    "/fire-case.jpg",
+    "/dragon-case.jpg",
+    "/knife-case.jpg",
+    "/premium-case.jpg"
+  ];
+
+  return fallback[index % fallback.length];
+}
+
+
+/* =========================
+   RENDER CASES
+========================= */
+
 function renderCases() {
 
   const container =
@@ -253,6 +304,9 @@ function renderCases() {
         const theme =
           getCaseTheme(index);
 
+        const artwork =
+          getCaseArtwork(c, index);
+
         const itemCount =
           Array.isArray(c.items)
             ? c.items.length
@@ -274,263 +328,34 @@ function renderCases() {
               style="
                 position:relative;
                 z-index:2;
-                height:155px;
-                display:grid;
-                place-items:center;
-                margin-bottom:5px;
+                height:180px;
+                margin:-8px -8px 8px;
+                overflow:hidden;
+                border-radius:14px;
               "
             >
-
-              <div
+              <img
+                src="${artwork}"
+                alt="${c.name}"
+                loading="lazy"
                 style="
-                  position:absolute;
-                  width:150px;
-                  height:48px;
-                  bottom:8px;
-                  border-radius:50%;
-                  background:${theme.glow};
-                  filter:blur(25px);
-                  opacity:.95;
-                "
-              ></div>
-
-              <!-- ЗОВНІШНІЙ КОНТУР КЕЙСА -->
-              <div
-                style="
-                  position:relative;
-                  width:160px;
-                  height:118px;
-                  display:grid;
-                  place-items:center;
+                  display:block;
+                  width:100%;
+                  height:100%;
+                  object-fit:cover;
+                  object-position:center;
+                  border-radius:14px;
                   filter:
-                    drop-shadow(
-                      0 17px 20px rgba(0,0,0,.55)
-                    )
-                    drop-shadow(
-                      0 0 15px ${theme.glow}
-                    );
+                    saturate(1.05)
+                    contrast(1.04);
+                  transition:
+                    transform .22s ease,
+                    filter .22s ease;
+                "
+                onerror="
+                  this.style.display='none';
                 "
               >
-
-                <div
-                  style="
-                    position:relative;
-                    width:142px;
-                    height:94px;
-
-                    border:
-                      3px solid
-                      ${theme.main};
-
-                    border-radius:
-                      13px 13px 18px 18px;
-
-                    background:
-                      linear-gradient(
-                        145deg,
-                        ${theme.main},
-                        ${theme.dark} 58%,
-                        #111
-                      );
-
-                    box-shadow:
-                      inset 0 0 0 3px
-                        rgba(255,255,255,.08),
-                      inset 0 -18px 30px
-                        rgba(0,0,0,.38),
-                      0 0 18px
-                        ${theme.glow};
-
-                    transform:
-                      perspective(600px)
-                      rotateX(-5deg)
-                      rotateY(-8deg);
-                  "
-                >
-
-                  <!-- РУЧКА -->
-                  <div
-                    style="
-                      position:absolute;
-                      left:13px;
-                      right:13px;
-                      top:-14px;
-
-                      height:24px;
-
-                      border:
-                        3px solid
-                        ${theme.main};
-
-                      border-bottom:0;
-
-                      border-radius:
-                        12px 12px 3px 3px;
-
-                      background:
-                        linear-gradient(
-                          180deg,
-                          ${theme.main},
-                          ${theme.dark}
-                        );
-
-                      box-shadow:
-                        inset 0 2px 0
-                        rgba(255,255,255,.15);
-                    "
-                  ></div>
-
-                  <!-- ВНУТРІШНІЙ КЕЙС -->
-                  <div
-                    style="
-                      position:absolute;
-                      left:50%;
-                      top:46%;
-
-                      transform:
-                        translate(-50%,-50%);
-
-                      width:78px;
-                      height:50px;
-
-                      border:
-                        2px solid
-                        rgba(255,255,255,.55);
-
-                      border-radius:
-                        8px 8px 10px 10px;
-
-                      background:
-                        linear-gradient(
-                          145deg,
-                          rgba(255,255,255,.18),
-                          rgba(0,0,0,.36)
-                        );
-
-                      box-shadow:
-                        inset 0 0 0 2px
-                          rgba(255,255,255,.06),
-                        0 0 14px
-                          ${theme.glow};
-                    "
-                  >
-
-                    <!-- МАЛЕНЬКА РУЧКА ВНУТРІШНЬОГО КЕЙСА -->
-                    <div
-                      style="
-                        position:absolute;
-                        left:18px;
-                        right:18px;
-                        top:-8px;
-
-                        height:10px;
-
-                        border:
-                          2px solid
-                          rgba(255,255,255,.5);
-
-                        border-bottom:0;
-
-                        border-radius:
-                          7px 7px 2px 2px;
-
-                        background:
-                          rgba(20,20,20,.65);
-                      "
-                    ></div>
-
-                    <!-- МЕНШИЙ ЗАМОК -->
-                    <div
-                      style="
-                        position:absolute;
-                        left:50%;
-                        top:52%;
-
-                        transform:
-                          translate(-50%,-50%);
-
-                        width:22px;
-                        height:15px;
-
-                        border:
-                          1.5px solid
-                          rgba(255,255,255,.65);
-
-                        border-radius:4px;
-
-                        background:#151515;
-
-                        box-shadow:
-                          0 0 8px
-                          ${theme.glow};
-                      "
-                    >
-
-                      <div
-                        style="
-                          position:absolute;
-                          left:50%;
-                          top:50%;
-
-                          transform:
-                            translate(-50%,-50%);
-
-                          width:5px;
-                          height:5px;
-
-                          border-radius:50%;
-
-                          background:
-                            ${theme.main};
-
-                          box-shadow:
-                            0 0 6px
-                            ${theme.glow};
-                        "
-                      ></div>
-
-                    </div>
-
-                  </div>
-
-                  <div
-                    style="
-                      position:absolute;
-                      left:12px;
-                      bottom:7px;
-
-                      font-size:7px;
-                      font-weight:900;
-                      letter-spacing:1.3px;
-
-                      color:
-                        rgba(255,255,255,.78);
-                    "
-                  >
-                    CASEZONE
-                  </div>
-
-                  <div
-                    style="
-                      position:absolute;
-                      right:12px;
-                      bottom:7px;
-
-                      font-size:7px;
-                      font-weight:900;
-                      letter-spacing:1px;
-
-                      color:
-                        rgba(255,255,255,.55);
-                    "
-                  >
-                    DROP
-                  </div>
-
-                </div>
-
-              </div>
-
             </div>
 
             <div
@@ -563,8 +388,7 @@ function renderCases() {
                 style="
                   display:flex;
                   align-items:center;
-                  justify-content:
-                    space-between;
+                  justify-content:space-between;
                   gap:8px;
                 "
               >
@@ -573,7 +397,6 @@ function renderCases() {
                   style="
                     color:${theme.main};
                     font-size:17px;
-
                     text-shadow:
                       0 0 12px
                       ${theme.glow};
@@ -585,12 +408,10 @@ function renderCases() {
                 <button
                   type="button"
                   onclick="
-                    openCase('${c.id}')
+                    showCaseDetails('${c.id}')
                   "
                   style="
-                    background:
-                      ${theme.main};
-
+                    background:${theme.main};
                     color:#080808;
                   "
                 >
@@ -633,7 +454,8 @@ function filterCases(type) {
     premium: 2,
     expensive: 3
   };
-    buttons[
+
+  buttons[
     indexMap[type] ?? 0
   ]?.classList.add(
     "active"
@@ -643,10 +465,465 @@ function filterCases(type) {
   renderCases();
 }
 /* =========================
+   CASE DETAILS / POSSIBLE DROPS
+========================= */
+
+async function showCaseDetails(id) {
+
+  const selectedCase =
+    cases.find(
+      item =>
+        String(item.id) ===
+        String(id)
+    );
+
+  if (!selectedCase) {
+    return;
+  }
+
+  const modal =
+    $("#modal");
+
+  const content =
+    $("#modalContent");
+
+  if (!modal || !content) {
+    return;
+  }
+
+  modal.classList.remove("hidden");
+
+  content.innerHTML = `
+    <div style="
+      min-height:520px;
+      padding:4px;
+    ">
+
+      <div style="
+        display:flex;
+        align-items:flex-start;
+        justify-content:space-between;
+        gap:20px;
+        margin-bottom:14px;
+      ">
+
+        <div>
+          <div style="
+            color:#ffd400;
+            font-size:10px;
+            font-weight:900;
+            letter-spacing:2px;
+            margin-bottom:5px;
+          ">
+            CASEZONE
+          </div>
+
+          <h2 style="
+            margin:0;
+            font-size:30px;
+          ">
+            ${selectedCase.name}
+          </h2>
+
+          <p style="
+            margin:6px 0 0;
+            color:#8f8f8f;
+            font-size:13px;
+          ">
+            Подивись, які предмети можуть випасти з цього кейса
+          </p>
+        </div>
+
+      </div>
+
+      <div style="
+        position:relative;
+        min-height:210px;
+        display:grid;
+        place-items:center;
+        overflow:hidden;
+        border:1px solid rgba(255,212,0,.12);
+        border-radius:18px;
+        background:
+          radial-gradient(
+            circle at 50% 52%,
+            rgba(255,212,0,.15),
+            transparent 32%
+          ),
+          linear-gradient(
+            180deg,
+            #141414,
+            #0d0d0d
+          );
+        margin-bottom:22px;
+      ">
+
+        <div style="
+          position:absolute;
+          width:300px;
+          height:110px;
+          border-radius:50%;
+          background:rgba(255,212,0,.14);
+          filter:blur(42px);
+        "></div>
+
+        <img
+          src="${getCaseArtwork(selectedCase, Math.max(0, cases.indexOf(selectedCase)))}"
+          alt="${selectedCase.name}"
+          style="
+            position:relative;
+            z-index:2;
+            width:min(330px,72%);
+            height:190px;
+            object-fit:cover;
+            object-position:center;
+            border-radius:16px;
+            filter:
+              drop-shadow(0 22px 30px rgba(0,0,0,.45))
+              saturate(1.05);
+          "
+        >
+
+      </div>
+
+      <div style="
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        margin-bottom:12px;
+      ">
+        <strong style="
+          font-size:14px;
+        ">
+          🎁 Можливі дропи
+        </strong>
+
+        <span style="
+          color:#777;
+          font-size:11px;
+        ">
+          ${Array.isArray(selectedCase.items) ? selectedCase.items.length : 0}
+          предметів
+        </span>
+      </div>
+
+      <div
+        id="casePossibleDrops"
+        style="
+          display:grid;
+          grid-template-columns:
+            repeat(auto-fit, minmax(130px, 1fr));
+          gap:10px;
+          margin-bottom:22px;
+        "
+      >
+        <div style="
+          grid-column:1/-1;
+          padding:28px;
+          text-align:center;
+          color:#777;
+        ">
+          Завантаження предметів...
+        </div>
+      </div>
+
+      <div style="
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        flex-wrap:wrap;
+        padding-top:16px;
+        border-top:1px solid rgba(255,255,255,.07);
+      ">
+
+        <button
+          type="button"
+          onclick="
+            $('#modal').classList.add('hidden')
+          "
+          style="
+            min-height:46px;
+            padding:0 18px;
+            border:1px solid rgba(255,255,255,.1);
+            border-radius:11px;
+            background:#141414;
+            color:#bbb;
+            font-weight:800;
+          "
+        >
+          ← Назад
+        </button>
+
+        <button
+          type="button"
+          onclick="
+            startCaseOpening('${selectedCase.id}')
+          "
+          style="
+            min-width:240px;
+            min-height:50px;
+            padding:0 24px;
+            border-radius:12px;
+            background:#ffd400;
+            color:#111;
+            font-weight:950;
+            font-size:14px;
+            box-shadow:
+              0 0 28px rgba(255,212,0,.16);
+          "
+        >
+          🔓 Відкрити кейс —
+          ${Number(selectedCase.price).toFixed(0)} ₴
+        </button>
+
+      </div>
+
+    </div>
+  `;
+
+  try {
+
+    const availableSkins =
+      skins.length
+        ? skins
+        : await api("/api/skins");
+
+    const dropsBox =
+      $("#casePossibleDrops");
+
+    if (!dropsBox) {
+      return;
+    }
+
+    const items =
+      Array.isArray(selectedCase.items)
+        ? selectedCase.items
+        : [];
+
+    if (!items.length) {
+
+      dropsBox.innerHTML = `
+        <div style="
+          grid-column:1/-1;
+          padding:30px;
+          text-align:center;
+          color:#777;
+        ">
+          У цьому кейсі поки немає предметів.
+        </div>
+      `;
+
+      return;
+    }
+
+    dropsBox.innerHTML =
+      items.map((item, index) => {
+
+        const itemName =
+          item?.[0] || "Предмет";
+
+        const rarity =
+          item?.[1] || "default";
+
+        const skin =
+          availableSkins.find(
+            s =>
+              s.name === itemName
+          );
+          const image =
+          skin?.image || "";
+
+        const rarityColor =
+          getDropRarityColor(
+            rarity,
+            index
+          );
+
+        return `
+          <div style="
+            position:relative;
+            overflow:hidden;
+            min-height:150px;
+            padding:10px;
+            border:
+              1px solid
+              ${rarityColor}55;
+            border-radius:12px;
+            background:
+              linear-gradient(
+                180deg,
+                ${rarityColor}12,
+                #111 58%
+              );
+          ">
+
+            <div style="
+              position:absolute;
+              left:15%;
+              right:15%;
+              bottom:-18px;
+              height:45px;
+              border-radius:50%;
+              background:${rarityColor};
+              opacity:.16;
+              filter:blur(22px);
+            "></div>
+
+            ${
+              image
+                ? `
+                  <img
+                    src="${image}"
+                    alt="${itemName}"
+                    style="
+                      position:relative;
+                      z-index:2;
+                      width:100%;
+                      height:92px;
+                      object-fit:contain;
+                    "
+                  >
+                `
+                : `
+                  <div style="
+                    height:92px;
+                    display:grid;
+                    place-items:center;
+                    color:#555;
+                    font-size:11px;
+                  ">
+                    Немає фото
+                  </div>
+                `
+            }
+
+            <div style="
+              position:relative;
+              z-index:2;
+              margin-top:5px;
+            ">
+              <strong style="
+                display:block;
+                font-size:11px;
+                line-height:1.3;
+              ">
+                ${itemName}
+              </strong>
+
+              <span style="
+                display:block;
+                margin-top:4px;
+                color:${rarityColor};
+                font-size:9px;
+                text-transform:uppercase;
+              ">
+                ${rarity}
+              </span>
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
+
+  } catch (e) {
+
+    console.error(
+      "Case drops preview error:",
+      e
+    );
+
+    const dropsBox =
+      $("#casePossibleDrops");
+
+    if (dropsBox) {
+
+      dropsBox.innerHTML = `
+        <div style="
+          grid-column:1/-1;
+          padding:30px;
+          text-align:center;
+          color:#ff6767;
+        ">
+          Не вдалося завантажити предмети.
+        </div>
+      `;
+    }
+  }
+}
+
+
+/* =========================
+   DROP RARITY COLOR
+========================= */
+
+function getDropRarityColor(
+  rarity,
+  index = 0
+) {
+
+  const value =
+    String(rarity || "")
+      .toLowerCase();
+
+  if (
+    value.includes("gold") ||
+    value.includes("knife") ||
+    value.includes("special") ||
+    value.includes("covert")
+  ) {
+    return "#ffd400";
+  }
+
+  if (
+    value.includes("red") ||
+    value.includes("classified")
+  ) {
+    return "#ff3b3b";
+  }
+
+  if (
+    value.includes("pink") ||
+    value.includes("restricted")
+  ) {
+    return "#ff3ca6";
+  }
+
+  if (
+    value.includes("purple") ||
+    value.includes("mil-spec")
+  ) {
+    return "#9a55ff";
+  }
+
+  if (
+    value.includes("blue")
+  ) {
+    return "#3f8cff";
+  }
+
+  const fallback = [
+    "#3f8cff",
+    "#8d3dff",
+    "#ff2fab",
+    "#ff3b21",
+    "#ffd000",
+    "#16c994"
+  ];
+
+  return fallback[
+    index % fallback.length
+  ];
+}
+
+
+/* =========================
    OPEN CASE
 ========================= */
 
-async function openCase(id) {
+async function startCaseOpening(id) {
 
   if (!currentUser) {
 
@@ -676,35 +953,119 @@ async function openCase(id) {
   $("#modalContent").innerHTML = `
 
     <div style="
-      text-align:center;
-      padding:10px;
+      position:relative;
+      overflow:hidden;
+      padding:8px 6px 18px;
     ">
 
       <div style="
-        color:#ffd400;
-        font-size:10px;
-        font-weight:900;
-        letter-spacing:2px;
+        text-align:center;
+        margin-bottom:18px;
       ">
-        CASEZONE DROP
+
+        <div style="
+          color:#ffd400;
+          font-size:10px;
+          font-weight:900;
+          letter-spacing:2px;
+        ">
+          CASEZONE DROP
+        </div>
+
+        <h2 style="
+          margin:8px 0 4px;
+          font-size:28px;
+        ">
+          ${selectedCase.name}
+        </h2>
+
+        <p style="
+          margin:0;
+          color:#888;
+          font-size:13px;
+        ">
+          Прокрутка предметів...
+        </p>
+
       </div>
 
-      <h2>
-        ${selectedCase.name}
-      </h2>
-
-      <p style="
-        color:#888;
+      <div style="
+        position:relative;
+        padding:18px 0;
       ">
-        Відкриваємо кейс...
-      </p>
+
+        <div style="
+          position:absolute;
+          left:50%;
+          top:0;
+          bottom:0;
+          width:2px;
+          transform:translateX(-50%);
+          background:#ffd400;
+          z-index:20;
+          box-shadow:
+            0 0 14px rgba(255,212,0,.75);
+          pointer-events:none;
+        "></div>
+
+        <div style="
+          position:absolute;
+          left:50%;
+          top:2px;
+          transform:translateX(-50%);
+          width:0;
+          height:0;
+          border-left:8px solid transparent;
+          border-right:8px solid transparent;
+          border-top:12px solid #ffd400;
+          z-index:21;
+        "></div>
+
+        <div style="
+          position:absolute;
+          left:50%;
+          bottom:2px;
+          transform:translateX(-50%);
+          width:0;
+          height:0;
+          border-left:8px solid transparent;
+          border-right:8px solid transparent;
+          border-bottom:12px solid #ffd400;
+          z-index:21;
+        "></div>
+
+        <div
+          class="reel"
+          id="reel"
+          style="
+            display:flex;
+            gap:10px;
+            overflow:hidden;
+            scroll-behavior:auto;
+            padding:10px calc(50% - 75px);
+            border-top:1px solid rgba(255,212,0,.14);
+            border-bottom:1px solid rgba(255,212,0,.14);
+            background:
+              linear-gradient(
+                180deg,
+                rgba(255,212,0,.03),
+                rgba(255,255,255,.015)
+              );
+          "
+        ></div>
+
+      </div>
+
+      <div style="
+        margin-top:14px;
+        text-align:center;
+        color:#777;
+        font-size:11px;
+      ">
+        Результат визначається сервером
+      </div>
 
     </div>
-
-    <div
-      class="reel"
-      id="reel"
-    ></div>
   `;
 
 
@@ -767,7 +1128,7 @@ async function openCase(id) {
           availableSkins.find(
             skin =>
               skin.name === item[0]
-          )?.image || ""
+               )?.image || ""
 
       }))
 
@@ -833,6 +1194,12 @@ async function openCase(id) {
         "win"
       );
 
+      slot.style.border =
+        "1px solid #ffd400";
+
+      slot.style.boxShadow =
+        "0 0 24px rgba(255,212,0,.28)";
+
     } else {
 
       if (!fakeItems.length) {
@@ -872,22 +1239,49 @@ async function openCase(id) {
     );
 
 
+    slot.style.cssText += `
+      flex:0 0 140px;
+      min-height:132px;
+      padding:10px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:10px;
+      background:
+        linear-gradient(
+          180deg,
+          #1b1b1b,
+          #111
+        );
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.02);
+    `;
+
     slot.innerHTML = `
 
       <img
         src="${currentItem.image}"
         alt="${currentItem.name}"
         style="
-          width:110px;
-          height:80px;
+          width:116px;
+          height:78px;
           object-fit:contain;
+          filter:
+            drop-shadow(
+              0 10px 12px rgba(0,0,0,.42)
+            );
         "
       >
 
       <div style="
-        margin-top:5px;
+        width:100%;
         font-size:10px;
+        line-height:1.25;
         text-align:center;
+        color:#ddd;
       ">
         ${currentItem.name}
       </div>
@@ -928,7 +1322,7 @@ async function openCase(id) {
 
 
       const duration =
-        3000;
+        4500;
 
 
       const startTime =
@@ -1071,7 +1465,7 @@ async function openCase(id) {
 
 
       requestAnimationFrame(
-        animate
+               animate
       );
 
     },
@@ -1805,7 +2199,7 @@ async function depositMethod(method) {
 
       <p style="
         color:#888;
-      ">
+           ">
         Криптовалютне поповнення
         буде підключено окремо.
       </p>
@@ -1948,8 +2342,7 @@ profileBtn
   ?.addEventListener(
     "click",
     async () => {
-
-      if (!currentUser) {
+  if (!currentUser) {
 
         auth();
         return;
