@@ -4459,3 +4459,17 @@ textarea {
 .upgrade-pointer-orbit {
   z-index: 10 !important;
 }
+
+
+/* UPGRADE ODDS SYNC:
+   кольоровий сектор завжди = реальний шанс */
+.upgrade-chance-circle {
+  background:
+    conic-gradient(
+      from -90deg,
+      #8d3dff 0%,
+      #8d3dff calc(var(--chance) * 1%),
+      #282c36 calc(var(--chance) * 1%),
+      #282c36 100%
+    ) !important;
+}
