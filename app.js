@@ -12,6 +12,7 @@ let currentUser = null;
 let cases = [];
 let skins = [];
 let activeCaseFilter = "all";
+let selectedOpenQuantity = 1;
 
 
 /* =========================
@@ -481,6 +482,8 @@ async function showCaseDetails(id) {
     return;
   }
 
+  selectedOpenQuantity = 1;
+
   const modal =
     $("#modal");
 
@@ -631,6 +634,50 @@ async function showCaseDetails(id) {
       <div style="
         display:flex;
         align-items:center;
+        justify-content:center;
+        gap:8px;
+        flex-wrap:wrap;
+        margin:0 0 16px;
+        padding:14px;
+        border:1px solid rgba(255,255,255,.07);
+        border-radius:12px;
+        background:#101010;
+      ">
+
+        <span style="
+          color:#888;
+          font-size:12px;
+          margin-right:4px;
+        ">
+          Кількість:
+        </span>
+
+        ${[1,2,3,4,5].map(q => `
+          <button
+            type="button"
+            class="case-qty-btn ${q === 1 ? "active" : ""}"
+            data-qty="${q}"
+            onclick="setCaseOpenQuantity(${q}, ${Number(selectedCase.price)})"
+            style="
+              width:42px;
+              height:38px;
+              border-radius:9px;
+              border:1px solid ${q === 1 ? "#ffd400" : "rgba(255,255,255,.10)"};
+              background:${q === 1 ? "#ffd400" : "#171717"};
+              color:${q === 1 ? "#111" : "#aaa"};
+              font-weight:900;
+              cursor:pointer;
+            "
+          >
+            x${q}
+          </button>
+        `).join("")}
+
+      </div>
+
+      <div style="
+        display:flex;
+        align-items:center;
         justify-content:space-between;
         gap:12px;
         flex-wrap:wrap;
@@ -657,12 +704,13 @@ async function showCaseDetails(id) {
         </button>
 
         <button
+          id="caseOpenBtn"
           type="button"
           onclick="
-            startCaseOpening('${selectedCase.id}')
+            startCaseOpening('${selectedCase.id}', selectedOpenQuantity)
           "
           style="
-            min-width:240px;
+            min-width:260px;
             min-height:50px;
             padding:0 24px;
             border-radius:12px;
@@ -674,7 +722,7 @@ async function showCaseDetails(id) {
               0 0 28px rgba(255,212,0,.16);
           "
         >
-          🔓 Відкрити кейс —
+          🔓 Відкрити x1 —
           ${Number(selectedCase.price).toFixed(0)} ₴
         </button>
 
@@ -732,7 +780,8 @@ async function showCaseDetails(id) {
             s =>
               s.name === itemName
           );
-          const image =
+
+        const image =
           skin?.image || "";
 
         const rarityColor =
@@ -801,7 +850,7 @@ async function showCaseDetails(id) {
 
             <div style="
               position:relative;
-              z-index:2;
+                z-index:2;
               margin-top:5px;
             ">
               <strong style="
@@ -856,6 +905,67 @@ async function showCaseDetails(id) {
 
 
 /* =========================
+   CASE QUANTITY
+========================= */
+
+function setCaseOpenQuantity(
+  quantity,
+  price
+) {
+
+  selectedOpenQuantity =
+    Math.max(
+      1,
+      Math.min(
+        5,
+        Number(quantity) || 1
+      )
+    );
+
+  $$(".case-qty-btn")
+    .forEach(button => {
+
+      const active =
+        Number(button.dataset.qty) ===
+        selectedOpenQuantity;
+
+      button.classList.toggle(
+        "active",
+        active
+      );
+
+      button.style.borderColor =
+        active
+          ? "#ffd400"
+          : "rgba(255,255,255,.10)";
+
+      button.style.background =
+        active
+          ? "#ffd400"
+          : "#171717";
+
+      button.style.color =
+        active
+          ? "#111"
+          : "#aaa";
+    });
+
+  const openButton =
+    $("#caseOpenBtn");
+
+  if (openButton) {
+
+    const total =
+      Number(price || 0) *
+      selectedOpenQuantity;
+
+    openButton.innerHTML =
+      `🔓 Відкрити x${selectedOpenQuantity} — ${total.toFixed(0)} ₴`;
+  }
+}
+
+
+/* =========================
    DROP RARITY COLOR
 ========================= */
 
@@ -866,56 +976,71 @@ function getDropRarityColor(
 
   const value =
     String(rarity || "")
+      .trim()
       .toLowerCase();
 
+  /* CS2 / CS:GO rarity colors */
+
   if (
-    value.includes("gold") ||
+    value.includes("contraband")
+  ) {
+    return "#e4ae39";
+  }
+
+  if (
+    value.includes("extraordinary") ||
+    value.includes("rare special") ||
+    value.includes("special item") ||
     value.includes("knife") ||
-    value.includes("special") ||
-    value.includes("covert")
+    value.includes("glove") ||
+    value.includes("gold")
   ) {
-    return "#ffd400";
+    return "#e4ae39";
   }
 
   if (
-    value.includes("red") ||
-    value.includes("classified")
+    value.includes("covert") ||
+    value === "red"
   ) {
-    return "#ff3b3b";
+    return "#eb4b4b";
   }
 
   if (
-    value.includes("pink") ||
-    value.includes("restricted")
+    value.includes("classified") ||
+    value === "pink"
   ) {
-    return "#ff3ca6";
+    return "#d32ce6";
   }
 
   if (
-    value.includes("purple") ||
-    value.includes("mil-spec")
+    value.includes("restricted") ||
+    value === "purple"
   ) {
-    return "#9a55ff";
+    return "#8847ff";
   }
 
   if (
-    value.includes("blue")
+    value.includes("mil-spec") ||
+    value.includes("mil spec") ||
+    value === "blue"
   ) {
-    return "#3f8cff";
+    return "#4b69ff";
   }
 
-  const fallback = [
-    "#3f8cff",
-    "#8d3dff",
-    "#ff2fab",
-    "#ff3b21",
-    "#ffd000",
-    "#16c994"
-  ];
+  if (
+    value.includes("industrial")
+  ) {
+    return "#5e98d9";
+  }
 
-  return fallback[
-    index % fallback.length
-  ];
+  if (
+    value.includes("consumer")
+  ) {
+    return "#b0c3d9";
+  }
+
+  /* fallback only if the server sends an unknown rarity */
+  return "#6f7b8a";
 }
 
 
@@ -923,7 +1048,10 @@ function getDropRarityColor(
    OPEN CASE
 ========================= */
 
-async function startCaseOpening(id) {
+async function startCaseOpening(
+  id,
+  quantity = 1
+) {
 
   if (!currentUser) {
 
@@ -931,6 +1059,14 @@ async function startCaseOpening(id) {
     return;
   }
 
+  quantity =
+    Math.max(
+      1,
+      Math.min(
+        5,
+        Number(quantity) || 1
+      )
+    );
 
   const selectedCase =
     cases.find(
@@ -939,19 +1075,38 @@ async function startCaseOpening(id) {
         String(id)
     );
 
-
   if (!selectedCase) {
     return;
   }
 
+  const totalPrice =
+    Number(selectedCase.price || 0) *
+    quantity;
+
+  if (
+    Number(currentUser?.balance || 0) <
+    totalPrice
+  ) {
+
+    alert(
+      `Недостатньо коштів. Потрібно ${totalPrice.toFixed(2)} ₴`
+    );
+
+    return;
+  }
 
   $("#modal")
     ?.classList
     .remove("hidden");
 
+  const content =
+    $("#modalContent");
 
-  $("#modalContent").innerHTML = `
+  if (!content) {
+    return;
+  }
 
+  content.innerHTML = `
     <div style="
       position:relative;
       overflow:hidden;
@@ -960,7 +1115,7 @@ async function startCaseOpening(id) {
 
       <div style="
         text-align:center;
-        margin-bottom:18px;
+        margin-bottom:16px;
       ">
 
         <div style="
@@ -984,77 +1139,19 @@ async function startCaseOpening(id) {
           color:#888;
           font-size:13px;
         ">
-          Прокрутка предметів...
+          Відкриваємо ${quantity}
+          ${quantity === 1 ? "кейс" : "кейси"}...
         </p>
 
       </div>
 
-      <div style="
-        position:relative;
-        padding:18px 0;
-      ">
-
-        <div style="
-          position:absolute;
-          left:50%;
-          top:0;
-          bottom:0;
-          width:2px;
-          transform:translateX(-50%);
-          background:#ffd400;
-          z-index:20;
-          box-shadow:
-            0 0 14px rgba(255,212,0,.75);
-          pointer-events:none;
-        "></div>
-
-        <div style="
-          position:absolute;
-          left:50%;
-          top:2px;
-          transform:translateX(-50%);
-          width:0;
-          height:0;
-          border-left:8px solid transparent;
-          border-right:8px solid transparent;
-          border-top:12px solid #ffd400;
-          z-index:21;
-        "></div>
-
-        <div style="
-          position:absolute;
-          left:50%;
-          bottom:2px;
-          transform:translateX(-50%);
-          width:0;
-          height:0;
-          border-left:8px solid transparent;
-          border-right:8px solid transparent;
-          border-bottom:12px solid #ffd400;
-          z-index:21;
-        "></div>
-
-        <div
-          class="reel"
-          id="reel"
-          style="
-            display:flex;
-            gap:10px;
-            overflow:hidden;
-            scroll-behavior:auto;
-            padding:10px calc(50% - 75px);
-            border-top:1px solid rgba(255,212,0,.14);
-            border-bottom:1px solid rgba(255,212,0,.14);
-            background:
-              linear-gradient(
-                180deg,
-                rgba(255,212,0,.03),
-                rgba(255,255,255,.015)
-              );
-          "
-        ></div>
-
-      </div>
+      <div
+        id="multiReels"
+        style="
+          display:grid;
+          gap:10px;
+        "
+      ></div>
 
       <div style="
         margin-top:14px;
@@ -1062,60 +1159,84 @@ async function startCaseOpening(id) {
         color:#777;
         font-size:11px;
       ">
-        Результат визначається сервером
+        Результат кожного відкриття визначається сервером
       </div>
 
     </div>
   `;
 
+  let inventoryBefore = [];
 
-  let result;
+  try {
+    inventoryBefore =
+      await api("/api/inventory");
+  } catch {
+    inventoryBefore = [];
+  }
 
+  const beforeIds =
+    new Set(
+      inventoryBefore.map(
+        item =>
+          String(item.id)
+      )
+    );
+
+  const results = [];
 
   try {
 
-    result =
-      await api(
-        "/api/open/" + id,
-        {
-          method: "POST"
-        }
-      );
+    for (
+      let i = 0;
+      i < quantity;
+      i++
+    ) {
+
+      const result =
+        await api(
+          "/api/open/" + id,
+          {
+            method: "POST"
+          }
+        );
+
+      results.push(result);
+    }
 
   } catch (e) {
 
-    $("#modalContent")
-      .innerHTML = `
+    if (!results.length) {
 
-      <div style="
-        text-align:center;
-        padding:30px;
-      ">
-
-        <h2>
-          ${selectedCase.name}
-        </h2>
-
-        <p style="
-          color:#ff5656;
+      content.innerHTML = `
+        <div style="
+          text-align:center;
+          padding:30px;
         ">
-          ${e.message}
-        </p>
+          <h2>
+            ${selectedCase.name}
+          </h2>
+          <p style="
+            color:#ff5656;
+          ">
+            ${e.message}
+          </p>
+        </div>
+      `;
 
-      </div>
-    `;
+      return;
+    }
 
-    return;
+    console.error(
+      "Partial multi-open:",
+      e
+    );
   }
-
 
   const availableSkins =
     await api("/api/skins");
 
-
   const fakeItems =
     selectedCase.items
-
       .map(item => ({
 
         name:
@@ -1128,206 +1249,286 @@ async function startCaseOpening(id) {
           availableSkins.find(
             skin =>
               skin.name === item[0]
-               )?.image || ""
+          )?.image || ""
 
       }))
-
       .filter(
         item =>
           item.image
       );
 
+  const reelsBox =
+    $("#multiReels");
 
-  const reel =
-    $("#reel");
-
-
-  if (!reel) {
+  if (!reelsBox) {
     return;
   }
 
+  reelsBox.innerHTML =
+    results.map(
+      (_, reelIndex) => `
+        <div style="
+          position:relative;
+          padding:10px 0;
+        ">
 
-  reel.innerHTML = "";
+          <div style="
+            position:absolute;
+            left:50%;
+            top:0;
+            bottom:0;
+            width:2px;
+            transform:translateX(-50%);
+            background:#ffd400;
+            z-index:20;
+            box-shadow:
+              0 0 14px rgba(255,212,0,.75);
+            pointer-events:none;
+          "></div>
 
+          <div style="
+            position:absolute;
+            left:50%;
+            top:1px;
+            transform:translateX(-50%);
+            width:0;
+            height:0;
+            border-left:7px solid transparent;
+            border-right:7px solid transparent;
+            border-top:10px solid #ffd400;
+            z-index:21;
+          "></div>
 
-  for (
-    let i = 0;
-    i < 30;
-    i++
-  ) {
+          <div style="
+            position:absolute;
+            left:50%;
+            bottom:1px;
+            transform:translateX(-50%);
+            width:0;
+            height:0;
+            border-left:7px solid transparent;
+            border-right:7px solid transparent;
+            border-bottom:10px solid #ffd400;
+            z-index:21;
+          "></div>
 
-    const slot =
-      document.createElement(
-        "div"
-      );
+          <div
+            class="reel"
+            id="reel-${reelIndex}"
+            style="
+              display:flex;
+              gap:10px;
+              overflow:hidden;
+              scroll-behavior:auto;
+              padding:8px calc(50% - 75px);
+              border-top:1px solid rgba(255,212,0,.12);
+              border-bottom:1px solid rgba(255,212,0,.12);
+              background:
+                linear-gradient(
+                  180deg,
+                  rgba(255,212,0,.025),
+                  rgba(255,255,255,.01)
+                );
+            "
+          ></div>
 
+        </div>
+      `
+    ).join("");
 
-    slot.className =
-      "slot";
+  results.forEach(
+    (result, reelIndex) => {
 
+      const reel =
+        $(`#reel-${reelIndex}`);
 
-    let currentItem;
-
-
-    if (i === 27) {
-
-      currentItem = {
-
-        name:
-          result.item.name,
-
-        rarity:
-          result.item.rarity,
-
-        image:
-          result.item.image ||
-          skinImage(
-            result.item.name
-          )
-      };
-
-
-      slot.id =
-        "winningItem";
-
-      slot.classList.add(
-        "win"
-      );
-
-      slot.style.border =
-        "1px solid #ffd400";
-
-      slot.style.boxShadow =
-        "0 0 24px rgba(255,212,0,.28)";
-
-    } else {
-
-      if (!fakeItems.length) {
-        continue;
-      }
-
-
-      currentItem =
-        fakeItems[
-          Math.floor(
-            Math.random() *
-            fakeItems.length
-          )
-        ];
-    }
-
-
-    if (!currentItem) {
-      continue;
-    }
-
-
-    const rarityClass =
-      "rarity-" +
-      String(
-        currentItem.rarity || ""
-      )
-        .toLowerCase()
-        .replace(
-          /[^a-z0-9]+/g,
-          "-"
-        );
-
-
-    slot.classList.add(
-      rarityClass
-    );
-
-
-    slot.style.cssText += `
-      flex:0 0 140px;
-      min-height:132px;
-      padding:10px;
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:10px;
-      background:
-        linear-gradient(
-          180deg,
-          #1b1b1b,
-          #111
-        );
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:7px;
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.02);
-    `;
-
-    slot.innerHTML = `
-
-      <img
-        src="${currentItem.image}"
-        alt="${currentItem.name}"
-        style="
-          width:116px;
-          height:78px;
-          object-fit:contain;
-          filter:
-            drop-shadow(
-              0 10px 12px rgba(0,0,0,.42)
-            );
-        "
-      >
-
-      <div style="
-        width:100%;
-        font-size:10px;
-        line-height:1.25;
-        text-align:center;
-        color:#ddd;
-      ">
-        ${currentItem.name}
-      </div>
-    `;
-
-
-    reel.appendChild(slot);
-  }
-
-
-  reel.scrollLeft = 0;
-
-
-  setTimeout(
-    () => {
-
-      const winningItem =
-        $("#winningItem");
-
-
-      if (!winningItem) {
+      if (!reel) {
         return;
       }
 
+      for (
+        let i = 0;
+        i < 30;
+        i++
+      ) {
 
-      const target =
-        winningItem.offsetLeft -
-        reel.clientWidth / 2 +
-        winningItem.clientWidth / 2;
+        const slot =
+          document.createElement(
+            "div"
+          );
 
+        slot.className =
+          "slot";
 
-      const start =
-        reel.scrollLeft;
+        let currentItem;
 
+        if (i === 27) {
 
-      const distance =
-        target - start;
+          currentItem = {
 
+            name:
+              result.item.name,
 
-      const duration =
-        4500;
+            rarity:
+              result.item.rarity,
 
+            image:
+              result.item.image ||
+              skinImage(
+                result.item.name
+              )
+          };
 
-      const startTime =
-        performance.now();
+          slot.id =
+            `winningItem-${reelIndex}`;
 
+          slot.classList.add(
+            "win"
+          );
+
+        } else {
+
+          if (!fakeItems.length) {
+            continue;
+          }
+
+          currentItem =
+            fakeItems[
+              Math.floor(
+                Math.random() *
+                fakeItems.length
+              )
+            ];
+        }
+
+        if (!currentItem) {
+          continue;
+        }
+
+        const rarityClass =
+          "rarity-" +
+          String(
+            currentItem.rarity || ""
+          )
+            .toLowerCase()
+            .replace(
+              /[^a-z0-9]+/g,
+              "-"
+            );
+
+        slot.classList.add(
+          rarityClass
+        );
+
+        const rarityColor =
+          getDropRarityColor(
+            currentItem.rarity,
+            i
+          );
+
+        slot.style.cssText += `
+          flex:0 0 140px;
+          min-height:125px;
+          padding:9px;
+          border:1px solid ${rarityColor};
+          border-radius:10px;
+          background:
+            linear-gradient(
+              180deg,
+              ${rarityColor}20,
+              #111 62%
+            );
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+          justify-content:center;
+          gap:6px;
+          box-shadow:
+            inset 0 0 0 1px rgba(255,255,255,.02),
+            0 0 16px ${rarityColor}22;
+        `;
+
+        slot.innerHTML = `
+          <img
+            src="${currentItem.image}"
+            alt="${currentItem.name}"
+            style="
+              width:116px;
+              height:76px;
+              object-fit:contain;
+              filter:
+                drop-shadow(
+                  0 10px 12px rgba(0,0,0,.42)
+                );
+            "
+          >
+
+          <div style="
+            width:100%;
+            font-size:10px;
+            line-height:1.25;
+            text-align:center;
+            color:${rarityColor};
+            text-shadow:
+              0 0 8px ${rarityColor}44;
+          ">
+            ${currentItem.name}
+          </div>
+        `;
+
+        reel.appendChild(slot);
+      }
+
+      reel.scrollLeft = 0;
+    }
+  );
+
+  await new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        220
+      )
+  );
+
+  const duration =
+    4500;
+
+  const startTime =
+    performance.now();
+
+  const animations =
+    results.map(
+      (_, reelIndex) => {
+
+        const reel =
+          $(`#reel-${reelIndex}`);
+
+        const winningItem =
+          $(`#winningItem-${reelIndex}`);
+
+        if (
+          !reel ||
+          !winningItem
+        ) {
+          return null;
+        }
+
+        return {
+          reel,
+          start:
+            reel.scrollLeft,
+          distance:
+            winningItem.offsetLeft -
+            reel.clientWidth / 2 +
+            winningItem.clientWidth / 2 -
+            reel.scrollLeft
+        };
+      }
+    ).filter(Boolean);
+
+  await new Promise(
+    resolve => {
 
       function animate(time) {
 
@@ -1341,7 +1542,6 @@ async function startCaseOpening(id) {
             1
           );
 
-
         const ease =
           1 -
           Math.pow(
@@ -1349,12 +1549,15 @@ async function startCaseOpening(id) {
             4
           );
 
+        animations.forEach(
+          animation => {
 
-        reel.scrollLeft =
-          start +
-          distance *
-          ease;
-
+            animation.reel.scrollLeft =
+              animation.start +
+              animation.distance *
+              ease;
+          }
+        );
 
         if (progress < 1) {
 
@@ -1365,115 +1568,388 @@ async function startCaseOpening(id) {
           return;
         }
 
-
-        setTimeout(
-          () => {
-
-            $("#modalContent")
-              .innerHTML = `
-
-              <div style="
-                text-align:center;
-                padding:15px;
-              ">
-
-                <div style="
-                  color:#ffd400;
-                  font-size:10px;
-                  font-weight:900;
-                  letter-spacing:2px;
-                ">
-                  CASEZONE DROP
-                </div>
-
-                <h2>
-                  🎉 Вітаємо!
-                </h2>
-
-
-                <div
-                  class="slot win"
-                  style="
-                    margin:25px auto;
-                    max-width:330px;
-                  "
-                >
-
-                  <img
-                    src="${
-                      result.item.image ||
-                      skinImage(
-                        result.item.name
-                      )
-                    }"
-                    alt="${
-                      result.item.name
-                    }"
-                    style="
-                      width:190px;
-                      height:140px;
-                      object-fit:contain;
-                    "
-                  >
-
-
-                  <strong style="
-                    display:block;
-                    margin-top:10px;
-                  ">
-                    ${result.item.name}
-                  </strong>
-
-
-                  <small style="
-                    display:block;
-                    margin-top:6px;
-                    color:#ffd400;
-                  ">
-                    ${result.item.rarity}
-                    •
-                    ${Number(
-                      result.item.value
-                    ).toFixed(2)} ₴
-                  </small>
-
-                </div>
-
-
-                <button
-                  type="button"
-                  onclick="closeWin()"
-                  style="
-                    min-height:44px;
-                    padding:0 24px;
-                    border-radius:10px;
-                    background:#ffd400;
-                    color:#111;
-                    font-weight:900;
-                  "
-                >
-                  Забрати
-                </button>
-
-              </div>
-            `;
-
-          },
-          450
-        );
+        resolve();
       }
 
-
       requestAnimationFrame(
-               animate
+        animate
       );
-
-    },
-    250
+    }
   );
 
+  await new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        350
+      )
+  );
+
+  let inventoryAfter = [];
+
+  try {
+    inventoryAfter =
+      await api("/api/inventory");
+  } catch {
+    inventoryAfter = [];
+  }
+
+  const newInventoryItems =
+    inventoryAfter.filter(
+      item =>
+        !beforeIds.has(
+          String(item.id)
+        )
+    );
+
+  const usedIds =
+    new Set();
+
+  const openedItems =
+    results.map(
+      result => {
+
+        const match =
+          newInventoryItems.find(
+            item =>
+              !usedIds.has(
+                String(item.id)
+              ) &&
+              item.item_name ===
+                result.item.name
+          );
+
+        if (match) {
+
+          usedIds.add(
+            String(match.id)
+          );
+        }
+
+        return {
+          ...result.item,
+          inventoryId:
+            match?.id || null
+        };
+      }
+    );
+
+  showMultiOpenResult(
+    selectedCase,
+    openedItems,
+    quantity
+  );
 
   await refresh();
+}
+
+
+/* =========================
+   MULTI OPEN RESULT
+========================= */
+
+function showMultiOpenResult(
+  selectedCase,
+  openedItems,
+  quantity
+) {
+
+  const content =
+    $("#modalContent");
+
+  if (!content) {
+    return;
+  }
+
+  const totalValue =
+    openedItems.reduce(
+      (sum, item) =>
+        sum +
+        Number(item.value || 0),
+      0
+    );
+
+  const sellableIds =
+    openedItems
+      .map(
+        item =>
+          item.inventoryId
+      )
+      .filter(Boolean);
+
+  content.innerHTML = `
+    <div style="
+      text-align:center;
+      padding:12px;
+    ">
+
+      <div style="
+        color:#ffd400;
+        font-size:10px;
+        font-weight:900;
+        letter-spacing:2px;
+      ">
+        CASEZONE DROP
+      </div>
+
+      <h2 style="
+        margin:8px 0 5px;
+      ">
+        🎉 Результат
+      </h2>
+
+      <p style="
+        margin:0 0 20px;
+        color:#888;
+        font-size:12px;
+          ">
+        Відкрито: ${openedItems.length}
+        ${openedItems.length === 1 ? "кейс" : "кейси"}
+      </p>
+
+      <div style="
+        display:grid;
+        grid-template-columns:
+          repeat(
+            auto-fit,
+            minmax(150px,1fr)
+          );
+        gap:10px;
+        margin-bottom:20px;
+      ">
+
+        ${openedItems.map(item => {
+
+          const rarityColor =
+            getDropRarityColor(
+              item.rarity
+            );
+
+          return `
+            <div style="
+              position:relative;
+              overflow:hidden;
+              min-height:190px;
+              padding:12px;
+              border:
+                1px solid
+                ${rarityColor};
+              border-radius:12px;
+              background:
+                linear-gradient(
+                  180deg,
+                  ${rarityColor}20,
+                  #111 65%
+                );
+              box-shadow:
+                0 0 18px
+                ${rarityColor}20;
+            ">
+
+              <img
+                src="${
+                  item.image ||
+                  skinImage(
+                    item.name
+                  )
+                }"
+                alt="${item.name}"
+                style="
+                  width:100%;
+                  height:110px;
+                  object-fit:contain;
+                "
+              >
+
+              <strong style="
+                display:block;
+                margin-top:8px;
+                font-size:12px;
+              ">
+                ${item.name}
+              </strong>
+
+              <span style="
+                display:block;
+                margin-top:4px;
+                color:${rarityColor};
+                font-size:10px;
+              ">
+                ${item.rarity}
+              </span>
+
+              <strong style="
+                display:block;
+                margin-top:6px;
+                color:#fff;
+                font-size:14px;
+              ">
+                ${Number(
+                  item.value || 0
+                ).toFixed(2)} ₴
+              </strong>
+
+            </div>
+          `;
+        }).join("")}
+
+      </div>
+
+      <div style="
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:10px;
+        flex-wrap:wrap;
+      ">
+
+        <button
+          type="button"
+          onclick="
+            startCaseOpening(
+              '${selectedCase.id}',
+              ${quantity}
+            )
+          "
+          style="
+            min-height:48px;
+            padding:0 22px;
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:11px;
+            background:#1b1b1b;
+            color:#fff;
+            font-weight:900;
+          "
+        >
+          ↻ Спробувати ще x${quantity}
+        </button>
+
+        <button
+          type="button"
+          ${sellableIds.length ? "" : "disabled"}
+          onclick='sellOpenedItems(${JSON.stringify(sellableIds)})'
+          style="
+            min-height:48px;
+            padding:0 24px;
+            border:0;
+            border-radius:11px;
+            background:
+              ${sellableIds.length ? "#ff2f91" : "#333"};
+            color:#fff;
+            font-weight:950;
+            cursor:
+              ${sellableIds.length ? "pointer" : "not-allowed"};
+            box-shadow:
+              ${sellableIds.length ? "0 0 22px rgba(255,47,145,.20)" : "none"};
+          "
+        >
+          🛒 Продати за
+          ${totalValue.toFixed(2)} ₴
+        </button>
+
+      </div>
+
+      ${
+        sellableIds.length
+          ? ""
+          : `
+            <div style="
+              margin-top:10px;
+              color:#777;
+              font-size:10px;
+            ">
+              Предмети вже додані у ваш інвентар.
+            </div>
+          `
+      }
+
+    </div>
+  `;
+}
+
+
+/* =========================
+   SELL OPENED ITEMS
+========================= */
+
+async function sellOpenedItems(ids) {
+
+  if (
+    !Array.isArray(ids) ||
+    !ids.length
+  ) {
+    return;
+  }
+
+  try {
+
+    for (
+      const id of ids
+    ) {
+
+      await api(
+        "/api/inventory/" +
+        id +
+        "/sell",
+        {
+          method: "POST"
+        }
+      );
+    }
+
+    await refresh();
+
+    $("#modalContent")
+      .innerHTML = `
+        <div style="
+          text-align:center;
+          padding:45px 20px;
+        ">
+
+          <div style="
+            font-size:38px;
+            margin-bottom:12px;
+          ">
+            ✅
+          </div>
+
+          <h2>
+            Предмети продано
+          </h2>
+
+          <p style="
+            color:#888;
+          ">
+            Кошти зараховані на баланс.
+          </p>
+
+          <button
+            type="button"
+            onclick="
+              $('#modal').classList.add('hidden')
+            "
+            style="
+              min-height:44px;
+              padding:0 22px;
+              border-radius:10px;
+              background:#ffd400;
+              color:#111;
+              font-weight:900;
+            "
+          >
+            Готово
+          </button>
+
+        </div>
+      `;
+
+  } catch (e) {
+
+    alert(
+      e.message ||
+      "Не вдалося продати предмети"
+    );
+  }
 }
 
 
@@ -2078,7 +2554,7 @@ $("#depositBtn")
             "
           >
             🎮 Скінами CS2
-          </button>
+                     </button>
 
         </div>
       `;
@@ -2199,7 +2675,7 @@ async function depositMethod(method) {
 
       <p style="
         color:#888;
-           ">
+          ">
         Криптовалютне поповнення
         буде підключено окремо.
       </p>
