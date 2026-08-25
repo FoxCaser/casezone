@@ -1990,28 +1990,28 @@ INSERT INTO site_inventory (
 
 app.get(
   "/api/me",
-  auth,
   async (req, res) => {
+
+    if (!req.session.userId) {
+      return res.status(401).json({
+        error: "Не авторизовано"
+      });
+    }
+
     try {
 
-      const result =
-        await pool.query(
-          `
-          SELECT
-            id,
-            username,
-            steam_id,
-            balance,
-            trade_url,
-              const result =
-        await pool.query(
-          `
-    );
-          FROM users
-          WHERE id = $1
-          `,
-          [req.session.userId]
-        );
+      const result = await pool.query(
+        `
+        SELECT
+          id,
+          username,
+          balance,
+          steam_trade_url
+        FROM users
+        WHERE id = $1
+        `,
+        [req.session.userId]
+      );
 
       if (!result.rows.length) {
         return res.status(404).json({
@@ -2028,7 +2028,7 @@ app.get(
 
       console.error(
         "Current user error:",
-             e
+        e
       );
 
       res.status(500).json({
@@ -2037,7 +2037,6 @@ app.get(
     }
   }
 );
-
 
 /* =========================
    API: ВИХІД
