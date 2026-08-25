@@ -1403,3 +1403,101 @@ min-width: 0;
   }
 
 }
+/* =========================
+   ПРОФІЛЬ
+========================= */
+
+.profile-card {
+  width: min(900px, 95vw);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.profile-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-tab {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  font-size: 15px;
+  transition: 0.2s;
+}
+
+.profile-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.profile-tab.active {
+  background: #ff7a00;
+  border-color: #ff7a00;
+  color: #fff;
+}
+
+.profile-content {
+  min-width: 0;
+}
+
+.profile-section h3 {
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+
+.profile-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #bbb;
+}
+
+#steamTradeUrl {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  outline: none;
+}
+
+#steamTradeUrl:focus {
+  border-color: #ff7a00;
+}
+
+#tradeUrlStatus {
+  min-height: 20px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .profile-tab {
+    flex: 1 1 100%;
+  }
+}
