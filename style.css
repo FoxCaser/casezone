@@ -2381,3 +2381,377 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* =========================================================
+   CASEZONE — ULTRA COMPACT DESKTOP
+   Під останній затверджений скрін
+========================================================= */
+
+@media (min-width: 1060px) {
+
+  .cz-header-inner,
+  .cz-main,
+  .cz-footer {
+    max-width: 1180px;
+  }
+
+  .cz-header-inner {
+    min-height: 62px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+  }
+
+  .cz-logo-icon {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  .cz-logo-text strong {
+    font-size: 17px;
+  }
+
+  .cz-logo-text small {
+    font-size: 7px;
+    letter-spacing: 1.1px;
+  }
+
+  .cz-nav {
+    gap: 7px;
+  }
+
+  /* Усі основні кнопки — максимально близько до тексту */
+  .cz-nav-link,
+  .cz-deposit-btn,
+  .cz-auth-btn,
+  .cz-profile-btn,
+  .hero-open-btn,
+  .filter,
+  .ghost,
+  .inventory-shortcut,
+  .inventory-open-secondary,
+  .case button,
+  .case-card button,
+  .cz-case-grid > div button {
+    min-width: 0 !important;
+    width: auto !important;
+    min-height: 30px !important;
+    height: 30px;
+    padding: 0 11px !important;
+    border-radius: 7px !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    white-space: nowrap;
+  }
+
+  .cz-profile-btn {
+    gap: 5px;
+  }
+
+  .cz-profile-btn span {
+    display: inline;
+  }
+
+  .cz-account {
+    gap: 7px;
+  }
+
+  .steam-avatar-btn {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+  .cz-balance {
+    min-width: 82px;
+    min-height: 38px;
+    padding: 5px 10px;
+    border-radius: 8px;
+  }
+
+  .cz-balance small {
+    font-size: 7px;
+  }
+
+  .cz-balance span {
+    margin-top: 1px;
+    font-size: 13px;
+  }
+
+  .cz-main {
+    padding-top: 12px;
+  }
+
+  .cz-dashboard-top {
+    grid-template-columns:
+      minmax(0, 1.55fr)
+      minmax(300px, .92fr);
+    gap: 10px;
+  }
+
+  .cz-dashboard-top .cz-hero {
+    min-height: 260px;
+    padding: 25px 30px;
+    grid-template-columns:
+      minmax(0, 1fr)
+      220px;
+    border-radius: 13px;
+  }
+
+  .cz-dashboard-top .hero-content {
+    max-width: 485px;
+  }
+
+  .cz-dashboard-top .eyebrow {
+    padding: 4px 7px;
+    font-size: 7px;
+    letter-spacing: 1.1px;
+  }
+
+  .cz-dashboard-top .cz-hero h1 {
+    max-width: 475px;
+    margin: 12px 0 8px;
+    font-size: clamp(27px, 2.55vw, 38px);
+    line-height: .98;
+    letter-spacing: -1.5px;
+  }
+
+  .cz-dashboard-top .cz-hero h1 span {
+    margin-top: 3px;
+  }
+
+  .cz-dashboard-top .sub {
+    max-width: 440px;
+    margin-top: 9px;
+    font-size: 10px;
+    line-height: 1.45;
+  }
+
+  .cz-dashboard-top .hero-open-btn {
+    margin-top: 16px;
+  }
+
+  .cz-dashboard-top .hero-visual {
+    min-height: 170px;
+  }
+
+  .cz-dashboard-top .hero-case-glow {
+    width: 185px;
+    height: 95px;
+    bottom: 22px;
+  }
+
+  .cz-dashboard-top .hero-case {
+    width: 145px;
+    height: 112px;
+    padding: 14px;
+    border-radius: 13px;
+  }
+
+  .cz-dashboard-top .hero-case::before {
+    inset: 8px;
+    border-radius: 9px;
+  }
+
+  .cz-dashboard-top .hero-case-top,
+  .cz-dashboard-top .hero-case-bottom {
+    font-size: 7px;
+    letter-spacing: 1.15px;
+  }
+
+  .cz-dashboard-top .hero-case-logo {
+    font-size: 32px;
+    letter-spacing: -2px;
+  }
+
+  .cz-dashboard-side {
+    gap: 9px;
+  }
+
+  .dashboard-side-card {
+    min-height: 125px;
+    padding: 14px 15px !important;
+    border-radius: 12px;
+  }
+
+  .side-title-line {
+    width: 3px;
+    height: 18px;
+    flex-basis: 3px;
+  }
+
+  .side-card-title,
+  .top-card-head {
+    gap: 7px;
+  }
+
+  .side-card-title h3,
+  .top-card-head h3 {
+    font-size: 12px;
+  }
+
+  .dashboard-side-card .live-placeholder {
+    margin-top: 13px;
+    min-height: auto;
+    padding: 0;
+    gap: 8px;
+    background: transparent;
+  }
+
+  .live-dot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .dashboard-side-card .live-placeholder strong {
+    font-size: 8px;
+  }
+
+  .dashboard-side-card .live-placeholder span {
+    margin-top: 3px;
+    font-size: 8px;
+  }
+
+  .dashboard-side-card .top-empty {
+    gap: 8px;
+    margin-top: 13px;
+  }
+
+  .top-player-avatar {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+    border-radius: 8px;
+  }
+
+  .dashboard-side-card .top-empty strong {
+    margin-bottom: 2px;
+    font-size: 9px;
+  }
+
+  .dashboard-side-card .top-empty span {
+    font-size: 8px;
+  }
+
+  .side-watermark {
+    right: 14px;
+    bottom: 11px;
+    font-size: 42px;
+  }
+
+  .side-watermark.crown {
+    font-size: 48px;
+  }
+
+  .cz-benefits {
+    margin-top: 9px;
+    gap: 8px;
+  }
+
+  .benefit-item {
+    min-height: 52px;
+    gap: 9px;
+    padding: 8px 11px;
+    border-radius: 10px;
+  }
+
+  .benefit-icon {
+    width: 29px;
+    height: 29px;
+    flex-basis: 29px;
+    border-radius: 7px;
+    font-size: 13px;
+  }
+
+  .benefit-item strong {
+    font-size: 9px;
+  }
+
+  .benefit-item span {
+    margin-top: 2px;
+    font-size: 7px;
+  }
+
+  .cases-section {
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: 13px;
+  }
+
+  .cases-section .cz-section-title {
+    min-height: 30px;
+    margin-bottom: 9px;
+  }
+
+  .cases-section .cz-section-title h2 {
+    font-size: 14px;
+  }
+
+  .cases-section .cz-section-title::before {
+    width: 3px;
+    height: 18px;
+  }
+
+  .cz-case-grid,
+  .grid {
+    grid-template-columns:
+      repeat(6, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .case,
+  .case-card,
+  .cz-case-grid > div {
+    min-height: 196px !important;
+    padding: 8px !important;
+    border-radius: 10px !important;
+  }
+
+  .cz-new-case-visual {
+    height: 112px !important;
+    margin: -3px -3px 4px !important;
+    border-radius: 8px !important;
+  }
+
+  .cz-new-case-visual img {
+    border-radius: 8px !important;
+  }
+
+  .case h3,
+  .case-card h3,
+  .cz-case-grid > div h3 {
+    margin: 5px 0 3px !important;
+    font-size: 9px !important;
+  }
+
+  .case-card > div:last-child > div:nth-child(2) {
+    font-size: 7px !important;
+    margin-bottom: 5px !important;
+  }
+
+  .case-card strong {
+    font-size: 11px !important;
+  }
+
+  .case-card button {
+    height: 27px !important;
+    min-height: 27px !important;
+    padding: 0 9px !important;
+    font-size: 9px !important;
+  }
+
+  .section-kicker {
+    font-size: 7px;
+    letter-spacing: 1.2px;
+  }
+
+  .cz-footer {
+    margin-top: 10px;
+    min-height: 54px;
+    padding: 10px 14px;
+    border-radius: 11px;
+  }
+}
