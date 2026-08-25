@@ -195,15 +195,12 @@ function renderCases() {
     return;
   }
 
-
   let filteredCases =
     [...cases];
-
 
   if (
     activeCaseFilter === "cheap"
   ) {
-
     filteredCases =
       cases.filter(
         c =>
@@ -211,11 +208,9 @@ function renderCases() {
       );
   }
 
-
   if (
     activeCaseFilter === "premium"
   ) {
-
     filteredCases =
       cases.filter(
         c =>
@@ -224,18 +219,15 @@ function renderCases() {
       );
   }
 
-
   if (
     activeCaseFilter === "expensive"
   ) {
-
     filteredCases =
       cases.filter(
         c =>
           Number(c.price) > 2500
       );
   }
-
 
   if (!filteredCases.length) {
 
@@ -254,7 +246,6 @@ function renderCases() {
     return;
   }
 
-
   container.innerHTML =
     filteredCases
       .map((c, index) => {
@@ -266,7 +257,6 @@ function renderCases() {
           Array.isArray(c.items)
             ? c.items.length
             : 0;
-
 
         return `
           <article
@@ -294,22 +284,22 @@ function renderCases() {
               <div
                 style="
                   position:absolute;
-                  width:145px;
-                  height:44px;
-                  bottom:10px;
+                  width:150px;
+                  height:48px;
+                  bottom:8px;
                   border-radius:50%;
                   background:${theme.glow};
-                  filter:blur(24px);
+                  filter:blur(25px);
                   opacity:.95;
                 "
               ></div>
 
-
+              <!-- ЗОВНІШНІЙ КОНТУР КЕЙСА -->
               <div
                 style="
                   position:relative;
-                  width:155px;
-                  height:116px;
+                  width:160px;
+                  height:118px;
                   display:grid;
                   place-items:center;
                   filter:
@@ -325,15 +315,15 @@ function renderCases() {
                 <div
                   style="
                     position:relative;
-                    width:138px;
-                    height:92px;
+                    width:142px;
+                    height:94px;
 
                     border:
                       3px solid
                       ${theme.main};
 
                     border-radius:
-                      12px 12px 17px 17px;
+                      13px 13px 18px 18px;
 
                     background:
                       linear-gradient(
@@ -358,14 +348,15 @@ function renderCases() {
                   "
                 >
 
+                  <!-- РУЧКА -->
                   <div
                     style="
                       position:absolute;
-                      left:10px;
-                      right:10px;
+                      left:13px;
+                      right:13px;
                       top:-14px;
 
-                      height:25px;
+                      height:24px;
 
                       border:
                         3px solid
@@ -374,7 +365,7 @@ function renderCases() {
                       border-bottom:0;
 
                       border-radius:
-                        12px 12px 2px 2px;
+                        12px 12px 3px 3px;
 
                       background:
                         linear-gradient(
@@ -389,75 +380,118 @@ function renderCases() {
                     "
                   ></div>
 
-
-                  <div
-                    style="
-                      position:absolute;
-                      left:14px;
-                      right:14px;
-                      top:12px;
-
-                      height:9px;
-
-                      border-radius:3px;
-
-                      background:
-                        rgba(255,255,255,.10);
-                    "
-                  ></div>
-
-
+                  <!-- ВНУТРІШНІЙ КЕЙС -->
                   <div
                     style="
                       position:absolute;
                       left:50%;
-                      top:34px;
+                      top:46%;
 
                       transform:
-                        translateX(-50%);
+                        translate(-50%,-50%);
 
-                      width:43px;
-                      height:29px;
+                      width:78px;
+                      height:50px;
 
                       border:
                         2px solid
                         rgba(255,255,255,.55);
 
-                      border-radius:6px;
+                      border-radius:
+                        8px 8px 10px 10px;
 
-                      background:#151515;
+                      background:
+                        linear-gradient(
+                          145deg,
+                          rgba(255,255,255,.18),
+                          rgba(0,0,0,.36)
+                        );
 
                       box-shadow:
-                        0 0 12px
-                        ${theme.glow};
+                        inset 0 0 0 2px
+                          rgba(255,255,255,.06),
+                        0 0 14px
+                          ${theme.glow};
                     "
                   >
 
+                    <!-- МАЛЕНЬКА РУЧКА ВНУТРІШНЬОГО КЕЙСА -->
+                    <div
+                      style="
+                        position:absolute;
+                        left:18px;
+                        right:18px;
+                        top:-8px;
+
+                        height:10px;
+
+                        border:
+                          2px solid
+                          rgba(255,255,255,.5);
+
+                        border-bottom:0;
+
+                        border-radius:
+                          7px 7px 2px 2px;
+
+                        background:
+                          rgba(20,20,20,.65);
+                      "
+                    ></div>
+
+                    <!-- МЕНШИЙ ЗАМОК -->
                     <div
                       style="
                         position:absolute;
                         left:50%;
-                        top:50%;
+                        top:52%;
 
                         transform:
                           translate(-50%,-50%);
 
-                        width:10px;
-                        height:10px;
+                        width:22px;
+                        height:15px;
 
-                        border-radius:50%;
+                        border:
+                          1.5px solid
+                          rgba(255,255,255,.65);
 
-                        background:
-                          ${theme.main};
+                        border-radius:4px;
+
+                        background:#151515;
 
                         box-shadow:
                           0 0 8px
                           ${theme.glow};
                       "
-                    ></div>
+                    >
+
+                      <div
+                        style="
+                          position:absolute;
+                          left:50%;
+                          top:50%;
+
+                          transform:
+                            translate(-50%,-50%);
+
+                          width:5px;
+                          height:5px;
+
+                          border-radius:50%;
+
+                          background:
+                            ${theme.main};
+
+                          box-shadow:
+                            0 0 6px
+                            ${theme.glow};
+                        "
+                      ></div>
+
+                    </div>
 
                   </div>
-
 
                   <div
                     style="
@@ -475,7 +509,6 @@ function renderCases() {
                   >
                     CASEZONE
                   </div>
-
 
                   <div
                     style="
@@ -500,7 +533,6 @@ function renderCases() {
 
             </div>
 
-
             <div
               style="
                 position:relative;
@@ -516,7 +548,6 @@ function renderCases() {
                 ${c.name}
               </h3>
 
-
               <div
                 style="
                   color:#777;
@@ -527,7 +558,6 @@ function renderCases() {
                 ${itemCount}
                 предметів
               </div>
-
 
               <div
                 style="
@@ -551,7 +581,6 @@ function renderCases() {
                 >
                   ${Number(c.price)} ₴
                 </strong>
-
 
                 <button
                   type="button"
@@ -604,7 +633,6 @@ function filterCases(type) {
     premium: 2,
     expensive: 3
   };
-
 
   buttons[
     indexMap[type] ?? 0
@@ -1239,8 +1267,6 @@ async function login() {
     alert(e.message);
   }
 }
-
-
 async function register() {
 
   try {
@@ -1877,7 +1903,7 @@ async function startLiqPay(amount) {
     alert(
       e.message ||
       "Не вдалося створити платіж"
-    );
+           );
   }
 }
 /* =========================
