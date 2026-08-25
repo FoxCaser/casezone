@@ -186,6 +186,57 @@ function getCaseTheme(index) {
    RENDER CASES
 ========================= */
 
+/* =========================
+   CASE ARTWORK
+========================= */
+
+function getCaseArtwork(c, index) {
+
+  const name =
+    String(c?.name || "")
+      .trim()
+      .toUpperCase();
+
+  const byName = {
+    "RED CASE": "/red-case.jpg",
+    "EPIC CASE": "/epic-case.jpg",
+    "LEGEND CASE": "/legend-case.jpg",
+    "BRONZE CASE": "/bronze-case.jpg",
+    "SILVER CASE": "/silver-case.jpg",
+    "GOLD CASE": "/gold-case.jpg",
+    "FIRE CASE": "/fire-case.jpg",
+    "DRAGON CASE": "/dragon-case.jpg",
+    "KNIFE CASE": "/knife-case.jpg",
+    "PREMIUM CASE": "/premium-case.jpg",
+    "BLACK MARKET": "/black-market.jpg",
+    "ULTIMATE CASE": "/ultimate-case.jpg"
+  };
+
+  if (byName[name]) {
+    return byName[name];
+  }
+
+  const fallback = [
+    "/red-case.jpg",
+    "/epic-case.jpg",
+    "/legend-case.jpg",
+    "/bronze-case.jpg",
+    "/silver-case.jpg",
+    "/gold-case.jpg",
+    "/fire-case.jpg",
+    "/dragon-case.jpg",
+    "/knife-case.jpg",
+    "/premium-case.jpg"
+  ];
+
+  return fallback[index % fallback.length];
+}
+
+
+/* =========================
+   RENDER CASES
+========================= */
+
 function renderCases() {
 
   const container =
@@ -253,6 +304,9 @@ function renderCases() {
         const theme =
           getCaseTheme(index);
 
+        const artwork =
+          getCaseArtwork(c, index);
+
         const itemCount =
           Array.isArray(c.items)
             ? c.items.length
@@ -274,263 +328,34 @@ function renderCases() {
               style="
                 position:relative;
                 z-index:2;
-                height:155px;
-                display:grid;
-                place-items:center;
-                margin-bottom:5px;
+                height:180px;
+                margin:-8px -8px 8px;
+                overflow:hidden;
+                border-radius:14px;
               "
             >
-
-              <div
+              <img
+                src="${artwork}"
+                alt="${c.name}"
+                loading="lazy"
                 style="
-                  position:absolute;
-                  width:150px;
-                  height:48px;
-                  bottom:8px;
-                  border-radius:50%;
-                  background:${theme.glow};
-                  filter:blur(25px);
-                  opacity:.95;
-                "
-              ></div>
-
-              <!-- ЗОВНІШНІЙ КОНТУР КЕЙСА -->
-              <div
-                style="
-                  position:relative;
-                  width:160px;
-                  height:118px;
-                  display:grid;
-                  place-items:center;
+                  display:block;
+                  width:100%;
+                  height:100%;
+                  object-fit:cover;
+                  object-position:center;
+                  border-radius:14px;
                   filter:
-                    drop-shadow(
-                      0 17px 20px rgba(0,0,0,.55)
-                    )
-                    drop-shadow(
-                      0 0 15px ${theme.glow}
-                    );
+                    saturate(1.05)
+                    contrast(1.04);
+                  transition:
+                    transform .22s ease,
+                    filter .22s ease;
+                "
+                onerror="
+                  this.style.display='none';
                 "
               >
-
-                <div
-                  style="
-                    position:relative;
-                    width:142px;
-                    height:94px;
-
-                    border:
-                      3px solid
-                      ${theme.main};
-
-                    border-radius:
-                      13px 13px 18px 18px;
-
-                    background:
-                      linear-gradient(
-                        145deg,
-                        ${theme.main},
-                        ${theme.dark} 58%,
-                        #111
-                      );
-
-                    box-shadow:
-                      inset 0 0 0 3px
-                        rgba(255,255,255,.08),
-                      inset 0 -18px 30px
-                        rgba(0,0,0,.38),
-                      0 0 18px
-                        ${theme.glow};
-
-                    transform:
-                      perspective(600px)
-                      rotateX(-5deg)
-                      rotateY(-8deg);
-                  "
-                >
-
-                  <!-- РУЧКА -->
-                  <div
-                    style="
-                      position:absolute;
-                      left:13px;
-                      right:13px;
-                      top:-14px;
-
-                      height:24px;
-
-                      border:
-                        3px solid
-                        ${theme.main};
-
-                      border-bottom:0;
-
-                      border-radius:
-                        12px 12px 3px 3px;
-
-                      background:
-                        linear-gradient(
-                          180deg,
-                          ${theme.main},
-                          ${theme.dark}
-                        );
-
-                      box-shadow:
-                        inset 0 2px 0
-                        rgba(255,255,255,.15);
-                    "
-                  ></div>
-
-                  <!-- ВНУТРІШНІЙ КЕЙС -->
-                  <div
-                    style="
-                      position:absolute;
-                      left:50%;
-                      top:46%;
-
-                      transform:
-                        translate(-50%,-50%);
-
-                      width:78px;
-                      height:50px;
-
-                      border:
-                        2px solid
-                        rgba(255,255,255,.55);
-
-                      border-radius:
-                        8px 8px 10px 10px;
-
-                      background:
-                        linear-gradient(
-                          145deg,
-                          rgba(255,255,255,.18),
-                          rgba(0,0,0,.36)
-                        );
-
-                      box-shadow:
-                        inset 0 0 0 2px
-                          rgba(255,255,255,.06),
-                        0 0 14px
-                          ${theme.glow};
-                    "
-                  >
-
-                    <!-- МАЛЕНЬКА РУЧКА ВНУТРІШНЬОГО КЕЙСА -->
-                    <div
-                      style="
-                        position:absolute;
-                        left:18px;
-                        right:18px;
-                        top:-8px;
-
-                        height:10px;
-
-                        border:
-                          2px solid
-                          rgba(255,255,255,.5);
-
-                        border-bottom:0;
-
-                        border-radius:
-                          7px 7px 2px 2px;
-
-                        background:
-                          rgba(20,20,20,.65);
-                      "
-                    ></div>
-
-                    <!-- МЕНШИЙ ЗАМОК -->
-                    <div
-                      style="
-                        position:absolute;
-                        left:50%;
-                        top:52%;
-
-                        transform:
-                          translate(-50%,-50%);
-
-                        width:22px;
-                        height:15px;
-
-                        border:
-                          1.5px solid
-                          rgba(255,255,255,.65);
-
-                        border-radius:4px;
-
-                        background:#151515;
-
-                        box-shadow:
-                          0 0 8px
-                          ${theme.glow};
-                      "
-                    >
-
-                      <div
-                        style="
-                          position:absolute;
-                          left:50%;
-                          top:50%;
-
-                          transform:
-                            translate(-50%,-50%);
-
-                          width:5px;
-                          height:5px;
-
-                          border-radius:50%;
-
-                          background:
-                            ${theme.main};
-
-                          box-shadow:
-                            0 0 6px
-                            ${theme.glow};
-                        "
-                      ></div>
-
-                    </div>
-
-                  </div>
-
-                  <div
-                    style="
-                      position:absolute;
-                      left:12px;
-                      bottom:7px;
-
-                      font-size:7px;
-                      font-weight:900;
-                      letter-spacing:1.3px;
-
-                      color:
-                        rgba(255,255,255,.78);
-                    "
-                  >
-                    CASEZONE
-                  </div>
-
-                  <div
-                    style="
-                      position:absolute;
-                      right:12px;
-                      bottom:7px;
-
-                      font-size:7px;
-                      font-weight:900;
-                      letter-spacing:1px;
-
-                      color:
-                        rgba(255,255,255,.55);
-                    "
-                  >
-                    DROP
-                  </div>
-
-                </div>
-
-              </div>
-
             </div>
 
             <div
@@ -563,8 +388,7 @@ function renderCases() {
                 style="
                   display:flex;
                   align-items:center;
-                  justify-content:
-                    space-between;
+                  justify-content:space-between;
                   gap:8px;
                 "
               >
@@ -573,7 +397,6 @@ function renderCases() {
                   style="
                     color:${theme.main};
                     font-size:17px;
-
                     text-shadow:
                       0 0 12px
                       ${theme.glow};
@@ -588,9 +411,7 @@ function renderCases() {
                     openCase('${c.id}')
                   "
                   style="
-                    background:
-                      ${theme.main};
-
+                    background:${theme.main};
                     color:#080808;
                   "
                 >
@@ -768,7 +589,7 @@ async function openCase(id) {
           availableSkins.find(
             skin =>
               skin.name === item[0]
-          )?.image || ""
+               )?.image || ""
 
       }))
 
@@ -1949,8 +1770,7 @@ profileBtn
   ?.addEventListener(
     "click",
     async () => {
-
-      if (!currentUser) {
+  if (!currentUser) {
 
         auth();
         return;
