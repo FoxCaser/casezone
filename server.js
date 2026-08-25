@@ -2083,6 +2083,51 @@ app.get(
   }
 );
 /* =========================
+   API: ІСТОРІЯ ВИВОДУ
+========================= */
+
+app.get(
+  "/api/withdraw-history",
+  auth,
+  async (req, res) => {
+
+    try {
+
+      const result = await pool.query(
+        `
+      SELECT
+  id,
+  item_name,
+  value,
+  status,
+  trade_offer_id
+FROM withdrawals
+WHERE user_id = $1
+ORDER BY id DESC
+        `,
+        [req.session.userId]
+      );
+
+      res.json({
+        ok: true,
+        withdrawals: result.rows
+      });
+
+    } catch (e) {
+
+      console.error(
+        "Withdraw history error:",
+        e
+      );
+
+      res.status(500).json({
+        error: "Помилка сервера"
+      });
+
+    }
+  }
+);
+/* =========================
    API: ВИХІД
 ========================= */
 
