@@ -14,91 +14,6 @@ let skins = [];
 let activeCaseFilter = "all";
 let selectedOpenQuantity = 1;
 
-/* =========================
-   ROULETTE CENTER MARKER
-========================= */
-
-function installRouletteMarkerStyles() {
-
-  if (
-    document.getElementById(
-      "casezoneRouletteMarkerStyles"
-    )
-  ) {
-    return;
-  }
-
-  const style =
-    document.createElement("style");
-
-  style.id =
-    "casezoneRouletteMarkerStyles";
-
-  style.textContent = `
-    .reel {
-      position: relative !important;
-      isolation: isolate;
-    }
-
-    .reel::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      transform: translateX(-50%);
-      background: #ffd400;
-      z-index: 2147483646;
-      pointer-events: none;
-      box-shadow:
-        0 0 5px #ffd400,
-        0 0 12px #ffd400,
-        0 0 24px rgba(255, 212, 0, .95),
-        0 0 42px rgba(255, 212, 0, .55);
-    }
-
-    .reel::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 0;
-      width: 0;
-      height: 0;
-      transform: translateX(-50%);
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
-      border-top: 14px solid #ffd400;
-      z-index: 2147483647;
-      pointer-events: none;
-      filter: drop-shadow(
-        0 0 6px rgba(255, 212, 0, .95)
-      );
-    }
-
-    .roulette-bottom-arrow {
-      position: absolute;
-      left: 50%;
-      bottom: 0;
-      width: 0;
-      height: 0;
-      transform: translateX(-50%);
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
-      border-bottom: 14px solid #ffd400;
-      z-index: 2147483647;
-      pointer-events: none;
-      filter: drop-shadow(
-        0 0 6px rgba(255, 212, 0, .95)
-      );
-    }
-  `;
-
-  document.head.appendChild(style);
-}
-
-installRouletteMarkerStyles();
-
 
 
 /* =========================
@@ -879,7 +794,7 @@ async function showCaseDetails(id) {
     if (!items.length) {
 
       dropsBox.innerHTML = `
-      <div style="
+        <div style="
           grid-column:1/-1;
           padding:30px;
           text-align:center;
@@ -957,7 +872,7 @@ async function showCaseDetails(id) {
                       z-index:2;
                       width:100%;
                       height:92px;
-                      object-fit:contain;
+                         object-fit:contain;
                     "
                          >
                 `
@@ -1395,17 +1310,16 @@ async function startCaseOpening(
       (_, reelIndex) => `
         <div style="
           position:relative;
+          isolation:isolate;
+          overflow:visible;
           padding:10px 0;
         ">
-          <div
-            class="roulette-bottom-arrow"
-          ></div>
-
           <div
             class="reel"
             id="reel-${reelIndex}"
             style="
               position:relative;
+              z-index:1;
               display:flex;
               gap:10px;
               overflow:hidden;
@@ -1419,6 +1333,62 @@ async function startCaseOpening(
                   rgba(255,212,0,.025),
                   rgba(255,255,255,.01)
                 );
+            "
+          ></div>
+
+          <!-- НЕРУХОМИЙ МАРКЕР ПОВЕРХ РУЛЕТКИ -->
+          <div
+            class="case-fixed-marker"
+            style="
+              position:absolute;
+              left:50%;
+              top:10px;
+              bottom:10px;
+              width:3px;
+              transform:translateX(-50%);
+              background:#ffd400;
+              z-index:50;
+              pointer-events:none;
+              box-shadow:
+                0 0 5px #ffd400,
+                0 0 12px rgba(255,212,0,.95),
+                0 0 24px rgba(255,212,0,.55);
+            "
+          ></div>
+
+          <div
+            class="case-fixed-marker-top"
+            style="
+              position:absolute;
+              left:50%;
+              top:2px;
+              width:0;
+              height:0;
+              transform:translateX(-50%);
+              border-left:9px solid transparent;
+              border-right:9px solid transparent;
+              border-top:13px solid #ffd400;
+              z-index:51;
+              pointer-events:none;
+              filter:drop-shadow(0 0 5px rgba(255,212,0,.9));
+            "
+          ></div>
+
+          <div
+            class="case-fixed-marker-bottom"
+            style="
+              position:absolute;
+              left:50%;
+              bottom:2px;
+              width:0;
+              height:0;
+              transform:translateX(-50%);
+              border-left:9px solid transparent;
+              border-right:9px solid transparent;
+              border-bottom:13px solid #ffd400;
+              z-index:51;
+              pointer-events:none;
+              filter:drop-shadow(0 0 5px rgba(255,212,0,.9));
             "
           ></div>
 
@@ -1760,7 +1730,7 @@ function showMultiOpenResult(
     );
 
   const sellableIds =
-      openedItems
+    openedItems
       .map(
         item =>
           item.inventoryId
@@ -2641,7 +2611,7 @@ $("#depositBtn")
             type="button"
             onclick="
               depositMethod('skins')
-               "
+            "
           >
             🎮 Скінами CS2
           </button>
