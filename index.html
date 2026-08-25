@@ -112,7 +112,114 @@
 
   </div>
 </div>
+<!-- =========================
+     ПРОФІЛЬ
+========================= -->
 
+<div id="profileModal" class="modal hidden">
+
+  <div class="modal-card profile-card">
+
+    <button
+      id="closeProfile"
+      class="x">
+      ×
+    </button>
+
+    <h2>👤 Профіль</h2>
+
+    <div class="profile-layout">
+
+      <div class="profile-menu">
+
+        <button
+          class="profile-tab active"
+          data-tab="settings">
+          ⚙️ Налаштування
+        </button>
+
+        <button
+          class="profile-tab"
+          data-tab="deposits">
+          💳 Історія поповнень
+        </button>
+
+        <button
+          class="profile-tab"
+          data-tab="withdrawals">
+          📦 Історія виводу
+        </button>
+
+      </div>
+
+
+      <div class="profile-content">
+
+        <!-- НАЛАШТУВАННЯ -->
+
+        <div
+          id="profileSettings"
+          class="profile-section">
+
+          <h3>Налаштування</h3>
+
+          <label for="steamTradeUrl">
+            Steam Trade URL
+          </label>
+
+          <input
+            id="steamTradeUrl"
+            type="text"
+            placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
+          >
+
+          <button
+            id="saveTradeUrl"
+            class="deposit-btn">
+            Зберегти
+          </button>
+
+          <p id="tradeUrlStatus"></p>
+
+        </div>
+
+
+        <!-- ІСТОРІЯ ПОПОВНЕНЬ -->
+
+        <div
+          id="profileDeposits"
+          class="profile-section hidden">
+
+          <h3>Історія поповнень</h3>
+
+          <div id="depositHistory">
+            Історія поповнень порожня
+          </div>
+
+        </div>
+
+
+        <!-- ІСТОРІЯ ВИВОДУ -->
+
+        <div
+          id="profileWithdrawals"
+          class="profile-section hidden">
+
+          <h3>Історія виводу скінів</h3>
+
+          <div id="withdrawHistory">
+            Історія виводу порожня
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 <div
   id="modal"
   class="modal hidden">
