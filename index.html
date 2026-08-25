@@ -71,9 +71,28 @@
 
       <div class="cz-account-user">
 
+        <button
+          id="steamAvatarBtn"
+          class="steam-avatar-btn"
+          type="button"
+          title="Відкрити профіль"
+        >
+          <img
+            id="steamAvatar"
+            alt="Steam avatar"
+            class="steam-avatar-img hidden"
+          >
+          <span
+            id="steamAvatarFallback"
+            class="steam-avatar-fallback"
+          >
+            👤
+          </span>
+        </button>
+
         <span
           id="userLabel"
-          class="cz-user-label"
+          class="sr-only"
         >
           Гість
         </span>
@@ -133,6 +152,10 @@
      HERO
 ========================= -->
 
+<section class="cz-dashboard-top">
+
+  <div class="cz-dashboard-left">
+
 <section class="hero cz-hero">
 
   <div class="hero-glow hero-glow-left"></div>
@@ -190,6 +213,55 @@
     </div>
 
   </div>
+
+</section>
+
+  </div>
+
+
+  <aside class="cz-dashboard-side">
+
+    <div class="community-main dashboard-side-card">
+
+      <div class="side-card-title">
+        <span class="side-title-line"></span>
+        <h3>ОСТАННІ ДРОПИ</h3>
+      </div>
+
+      <div class="live-placeholder">
+        <div class="live-dot"></div>
+        <div>
+          <strong>LIVE DROP</strong>
+          <span>
+            Тут показуються останні виграші гравців
+          </span>
+        </div>
+      </div>
+
+      <div class="side-watermark">🎁</div>
+
+    </div>
+
+    <div class="top-players-card dashboard-side-card">
+
+      <div class="top-card-head">
+        <span>★</span>
+        <h3>ТОП ГРАВЦІВ</h3>
+      </div>
+
+      <div class="top-empty">
+        <div class="top-player-avatar">👤</div>
+        <div>
+          <strong>Prime™ CaseZone</strong>
+          <span>Сума виграшів: 1489324.00 ₴</span>
+        </div>
+      </div>
+
+      <div class="side-watermark crown">♛</div>
+
+    </div>
+
+  </aside>
 
 </section>
 
@@ -353,139 +425,6 @@
 </section>
 
 
-<!-- =========================
-     LIVE / ТОП
-========================= -->
-
-<section class="cz-community">
-
-  <div class="community-main">
-
-    <div class="section-title cz-section-title">
-
-      <div>
-
-        <span class="section-kicker">
-          COMMUNITY
-        </span>
-
-        <h2>
-          Останні дропи
-        </h2>
-
-      </div>
-
-    </div>
-
-
-    <div class="live-placeholder">
-
-      <div class="live-dot"></div>
-
-      <div>
-        <strong>
-          LIVE DROP
-        </strong>
-
-        <span>
-          Тут згодом з'являться
-          останні виграні скіни
-        </span>
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <aside class="top-players-card">
-
-    <div class="top-card-head">
-
-      <span>
-        ★
-      </span>
-
-      <h3>
-        ТОП ГРАВЦІВ
-      </h3>
-
-    </div>
-
-
-    <div class="top-empty">
-
-      <strong>
-        Рейтинг CaseZone
-      </strong>
-
-      <span>
-        Скоро тут будуть
-        найкращі гравці
-      </span>
-
-    </div>
-
-  </aside>
-
-</section>
-
-
-<!-- =========================
-     ІНВЕНТАР НА ГОЛОВНІЙ
-========================= -->
-
-<section class="home-inventory-section">
-
-  <div class="section-title cz-section-title">
-
-    <div>
-
-      <span class="section-kicker">
-        INVENTORY
-      </span>
-
-      <h2>
-        Твій інвентар
-      </h2>
-
-    </div>
-
-
-    <button
-      type="button"
-      class="inventory-open-secondary"
-      id="inventoryOpenSecondary"
-    >
-      Відкрити інвентар
-      <span>→</span>
-    </button>
-
-  </div>
-
-
-  <div class="inventory-preview">
-
-    <div class="inventory-preview-icon">
-      🎒
-    </div>
-
-    <div>
-
-      <strong>
-        Усі твої скіни в одному місці
-      </strong>
-
-      <p>
-        Відкривай кейси, збирай предмети
-        та відправляй їх на Steam.
-      </p>
-
-    </div>
-
-  </div>
-
-</section>
 
 
 <!-- =========================
@@ -727,6 +666,26 @@
             <h3>
               Налаштування
             </h3>
+
+          </div>
+
+
+
+          <div class="steam-profile-info">
+
+            <div>
+              <span class="steam-profile-label">
+                STEAM ID
+              </span>
+
+              <strong id="profileSteamId">
+                Не підключено
+              </strong>
+            </div>
+
+            <span class="steam-profile-badge">
+              STEAM
+            </span>
 
           </div>
 
