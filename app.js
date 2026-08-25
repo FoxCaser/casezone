@@ -872,7 +872,7 @@ async function showCaseDetails(id) {
                       z-index:2;
                       width:100%;
                       height:92px;
-                         object-fit:contain;
+                      object-fit:contain;
                     "
                          >
                 `
@@ -3491,4 +3491,906 @@ async function initApp() {
 }
 
 
+
+/* =========================
+   UPGRADE PAGE
+========================= */
+
+let upgradeInventoryItems = [];
+let upgradeTargetItems = [];
+let selectedUpgradeSource = null;
+let selectedUpgradeTarget = null;
+
+const homeSections = () => [
+  $(".cz-dashboard-top"),
+  $(".cz-benefits"),
+  $(".cases-section"),
+  $(".cz-stats")
+].filter(Boolean);
+
+
+function showHomePage() {
+
+  $("#upgradeSection")
+    ?.classList
+    .add("hidden");
+
+  homeSections()
+    .forEach(
+      section =>
+        section.classList
+          .remove("hidden")
+    );
+
+  $("#upgradeNavBtn")
+    ?.classList
+    .remove("active");
+
+  $("#casesNavBtn")
+    ?.classList
+    .add("active");
+}
+
+
+async function showUpgradePage() {
+
+  if (!currentUser) {
+    auth();
+    return;
+  }
+
+  homeSections()
+    .forEach(
+      section =>
+        section.classList
+          .add("hidden")
+    );
+
+  $("#upgradeSection")
+    ?.classList
+    .remove("hidden");
+
+  $("#casesNavBtn")
+    ?.classList
+    .remove("active");
+
+  $("#upgradeNavBtn")
+    ?.classList
+    .add("active");
+
+  await loadUpgradeData();
+}
+
+
+$("#upgradeNavBtn")
+  ?.addEventListener(
+    "click",
+    showUpgradePage
+  );
+
+
+$("#casesNavBtn")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      showHomePage();
+    }
+  );
+
+
+async function loadUpgradeData() {
+
+  const inventoryGrid =
+    $("#upgradeInventoryGrid");
+
+  const targetGrid =
+    $("#upgradeTargetGrid");
+
+  if (inventoryGrid) {
+    inventoryGrid.innerHTML =
+      `<div class="upgrade-loading">Завантаження...</div>`;
+  }
+
+  if (targetGrid) {
+    targetGrid.innerHTML =
+      `<div class="upgrade-loading">Завантаження...</div>`;
+  }
+
+  try {
+
+    const [
+      inventory,
+      targets,
+      skinList
+    ] =
+      await Promise.all([
+        api("/api/inventory"),
+        api("/api/upgrade-targets"),
+        skins.length
+          ? Promise.resolve(skins)
+          : api("/api/skins")
+      ]);
+
+    if (!skins.length) {
+      skins = skinList;
+    }
+
+    upgradeInventoryItems =
+      inventory.map(
+        item => ({
+          ...item,
+          image:
+            skinImage(
+              item.item_name
+            )
+        })
+      );
+
+    upgradeTargetItems =
+      targets;
+
+    if (
+      selectedUpgradeSource &&
+      !upgradeInventoryItems.some(
+        item =>
+          String(item.id) ===
+          String(
+            selectedUpgradeSource.id
+          )
+      )
+    ) {
+      selectedUpgradeSource = null;
+    }
+
+    renderUpgradeInventory();
+    renderUpgradeTargets();
+    refreshUpgradeSelection();
+
+  } catch (e) {
+
+    console.error(
+      "Upgrade data error:",
+      e
+    );
+
+    if (inventoryGrid) {
+      inventoryGrid.innerHTML =
+        `<div class="upgrade-loading">Не вдалося завантажити інвентар.</div>`;
+    }
+
+    if (targetGrid) {
+      targetGrid.innerHTML =
+        `<div class="upgrade-loading">Не вдалося завантажити предмети.</div>`;
+    }
+  }
+}
+
+
+function upgradeSearchValue(id) {
+
+  return String(
+    $(id)?.value || ""
+  )
+    .trim()
+    .toLowerCase();
+}
+
+
+function renderUpgradeInventory() {
+
+  const box =
+    $("#upgradeInventoryGrid");
+
+  if (!box) {
+    return;
+  }
+
+  const query =
+    upgradeSearchValue(
+      "#upgradeInventorySearch"
+    );
+
+  const list =
+    upgradeInventoryItems
+      .filter(
+        item =>
+          !query ||
+          item.item_name
+            .toLowerCase()
+            .includes(query)
+      );
+
+  $("#upgradeInventoryCount")
+    .textContent =
+      String(list.length);
+
+  if (!list.length) {
+
+    box.innerHTML = `
+      <div class="upgrade-loading">
+        У твоєму інвентарі немає доступних предметів.
+      </div>
+    `;
+
+    return;
+  }
+
+  box.innerHTML =
+    list.map(item => {
+
+      const rarityColor =
+        getDropRarityColor(
+          item.rarity
+        );
+
+      const selected =
+        String(
+          selectedUpgradeSource?.id
+        ) ===
+        String(item.id);
+
+      return `
+        <button
+          type="button"
+          class="
+            upgrade-item
+            ${selected ? "selected" : ""}
+          "
+          onclick="
+            chooseUpgradeSource(
+              ${Number(item.id)}
+            )
+          "
+          style="
+            --upgrade-rarity:
+              ${rarityColor};
+          "
+        >
+
+          <span class="upgrade-item-price">
+            ${Number(item.value).toFixed(2)} ₴
+          </span>
+
+          <img
+            src="${item.image || ""}"
+            alt="${item.item_name}"
+          >
+
+          <div class="upgrade-item-name">
+            ${item.item_name}
+          </div>
+
+          <div
+            class="upgrade-item-rarity"
+            style="color:${rarityColor};"
+          >
+            ${item.rarity}
+          </div>
+
+        </button>
+      `;
+    }).join("");
+}
+
+
+function renderUpgradeTargets() {
+
+  const box =
+    $("#upgradeTargetGrid");
+
+  if (!box) {
+    return;
+  }
+
+  const query =
+    upgradeSearchValue(
+      "#upgradeTargetSearch"
+    );
+
+  const minValue =
+    Number(
+      selectedUpgradeSource?.value || 0
+    );
+
+  const list =
+    upgradeTargetItems
+      .filter(
+        item =>
+          Number(item.value) >
+          minValue
+      )
+      .filter(
+        item =>
+          !query ||
+          item.name
+            .toLowerCase()
+            .includes(query)
+      );
+
+  $("#upgradeTargetCount")
+    .textContent =
+      String(list.length);
+
+  if (!list.length) {
+
+    box.innerHTML = `
+      <div class="upgrade-loading">
+        Немає дорожчих предметів для цього скіна.
+      </div>
+    `;
+
+    return;
+  }
+
+  box.innerHTML =
+    list.map(item => {
+
+      const rarityColor =
+        getDropRarityColor(
+          item.rarity
+        );
+
+      const selected =
+        selectedUpgradeTarget?.name ===
+        item.name;
+
+      return `
+        <button
+          type="button"
+          class="
+            upgrade-item
+            ${selected ? "selected" : ""}
+          "
+          onclick='chooseUpgradeTarget(
+            ${JSON.stringify(item.name)}
+          )'
+          style="
+            --upgrade-rarity:
+              ${rarityColor};
+          "
+        >
+
+          <span class="upgrade-item-price">
+            ${Number(item.value).toFixed(2)} ₴
+          </span>
+
+          <img
+            src="${item.image || ""}"
+            alt="${item.name}"
+          >
+
+          <div class="upgrade-item-name">
+            ${item.name}
+          </div>
+
+          <div
+            class="upgrade-item-rarity"
+            style="color:${rarityColor};"
+          >
+            ${item.rarity}
+          </div>
+
+        </button>
+      `;
+    }).join("");
+}
+
+
+function chooseUpgradeSource(id) {
+
+  selectedUpgradeSource =
+    upgradeInventoryItems.find(
+      item =>
+        Number(item.id) ===
+        Number(id)
+    ) || null;
+
+  if (
+    selectedUpgradeTarget &&
+    Number(
+      selectedUpgradeTarget.value
+    ) <=
+    Number(
+      selectedUpgradeSource?.value || 0
+    )
+  ) {
+    selectedUpgradeTarget = null;
+  }
+
+  renderUpgradeInventory();
+  renderUpgradeTargets();
+  refreshUpgradeSelection();
+}
+
+
+function chooseUpgradeTarget(name) {
+
+  selectedUpgradeTarget =
+    upgradeTargetItems.find(
+      item =>
+        item.name === name
+    ) || null;
+
+  renderUpgradeTargets();
+  refreshUpgradeSelection();
+}
+
+
+function calculateUpgradeChance() {
+
+  if (
+    !selectedUpgradeSource ||
+    !selectedUpgradeTarget
+  ) {
+    return 0;
+  }
+
+  const source =
+    Number(
+      selectedUpgradeSource.value
+    );
+
+  const target =
+    Number(
+      selectedUpgradeTarget.value
+    );
+
+  if (
+    !source ||
+    !target ||
+    target <= source
+  ) {
+    return 0;
+  }
+
+  return Math.max(
+    1,
+    Math.min(
+      75,
+      source /
+      target *
+      90
+    )
+  );
+}
+
+
+function refreshUpgradeSelection() {
+
+  const source =
+    selectedUpgradeSource;
+
+  const target =
+    selectedUpgradeTarget;
+
+  $("#upgradeSourceEmpty")
+    ?.classList
+    .toggle(
+      "hidden",
+      !!source
+    );
+
+  $("#upgradeSourceSelected")
+    ?.classList
+    .toggle(
+      "hidden",
+      !source
+    );
+
+  $("#upgradeTargetEmpty")
+    ?.classList
+    .toggle(
+      "hidden",
+      !!target
+    );
+
+  $("#upgradeTargetSelected")
+    ?.classList
+    .toggle(
+      "hidden",
+      !target
+    );
+
+  if (source) {
+
+    $("#upgradeSourceImage").src =
+      source.image || "";
+
+    $("#upgradeSourceName")
+      .textContent =
+        source.item_name;
+
+    $("#upgradeSourceRarity")
+      .textContent =
+        source.rarity;
+
+    $("#upgradeSourceRarity")
+      .style.color =
+        getDropRarityColor(
+          source.rarity
+        );
+
+    $("#upgradeSourcePrice")
+      .textContent =
+        Number(
+          source.value
+        ).toFixed(2) + " ₴";
+
+  } else {
+
+    $("#upgradeSourcePrice")
+      .textContent =
+        "0.00 ₴";
+  }
+
+  if (target) {
+
+    $("#upgradeTargetImage").src =
+      target.image || "";
+
+    $("#upgradeTargetName")
+      .textContent =
+        target.name;
+
+    $("#upgradeTargetRarity")
+      .textContent =
+        target.rarity;
+
+    $("#upgradeTargetRarity")
+      .style.color =
+        getDropRarityColor(
+          target.rarity
+        );
+
+    $("#upgradeTargetPrice")
+      .textContent =
+        Number(
+          target.value
+        ).toFixed(2) + " ₴";
+
+  } else {
+
+    $("#upgradeTargetPrice")
+      .textContent =
+        "0.00 ₴";
+  }
+
+  const chance =
+    calculateUpgradeChance();
+
+  const chanceRing =
+    $("#upgradeChanceRing");
+
+  if (chanceRing) {
+    chanceRing.style
+      .setProperty(
+        "--chance",
+        chance.toFixed(2)
+      );
+  }
+
+  $("#upgradeChance")
+    .textContent =
+      chance.toFixed(2) + "%";
+
+  $("#upgradeChanceText")
+    .textContent =
+      chance
+        ? (
+            chance >= 50
+              ? "Високий шанс"
+              : chance >= 25
+                ? "Середній шанс"
+                : "Ризиковий шанс"
+          )
+        : "Вибери предмети";
+
+  const multiplier =
+    source && target
+      ? Number(target.value) /
+        Number(source.value)
+      : 0;
+
+  $("#upgradeMultiplier")
+    .textContent =
+      "x" +
+      multiplier.toFixed(2);
+
+  const button =
+    $("#upgradeActionBtn");
+
+  if (button) {
+    button.disabled =
+      !source ||
+      !target ||
+      chance <= 0;
+  }
+}
+
+
+$("#upgradeInventorySearch")
+  ?.addEventListener(
+    "input",
+    renderUpgradeInventory
+  );
+
+
+$("#upgradeTargetSearch")
+  ?.addEventListener(
+    "input",
+    renderUpgradeTargets
+  );
+
+
+$("#upgradeActionBtn")
+  ?.addEventListener(
+    "click",
+    executeUpgrade
+  );
+
+
+async function executeUpgrade() {
+
+  if (
+    !selectedUpgradeSource ||
+    !selectedUpgradeTarget
+  ) {
+    return;
+  }
+
+  const button =
+    $("#upgradeActionBtn");
+
+  button.disabled = true;
+  button.textContent =
+    "АПГРЕЙД...";
+
+  try {
+
+    const result =
+      await api(
+        "/api/upgrade",
+        {
+          method: "POST",
+
+          body:
+            JSON.stringify({
+              inventoryId:
+                selectedUpgradeSource.id,
+
+              targetName:
+                selectedUpgradeTarget.name
+            })
+        }
+      );
+
+    showUpgradeResult(
+      result
+    );
+
+    selectedUpgradeSource = null;
+    selectedUpgradeTarget = null;
+
+    await refresh();
+    await loadUpgradeData();
+
+  } catch (e) {
+
+    alert(
+      e.message ||
+      "Не вдалося виконати апгрейд"
+    );
+
+  } finally {
+
+    button.textContent =
+      "АПГРЕЙД";
+
+    button.disabled =
+      !selectedUpgradeSource ||
+      !selectedUpgradeTarget;
+  }
+}
+
+
+function showUpgradeResult(result) {
+
+  const overlay =
+    document.createElement("div");
+
+  overlay.className =
+    "upgrade-result-overlay";
+
+  const color =
+    result.success
+      ? "#16c994"
+      : "#eb4b4b";
+
+  overlay.innerHTML = `
+    <div
+      class="upgrade-result-card"
+      style="
+        border-color:${color}55;
+        box-shadow:
+          0 0 45px ${color}18;
+      "
+    >
+
+      <div style="
+        color:${color};
+        font-size:10px;
+        font-weight:900;
+        letter-spacing:1.7px;
+      ">
+        ${
+          result.success
+            ? "UPGRADE SUCCESS"
+            : "UPGRADE FAILED"
+        }
+      </div>
+
+      ${
+        result.success
+          ? `
+            <img
+              src="${result.target.image || ""}"
+              alt="${result.target.name}"
+            >
+          `
+          : `
+            <div style="
+              font-size:52px;
+              margin:25px 0;
+            ">
+              ✕
+            </div>
+          `
+      }
+
+      <h2>
+        ${
+          result.success
+            ? "Апгрейд успішний!"
+            : "Не пощастило"
+        }
+      </h2>
+
+      <p>
+        ${
+          result.success
+            ? `Ти отримав ${result.target.name} за ${Number(result.target.value).toFixed(2)} ₴`
+            : "Використаний скін втрачено."
+        }
+      </p>
+
+      <p>
+        Шанс був:
+        ${Number(result.chance).toFixed(2)}%
+      </p>
+
+      <button
+        type="button"
+        onclick="
+          this.closest(
+            '.upgrade-result-overlay'
+          ).remove()
+        "
+      >
+        Продовжити
+      </button>
+
+    </div>
+  `;
+
+  document.body
+    .appendChild(
+      overlay
+    );
+}
+
+
+$("#upgradeHelpBtn")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      alert(
+        "Вибери свій скін і дорожчий цільовий предмет. Шанс залежить від співвідношення їх вартості. При успіху цільовий скін додається в інвентар, при невдачі використаний скін зникає."
+      );
+    }
+  );
+
+
+$("#upgradeHistoryBtn")
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      try {
+
+        const data =
+          await api(
+            "/api/upgrade-history"
+          );
+
+        const list =
+          data.upgrades || [];
+
+        $("#modal")
+          ?.classList
+          .remove("hidden");
+
+        $("#modalContent")
+          .innerHTML = `
+            <div style="
+              padding:8px;
+            ">
+              <div
+                class="section-kicker"
+              >
+                CASEZONE
+              </div>
+
+              <h2>
+                Історія апгрейдів
+              </h2>
+
+              ${
+                list.length
+                  ? list.map(item => `
+                      <div style="
+                        display:grid;
+                        grid-template-columns:
+                          1fr auto 1fr auto;
+                        gap:10px;
+                        align-items:center;
+                        padding:10px 0;
+                        border-bottom:
+                          1px solid
+                          rgba(255,255,255,.07);
+                        font-size:10px;
+                      ">
+                        <span>
+                          ${item.source_name}
+                        </span>
+
+                        <span>→</span>
+
+                        <span>
+                          ${item.target_name}
+                        </span>
+
+                        <strong style="
+                          color:${
+                            item.success
+                              ? "#16c994"
+                              : "#eb4b4b"
+                          };
+                        ">
+                          ${
+                            item.success
+                              ? "Успіх"
+                              : "Невдача"
+                          }
+                        </strong>
+                      </div>
+                    `).join("")
+                  : `
+                    <p style="
+                      color:#777;
+                    ">
+                      Історія порожня.
+                    </p>
+                  `
+              }
+            </div>
+          `;
+
+      } catch (e) {
+
+        alert(e.message);
+      }
+    }
+  );
 initApp();
