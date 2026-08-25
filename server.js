@@ -481,11 +481,11 @@ app.post(
   auth,
   async (req, res) => {
     try {
-
-    const {
+const {
   skinName,
   value,
-  assetid
+  assetid,
+  tradeUrl
 } = req.body;
       if (
         !skinName ||
@@ -500,7 +500,16 @@ app.post(
       
       const skinImage =
         image || skinImages[skinName] || null;
-
+if (tradeUrl) {
+  await pool.query(
+    `
+    UPDATE users
+    SET trade_url = $1
+    WHERE id = $2
+    `,
+    [tradeUrl, req.session.userId]
+  );
+}
       const result = await pool.query(
         `
         INSERT INTO skin_deposit_requests
