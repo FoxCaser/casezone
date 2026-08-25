@@ -72,6 +72,7 @@ async function refresh() {
     ) {
       currentUser = null;
     } else {
+
       console.error(
         "User refresh error:",
         e
@@ -143,75 +144,41 @@ async function loadCases() {
 function getCaseTheme(index) {
 
   const themes = [
-
     {
       main: "#168cff",
       dark: "#073a70",
       glow: "rgba(22,140,255,.62)"
     },
-
     {
       main: "#8d3dff",
       dark: "#35106d",
       glow: "rgba(141,61,255,.62)"
     },
-
     {
       main: "#ff2fab",
       dark: "#761147",
       glow: "rgba(255,47,171,.62)"
     },
-
     {
       main: "#ff3b21",
       dark: "#72180e",
       glow: "rgba(255,59,33,.62)"
     },
-
     {
       main: "#ffd000",
       dark: "#806900",
       glow: "rgba(255,208,0,.65)"
     },
-
     {
       main: "#16c994",
       dark: "#075a43",
       glow: "rgba(22,201,148,.60)"
     }
-
   ];
 
   return themes[
     index % themes.length
   ];
-}
-
-
-/* =========================
-   CASE PREVIEW IMAGE
-========================= */
-
-function getCasePreview(c) {
-
-  if (!Array.isArray(c.items)) {
-    return "";
-  }
-
-  for (const item of c.items) {
-
-    const skin =
-      skins.find(
-        skin =>
-          skin.name === item[0]
-      );
-
-    if (skin?.image) {
-      return skin.image;
-    }
-  }
-
-  return "";
 }
 
 
@@ -295,9 +262,6 @@ function renderCases() {
         const theme =
           getCaseTheme(index);
 
-        const preview =
-          getCasePreview(c);
-
         const itemCount =
           Array.isArray(c.items)
             ? c.items.length
@@ -330,13 +294,13 @@ function renderCases() {
               <div
                 style="
                   position:absolute;
-                  width:135px;
-                  height:42px;
-                  bottom:13px;
+                  width:145px;
+                  height:44px;
+                  bottom:10px;
                   border-radius:50%;
                   background:${theme.glow};
-                  filter:blur(23px);
-                  opacity:.9;
+                  filter:blur(24px);
+                  opacity:.95;
                 "
               ></div>
 
@@ -344,102 +308,192 @@ function renderCases() {
               <div
                 style="
                   position:relative;
-                  width:135px;
-                  height:95px;
-
+                  width:155px;
+                  height:116px;
                   display:grid;
                   place-items:center;
-
-                  border:
-                    2px solid
-                    ${theme.main};
-
-                  border-radius:14px;
-
-                  background:
-                    linear-gradient(
-                      145deg,
-                      ${theme.main},
-                      ${theme.dark} 58%,
-                      #101010
+                  filter:
+                    drop-shadow(
+                      0 17px 20px rgba(0,0,0,.55)
+                    )
+                    drop-shadow(
+                      0 0 15px ${theme.glow}
                     );
-
-                  box-shadow:
-                    0 19px 30px rgba(0,0,0,.5),
-                    0 0 25px ${theme.glow};
-
-                  transform:
-                    perspective(550px)
-                    rotateX(-5deg)
-                    rotateY(-8deg);
-
-                  overflow:hidden;
                 "
               >
-
-                ${
-                  preview
-
-                    ? `
-                      <img
-                        src="${preview}"
-                        alt="${c.name}"
-                        style="
-                          position:absolute;
-                          width:92%;
-                          height:92%;
-                          object-fit:contain;
-                          opacity:.18;
-                          filter:
-                            grayscale(.25)
-                            brightness(1.3);
-                        "
-                      >
-                    `
-
-                    : ""
-                }
-
 
                 <div
                   style="
                     position:relative;
-                    z-index:2;
+                    width:138px;
+                    height:92px;
 
-                    font-size:34px;
-                    font-weight:1000;
-                    letter-spacing:-3px;
+                    border:
+                      3px solid
+                      ${theme.main};
 
-                    color:#fff;
+                    border-radius:
+                      12px 12px 17px 17px;
 
-                    text-shadow:
-                      0 0 14px
-                      ${theme.glow};
+                    background:
+                      linear-gradient(
+                        145deg,
+                        ${theme.main},
+                        ${theme.dark} 58%,
+                        #111
+                      );
+
+                    box-shadow:
+                      inset 0 0 0 3px
+                        rgba(255,255,255,.08),
+                      inset 0 -18px 30px
+                        rgba(0,0,0,.38),
+                      0 0 18px
+                        ${theme.glow};
+
+                    transform:
+                      perspective(600px)
+                      rotateX(-5deg)
+                      rotateY(-8deg);
                   "
                 >
-                  CZ
-                </div>
+
+                  <div
+                    style="
+                      position:absolute;
+                      left:10px;
+                      right:10px;
+                      top:-14px;
+
+                      height:25px;
+
+                      border:
+                        3px solid
+                        ${theme.main};
+
+                      border-bottom:0;
+
+                      border-radius:
+                        12px 12px 2px 2px;
+
+                      background:
+                        linear-gradient(
+                          180deg,
+                          ${theme.main},
+                          ${theme.dark}
+                        );
+
+                      box-shadow:
+                        inset 0 2px 0
+                        rgba(255,255,255,.15);
+                    "
+                  ></div>
 
 
-                <div
-                  style="
-                    position:absolute;
-                    left:9px;
-                    bottom:7px;
+                  <div
+                    style="
+                      position:absolute;
+                      left:14px;
+                      right:14px;
+                      top:12px;
 
-                    font-size:7px;
-                    font-weight:900;
-                    letter-spacing:1.3px;
+                      height:9px;
 
-                    color:rgba(
-                      255,
-                      255,
-                      255,
-                      .8
-                    );
-                  "
-                >
-                  CASEZONE
+                      border-radius:3px;
+
+                      background:
+                        rgba(255,255,255,.10);
+                    "
+                  ></div>
+
+
+                  <div
+                    style="
+                      position:absolute;
+                      left:50%;
+                      top:34px;
+
+                      transform:
+                        translateX(-50%);
+
+                      width:43px;
+                      height:29px;
+
+                      border:
+                        2px solid
+                        rgba(255,255,255,.55);
+
+                      border-radius:6px;
+
+                      background:#151515;
+
+                      box-shadow:
+                        0 0 12px
+                        ${theme.glow};
+                    "
+                  >
+
+                    <div
+                      style="
+                        position:absolute;
+                        left:50%;
+                        top:50%;
+
+                        transform:
+                          translate(-50%,-50%);
+
+                        width:10px;
+                        height:10px;
+
+                        border-radius:50%;
+
+                        background:
+                          ${theme.main};
+
+                        box-shadow:
+                          0 0 8px
+                          ${theme.glow};
+                      "
+                    ></div>
+
+                  </div>
+
+
+                  <div
+                    style="
+                      position:absolute;
+                      left:12px;
+                      bottom:7px;
+
+                      font-size:7px;
+                      font-weight:900;
+                      letter-spacing:1.3px;
+
+                      color:
+                        rgba(255,255,255,.78);
+                    "
+                  >
+                    CASEZONE
+                  </div>
+
+
+                  <div
+                    style="
+                      position:absolute;
+                      right:12px;
+                      bottom:7px;
+
+                      font-size:7px;
+                      font-weight:900;
+                      letter-spacing:1px;
+
+                      color:
+                        rgba(255,255,255,.55);
+                    "
+                  >
+                    DROP
+                  </div>
+
                 </div>
 
               </div>
@@ -447,44 +501,54 @@ function renderCases() {
             </div>
 
 
-            <div style="
-              position:relative;
-              z-index:3;
-            ">
+            <div
+              style="
+                position:relative;
+                z-index:3;
+              "
+            >
 
-              <h3 style="
-                margin:
-                  7px 0 5px;
-              ">
+              <h3
+                style="
+                  margin:7px 0 5px;
+                "
+              >
                 ${c.name}
               </h3>
 
 
-              <div style="
-                color:#777;
-                font-size:10px;
-                margin-bottom:11px;
-              ">
+              <div
+                style="
+                  color:#777;
+                  font-size:10px;
+                  margin-bottom:11px;
+                "
+              >
                 ${itemCount}
                 предметів
               </div>
 
 
-              <div style="
-                display:flex;
-                align-items:center;
-                justify-content:
-                  space-between;
-                gap:8px;
-              ">
+              <div
+                style="
+                  display:flex;
+                  align-items:center;
+                  justify-content:
+                    space-between;
+                  gap:8px;
+                "
+              >
 
-                <strong style="
-                  color:${theme.main};
-                  font-size:17px;
-                  text-shadow:
-                    0 0 12px
-                    ${theme.glow};
-                ">
+                <strong
+                  style="
+                    color:${theme.main};
+                    font-size:17px;
+
+                    text-shadow:
+                      0 0 12px
+                      ${theme.glow};
+                  "
+                >
                   ${Number(c.price)} ₴
                 </strong>
 
@@ -497,6 +561,7 @@ function renderCases() {
                   style="
                     background:
                       ${theme.main};
+
                     color:#080808;
                   "
                 >
