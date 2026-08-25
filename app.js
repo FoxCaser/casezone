@@ -1599,7 +1599,8 @@ profileTabs.forEach(
           profileWithdrawals.classList.remove(
             "hidden"
           );
-
+          
+loadWithdrawHistory();
         }
 
       }
@@ -1733,6 +1734,81 @@ async function loadDepositHistory() {
     );
 
     depositHistory.innerHTML =
+      "Не вдалося завантажити історію";
+
+  }
+}
+/* =========================
+   ІСТОРІЯ ВИВОДУ
+========================= */
+
+async function loadWithdrawHistory() {
+
+  const withdrawHistory =
+    document.getElementById("withdrawHistory");
+
+  withdrawHistory.innerHTML =
+    "Завантаження...";
+
+  try {
+
+    const data =
+      await api("/api/withdraw-history");
+
+    const withdrawals =
+      data.withdrawals || [];
+
+    if (!withdrawals.length) {
+
+      withdrawHistory.innerHTML =
+        "Історія виводу порожня";
+
+      return;
+    }
+
+    withdrawHistory.innerHTML =
+      withdrawals.map(item => {
+
+        return `
+          <div class="history-item">
+
+            <div class="history-info">
+
+              <strong>
+                ${item.item_name}
+              </strong>
+
+              <span>
+                ${Number(item.value).toFixed(2)} ₴
+              </span>
+
+              <span>
+                Статус: ${item.status}
+              </span>
+
+              ${
+                item.trade_offer_id
+                  ? `<small>
+                       Trade Offer: ${item.trade_offer_id}
+                     </small>`
+                  : ""
+              }
+
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
+
+  } catch (e) {
+
+    console.error(
+      "Withdraw history error:",
+      e
+    );
+
+    withdrawHistory.innerHTML =
       "Не вдалося завантажити історію";
 
   }
