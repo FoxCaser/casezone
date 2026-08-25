@@ -1503,12 +1503,12 @@ profileBtn?.addEventListener(
         await api("/api/me");
 
       if (
-        data.user &&
-        data.user.steam_trade_url
-      ) {
-        steamTradeUrl.value =
-          data.user.steam_trade_url;
-      }
+  data.user &&
+  data.user.trade_url
+) {
+  steamTradeUrl.value =
+    data.user.trade_url;
+}
 
     } catch (e) {
 
