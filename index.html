@@ -437,7 +437,7 @@
 
 
 <!-- =========================
-     АПГРЕЙД СКІНІВ
+     АПГРЕЙД СКІНІВ — MULTI
 ========================= -->
 
 <section
@@ -445,87 +445,57 @@
   class="upgrade-page hidden"
 >
 
-  <div class="upgrade-page-head">
+  <div class="upgrade-stage upgrade-stage-v2">
 
-    <button
-      type="button"
-      class="upgrade-history-btn"
-      id="upgradeHistoryBtn"
-    >
-      ↻ Історія апгрейдів
-    </button>
-
-    <div class="upgrade-title">
-      <span class="section-kicker">
-        CASEZONE UPGRADE
-      </span>
-
-      <h1>
-        АПГРЕЙД СКІНІВ
-      </h1>
-
-      <p>
-        Вибери свій скін і предмет дорожче.
-        Чим більша різниця в ціні — тим нижчий шанс.
-      </p>
-    </div>
-
-    <button
-      type="button"
-      class="upgrade-help-btn"
-      id="upgradeHelpBtn"
-    >
-      ? Як це працює
-    </button>
-
-  </div>
-
-
-  <div class="upgrade-stage">
-
-    <article class="upgrade-main-card source-card">
+    <article class="upgrade-main-card upgrade-source-panel">
 
       <div class="upgrade-card-head">
-        <span>ВАШ СКІН</span>
+        <span>
+          ВАШІ СКІНИ
+          <small id="upgradeSelectedCount">(0/5)</small>
+        </span>
+
         <strong id="upgradeSourcePrice">
           0.00 ₴
         </strong>
       </div>
 
       <div
-        id="upgradeSourceEmpty"
-        class="upgrade-empty-state"
+        id="upgradeSelectedSkins"
+        class="upgrade-selected-grid"
       >
-        <div class="upgrade-empty-icon">
-          ＋
-        </div>
-        <strong>
-          Вибери предмет
-        </strong>
-        <span>
-          зі свого інвентарю
-        </span>
+        <button
+          type="button"
+          class="upgrade-add-slot"
+          onclick="document.getElementById('upgradeInventoryGrid')?.scrollIntoView({behavior:'smooth',block:'center'})"
+        >
+          <span>＋</span>
+          <small>ДОДАТИ СКІН</small>
+        </button>
       </div>
 
-      <div
-        id="upgradeSourceSelected"
-        class="upgrade-selected hidden"
-      >
-        <div class="upgrade-hex source-hex"></div>
-
-        <img
-          id="upgradeSourceImage"
-          alt="Ваш скін"
-        >
-
-        <div class="upgrade-selected-info">
-          <strong id="upgradeSourceName">
-            —
+      <div class="upgrade-source-summary">
+        <span>
+          Вибрано:
+          <strong id="upgradeSelectedCountBottom">
+            0 / 5
           </strong>
-          <span id="upgradeSourceRarity">
-            —
-          </span>
-        </div>
+        </span>
+
+        <span>
+          Сума:
+          <strong id="upgradeSelectedTotal">
+            0.00 ₴
+          </strong>
+        </span>
+
+        <button
+          type="button"
+          id="clearUpgradeSelection"
+          class="upgrade-clear-btn"
+        >
+          Очистити
+        </button>
       </div>
 
     </article>
@@ -538,26 +508,73 @@
       </span>
 
       <div
-        class="upgrade-chance-ring"
-        id="upgradeChanceRing"
-        style="--chance:0;"
+        class="upgrade-wheel"
+        id="upgradeWheel"
       >
-        <div class="upgrade-ring-core">
-          <strong id="upgradeChance">
-            0.00%
-          </strong>
-          <span id="upgradeChanceText">
-            Вибери предмети
-          </span>
+        <div class="upgrade-wheel-pointer"></div>
+
+        <div
+          class="upgrade-chance-ring"
+          id="upgradeChanceRing"
+          style="--chance:0;"
+        >
+          <div class="upgrade-ring-ticks"></div>
+
+          <div class="upgrade-ring-core">
+            <strong id="upgradeChance">
+              0.00%
+            </strong>
+
+            <span id="upgradeChanceText">
+              Вибери скіни
+            </span>
+          </div>
         </div>
+      </div>
+
+      <div
+        class="upgrade-preset-row"
+        id="upgradePresetRow"
+      >
+        <button
+          type="button"
+          class="upgrade-preset-btn"
+          data-mode="2x"
+        >
+          2x
+        </button>
+
+        <button
+          type="button"
+          class="upgrade-preset-btn"
+          data-mode="5x"
+        >
+          5x
+        </button>
+
+        <button
+          type="button"
+          class="upgrade-preset-btn active"
+          data-mode="10x"
+        >
+          10x
+        </button>
+
+        <button
+          type="button"
+          class="upgrade-preset-btn"
+          data-mode="75"
+        >
+          75%
+        </button>
       </div>
 
       <div class="upgrade-ratio">
         <span>
-          Множник
+          Режим:
         </span>
         <strong id="upgradeMultiplier">
-          x0.00
+          10x
         </strong>
       </div>
 
@@ -570,8 +587,11 @@
         АПГРЕЙД
       </button>
 
-      <span class="upgrade-action-note">
-        Результат визначається сервером
+      <span
+        class="upgrade-action-note"
+        id="upgradeActionNote"
+      >
+        Оберіть скіни з інвентарю
       </span>
 
     </div>
@@ -580,7 +600,10 @@
     <article class="upgrade-main-card target-card">
 
       <div class="upgrade-card-head">
-        <span>ВИ ОТРИМАЄТЕ</span>
+        <span>
+          СКІН ДЛЯ АПГРЕЙДУ
+        </span>
+
         <strong id="upgradeTargetPrice">
           0.00 ₴
         </strong>
@@ -590,14 +613,16 @@
         id="upgradeTargetEmpty"
         class="upgrade-empty-state"
       >
-        <div class="upgrade-empty-icon">
-          ◎
+        <div class="upgrade-target-silhouette">
+          ✦
         </div>
+
         <strong>
-          Вибери ціль
+          Оберіть скіни з інвентарю
         </strong>
+
         <span>
-          дорожчу за твій скін
+          Підходящий апгрейд з’явиться тут
         </span>
       </div>
 
@@ -609,16 +634,21 @@
 
         <img
           id="upgradeTargetImage"
-          alt="Цільовий скін"
+          alt="Скін для апгрейду"
         >
 
         <div class="upgrade-selected-info">
           <strong id="upgradeTargetName">
             —
           </strong>
+
           <span id="upgradeTargetRarity">
             —
           </span>
+
+          <b id="upgradeTargetRange">
+            —
+          </b>
         </div>
       </div>
 
@@ -627,65 +657,84 @@
   </div>
 
 
-  <div class="upgrade-lists">
+  <section class="upgrade-list-panel upgrade-inventory-only">
 
-    <section class="upgrade-list-panel">
+    <div class="upgrade-list-head">
 
-      <div class="upgrade-list-head">
-        <div>
-          <strong>
-            ВАШІ ПРЕДМЕТИ
-          </strong>
-          <span id="upgradeInventoryCount">
-            0
-          </span>
-        </div>
+      <div>
+        <strong>
+          ВАШ ІНВЕНТАР
+          <small>
+            (тільки скіни для апгрейду)
+          </small>
+        </strong>
+
+        <span id="upgradeInventoryCount">
+          0
+        </span>
+      </div>
+
+      <div class="upgrade-list-tools">
 
         <input
           id="upgradeInventorySearch"
           type="text"
           placeholder="Пошук..."
         >
-      </div>
 
-      <div
-        id="upgradeInventoryGrid"
-        class="upgrade-item-grid"
-      ></div>
-
-    </section>
-
-
-    <section class="upgrade-list-panel">
-
-      <div class="upgrade-list-head">
-        <div>
-          <strong>
-            МОЖЛИВИЙ ДРОП
-          </strong>
-          <span id="upgradeTargetCount">
-            0
-          </span>
-        </div>
-
-        <input
-          id="upgradeTargetSearch"
-          type="text"
-          placeholder="Пошук..."
+        <select
+          id="upgradeInventorySort"
         >
+          <option value="desc">
+            Ціна ↓
+          </option>
+          <option value="asc">
+            Ціна ↑
+          </option>
+        </select>
+
       </div>
 
-      <div
-        id="upgradeTargetGrid"
-        class="upgrade-item-grid"
-      ></div>
+    </div>
 
-    </section>
+    <div
+      id="upgradeInventoryGrid"
+      class="upgrade-item-grid upgrade-item-grid-wide"
+    ></div>
 
-  </div>
+  </section>
+
+
+  <section class="upgrade-list-panel upgrade-history-panel">
+
+    <div class="upgrade-list-head">
+      <div>
+        <strong>
+          ІСТОРІЯ АПГРЕЙДІВ
+        </strong>
+      </div>
+
+      <button
+        type="button"
+        class="upgrade-history-btn"
+        id="upgradeHistoryRefresh"
+      >
+        Оновити
+      </button>
+    </div>
+
+    <div
+      id="upgradeHistoryList"
+      class="upgrade-history-list"
+    >
+      <div class="upgrade-loading">
+        Історія порожня.
+      </div>
+    </div>
+
+  </section>
 
 </section>
-
 
 <!-- =========================
      СТАТИСТИКА
