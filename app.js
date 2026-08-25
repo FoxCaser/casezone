@@ -224,6 +224,10 @@ function getCaseTheme(index) {
 
 
 /* =========================
+   RENDER CASES
+========================= */
+
+/* =========================
    CASE ARTWORK
 ========================= */
 
@@ -501,10 +505,8 @@ function filterCases(type) {
 
   renderCases();
 }
-
-
 /* =========================
-   CASE DETAILS
+   CASE DETAILS / POSSIBLE DROPS
 ========================= */
 
 async function showCaseDetails(id) {
@@ -609,13 +611,7 @@ async function showCaseDetails(id) {
         "></div>
 
         <img
-          src="${getCaseArtwork(
-            selectedCase,
-            Math.max(
-              0,
-              cases.indexOf(selectedCase)
-            )
-          )}"
+          src="${getCaseArtwork(selectedCase, Math.max(0, cases.indexOf(selectedCase)))}"
           alt="${selectedCase.name}"
           style="
             position:relative;
@@ -626,10 +622,7 @@ async function showCaseDetails(id) {
             object-position:center;
             border-radius:16px;
             filter:
-              drop-shadow(
-                0 22px 30px
-                rgba(0,0,0,.45)
-              )
+              drop-shadow(0 22px 30px rgba(0,0,0,.45))
               saturate(1.05);
           "
         >
@@ -653,13 +646,7 @@ async function showCaseDetails(id) {
           color:#777;
           font-size:11px;
         ">
-          ${
-            Array.isArray(
-              selectedCase.items
-            )
-              ? selectedCase.items.length
-              : 0
-          }
+          ${Array.isArray(selectedCase.items) ? selectedCase.items.length : 0}
           предметів
         </span>
       </div>
@@ -669,10 +656,7 @@ async function showCaseDetails(id) {
         style="
           display:grid;
           grid-template-columns:
-            repeat(
-              auto-fit,
-              minmax(130px,1fr)
-            );
+            repeat(auto-fit, minmax(130px, 1fr));
           gap:10px;
           margin-bottom:22px;
         "
@@ -695,9 +679,7 @@ async function showCaseDetails(id) {
         flex-wrap:wrap;
         margin:0 0 16px;
         padding:14px;
-        border:
-          1px solid
-          rgba(255,255,255,.07);
+        border:1px solid rgba(255,255,255,.07);
         border-radius:12px;
         background:#101010;
       ">
@@ -713,40 +695,16 @@ async function showCaseDetails(id) {
         ${[1,2,3,4,5].map(q => `
           <button
             type="button"
-            class="
-              case-qty-btn
-              ${q === 1 ? "active" : ""}
-            "
+            class="case-qty-btn ${q === 1 ? "active" : ""}"
             data-qty="${q}"
-            onclick="
-              setCaseOpenQuantity(
-                ${q},
-                ${Number(selectedCase.price)}
-              )
-            "
+            onclick="setCaseOpenQuantity(${q}, ${Number(selectedCase.price)})"
             style="
               width:42px;
               height:38px;
               border-radius:9px;
-              border:
-                1px solid
-                ${
-                  q === 1
-                    ? "#ffd400"
-                    : "rgba(255,255,255,.10)"
-                };
-              background:
-                ${
-                  q === 1
-                    ? "#ffd400"
-                    : "#171717"
-                };
-              color:
-                ${
-                  q === 1
-                    ? "#111"
-                    : "#aaa"
-                };
+              border:1px solid ${q === 1 ? "#ffd400" : "rgba(255,255,255,.10)"};
+              background:${q === 1 ? "#ffd400" : "#171717"};
+              color:${q === 1 ? "#111" : "#aaa"};
               font-weight:900;
               cursor:pointer;
             "
@@ -764,24 +722,18 @@ async function showCaseDetails(id) {
         gap:12px;
         flex-wrap:wrap;
         padding-top:16px;
-        border-top:
-          1px solid
-          rgba(255,255,255,.07);
+        border-top:1px solid rgba(255,255,255,.07);
       ">
 
         <button
           type="button"
           onclick="
-            $('#modal')
-              .classList
-              .add('hidden')
+            $('#modal').classList.add('hidden')
           "
           style="
             min-height:46px;
             padding:0 18px;
-            border:
-              1px solid
-              rgba(255,255,255,.1);
+            border:1px solid rgba(255,255,255,.1);
             border-radius:11px;
             background:#141414;
             color:#bbb;
@@ -795,10 +747,7 @@ async function showCaseDetails(id) {
           id="caseOpenBtn"
           type="button"
           onclick="
-            startCaseOpening(
-              '${selectedCase.id}',
-              selectedOpenQuantity
-            )
+            startCaseOpening('${selectedCase.id}', selectedOpenQuantity)
           "
           style="
             min-width:260px;
@@ -810,18 +759,16 @@ async function showCaseDetails(id) {
             font-weight:950;
             font-size:14px;
             box-shadow:
-              0 0 28px
-              rgba(255,212,0,.16);
+              0 0 28px rgba(255,212,0,.16);
           "
         >
           🔓 Відкрити x1 —
-          ${Number(
-            selectedCase.price
-          ).toFixed(0)} ₴
+          ${Number(selectedCase.price).toFixed(0)} ₴
         </button>
 
       </div>
-          </div>
+
+    </div>
   `;
 
   try {
@@ -926,7 +873,7 @@ async function showCaseDetails(id) {
                       height:92px;
                       object-fit:contain;
                     "
-                  >
+                         >
                 `
                 : `
                   <div style="
@@ -1072,6 +1019,8 @@ function getDropRarityColor(
       .trim()
       .toLowerCase();
 
+  /* CS2 / CS:GO rarity colors */
+
   if (
     value.includes("contraband")
   ) {
@@ -1130,6 +1079,7 @@ function getDropRarityColor(
     return "#b0c3d9";
   }
 
+  /* fallback only if the server sends an unknown rarity */
   return "#6f7b8a";
 }
 
@@ -1258,12 +1208,9 @@ async function startCaseOpening(
   let inventoryBefore = [];
 
   try {
-
     inventoryBefore =
       await api("/api/inventory");
-
   } catch {
-
     inventoryBefore = [];
   }
 
@@ -1308,7 +1255,6 @@ async function startCaseOpening(
           <h2>
             ${selectedCase.name}
           </h2>
-
           <p style="
             color:#ff5656;
           ">
@@ -1366,15 +1312,14 @@ async function startCaseOpening(
           padding:10px 0;
         ">
 
-          <!-- ЖОВТА ЛІНІЯ ПО ЦЕНТРУ -->
+          <!-- ЖОВТИЙ ЦЕНТРАЛЬНИЙ МАРКЕР -->
           <div style="
             position:absolute;
             left:50%;
             top:0;
             bottom:0;
             width:3px;
-            transform:
-              translateX(-50%);
+            transform:translateX(-50%);
             background:
               linear-gradient(
                 180deg,
@@ -1391,50 +1336,40 @@ async function startCaseOpening(
             pointer-events:none;
           "></div>
 
-          <!-- ТРИКУТНИК ЗВЕРХУ -->
+          <!-- ВЕРХНІЙ ТРИКУТНИК -->
           <div style="
             position:absolute;
             left:50%;
             top:-1px;
-            transform:
-              translateX(-50%);
+            transform:translateX(-50%);
             width:0;
             height:0;
-            border-left:
-              10px solid transparent;
-            border-right:
-              10px solid transparent;
-            border-top:
-              14px solid #ffd400;
+            border-left:10px solid transparent;
+            border-right:10px solid transparent;
+            border-top:14px solid #ffd400;
             z-index:1000;
             filter:
               drop-shadow(
-                0 0 6px
-                rgba(255,212,0,.8)
+                0 0 6px rgba(255,212,0,.8)
               );
             pointer-events:none;
           "></div>
 
-          <!-- ТРИКУТНИК ЗНИЗУ -->
+          <!-- НИЖНІЙ ТРИКУТНИК -->
           <div style="
             position:absolute;
             left:50%;
             bottom:-1px;
-            transform:
-              translateX(-50%);
+            transform:translateX(-50%);
             width:0;
             height:0;
-            border-left:
-              10px solid transparent;
-            border-right:
-              10px solid transparent;
-            border-bottom:
-              14px solid #ffd400;
+            border-left:10px solid transparent;
+            border-right:10px solid transparent;
+            border-bottom:14px solid #ffd400;
             z-index:1000;
             filter:
               drop-shadow(
-                0 0 6px
-                rgba(255,212,0,.8)
+                0 0 6px rgba(255,212,0,.8)
               );
             pointer-events:none;
           "></div>
@@ -1447,15 +1382,9 @@ async function startCaseOpening(
               gap:10px;
               overflow:hidden;
               scroll-behavior:auto;
-              padding:
-                8px
-                calc(50% - 75px);
-              border-top:
-                1px solid
-                rgba(255,212,0,.12);
-              border-bottom:
-                1px solid
-                rgba(255,212,0,.12);
+              padding:8px calc(50% - 75px);
+              border-top:1px solid rgba(255,212,0,.12);
+              border-bottom:1px solid rgba(255,212,0,.12);
               background:
                 linear-gradient(
                   180deg,
@@ -1563,9 +1492,7 @@ async function startCaseOpening(
           flex:0 0 140px;
           min-height:125px;
           padding:9px;
-          border:
-            1px solid
-            ${rarityColor};
+          border:1px solid ${rarityColor};
           border-radius:10px;
           background:
             linear-gradient(
@@ -1579,11 +1506,8 @@ async function startCaseOpening(
           justify-content:center;
           gap:6px;
           box-shadow:
-            inset
-            0 0 0 1px
-            rgba(255,255,255,.02),
-            0 0 16px
-            ${rarityColor}22;
+            inset 0 0 0 1px rgba(255,255,255,.02),
+            0 0 16px ${rarityColor}22;
         `;
 
         slot.innerHTML = `
@@ -1596,8 +1520,7 @@ async function startCaseOpening(
               object-fit:contain;
               filter:
                 drop-shadow(
-                  0 10px 12px
-                  rgba(0,0,0,.42)
+                  0 10px 12px rgba(0,0,0,.42)
                 );
             "
           >
@@ -1609,8 +1532,7 @@ async function startCaseOpening(
             text-align:center;
             color:${rarityColor};
             text-shadow:
-              0 0 8px
-              ${rarityColor}44;
+              0 0 8px ${rarityColor}44;
           ">
             ${currentItem.name}
           </div>
@@ -1645,9 +1567,7 @@ async function startCaseOpening(
           $(`#reel-${reelIndex}`);
 
         const winningItem =
-          $(
-            `#winningItem-${reelIndex}`
-          );
+          $(`#winningItem-${reelIndex}`);
 
         if (
           !reel ||
@@ -1658,10 +1578,8 @@ async function startCaseOpening(
 
         return {
           reel,
-
           start:
             reel.scrollLeft,
-
           distance:
             winningItem.offsetLeft -
             reel.clientWidth / 2 +
@@ -1669,8 +1587,7 @@ async function startCaseOpening(
             reel.scrollLeft
         };
       }
-    )
-    .filter(Boolean);
+    ).filter(Boolean);
 
   await new Promise(
     resolve => {
@@ -1697,8 +1614,7 @@ async function startCaseOpening(
         animations.forEach(
           animation => {
 
-            animation.reel
-              .scrollLeft =
+            animation.reel.scrollLeft =
               animation.start +
               animation.distance *
               ease;
@@ -1722,7 +1638,8 @@ async function startCaseOpening(
       );
     }
   );
-     await new Promise(
+
+  await new Promise(
     resolve =>
       setTimeout(
         resolve,
@@ -1831,7 +1748,7 @@ function showMultiOpenResult(
       <div style="
         color:#ffd400;
         font-size:10px;
-        font-weight:900;
+         font-weight:900;
         letter-spacing:2px;
       ">
         CASEZONE DROP
@@ -2108,6 +2025,7 @@ async function closeWin() {
     ?.classList
     .add("hidden");
 
+
   await showInventory();
 }
 
@@ -2121,6 +2039,7 @@ function auth() {
   $("#modal")
     ?.classList
     .remove("hidden");
+
 
   $("#modalContent")
     .innerHTML = `
@@ -2144,6 +2063,7 @@ function auth() {
         Вхід / реєстрація
       </h2>
 
+
       <input
         id="u"
         type="text"
@@ -2159,6 +2079,7 @@ function auth() {
         "
       >
 
+
       <input
         id="p"
         type="password"
@@ -2173,6 +2094,7 @@ function auth() {
           color:#fff;
         "
       >
+
 
       <div style="
         display:flex;
@@ -2196,6 +2118,7 @@ function auth() {
           Увійти
         </button>
 
+
         <button
           type="button"
           onclick="register()"
@@ -2212,6 +2135,7 @@ function auth() {
         </button>
 
       </div>
+
 
       <button
         type="button"
@@ -2261,9 +2185,11 @@ async function login() {
       }
     );
 
+
     $("#modal")
       ?.classList
       .add("hidden");
+
 
     await refresh();
 
@@ -2272,8 +2198,6 @@ async function login() {
     alert(e.message);
   }
 }
-
-
 async function register() {
 
   try {
@@ -2294,9 +2218,11 @@ async function register() {
       }
     );
 
+
     $("#modal")
       ?.classList
       .add("hidden");
+
 
     await refresh();
 
@@ -2305,8 +2231,6 @@ async function register() {
     alert(e.message);
   }
 }
-
-
 /* =========================
    INVENTORY ACTIONS
 ========================= */
@@ -2323,6 +2247,7 @@ async function sellItem(id) {
         method: "POST"
       }
     );
+
 
     await refresh();
 
@@ -2347,10 +2272,12 @@ async function withdrawItem(id) {
         }
       );
 
+
     alert(
       "Заявка на вивід створена! ID: " +
       result.withdrawalId
     );
+
 
     await showInventory();
 
@@ -2373,6 +2300,7 @@ async function showInventory() {
     return;
   }
 
+
   try {
 
     const items =
@@ -2380,21 +2308,26 @@ async function showInventory() {
         "/api/inventory"
       );
 
+
     const skinList =
       await api(
         "/api/skins"
       );
 
+
     $("#inventory")
       ?.classList
       .remove("hidden");
 
+
     const itemsBox =
       $("#items");
+
 
     if (!itemsBox) {
       return;
     }
+
 
     if (!items.length) {
 
@@ -2413,6 +2346,7 @@ async function showInventory() {
       return;
     }
 
+
     itemsBox.innerHTML =
       items.map(item => {
 
@@ -2423,8 +2357,10 @@ async function showInventory() {
               item.item_name
           );
 
+
         const image =
           skin?.image || "";
+
 
         const rarity =
           String(
@@ -2435,6 +2371,7 @@ async function showInventory() {
               /[^a-z0-9]+/g,
               "-"
             );
+
 
         return `
 
@@ -2450,12 +2387,14 @@ async function showInventory() {
               alt="${item.item_name}"
             >
 
+
             <strong style="
               display:block;
               margin-top:8px;
             ">
               ${item.item_name}
             </strong>
+
 
             <span style="
               display:block;
@@ -2466,6 +2405,7 @@ async function showInventory() {
               ${item.rarity}
             </span>
 
+
             <strong style="
               display:block;
               margin-top:5px;
@@ -2475,6 +2415,7 @@ async function showInventory() {
                 item.value || 0
               ).toFixed(2)} ₴
             </strong>
+
 
             <div style="
               display:grid;
@@ -2490,6 +2431,7 @@ async function showInventory() {
               >
                 Продати
               </button>
+
 
               <button
                 type="button"
@@ -2528,19 +2470,26 @@ $("#authBtn")
 
       if (currentUser) {
 
-        await api(
-          "/api/logout",
-          {
-            method: "POST"
-          }
-        );
+        try {
 
-        currentUser = null;
+          await api(
+            "/api/logout",
+            {
+              method: "POST"
+            }
+          );
 
-        await refresh();
+
+          location.reload();
+
+        } catch (e) {
+
+          alert(e.message);
+        }
 
         return;
       }
+
 
       auth();
     }
@@ -2548,20 +2497,6 @@ $("#authBtn")
 
 
 $("#inventoryBtn")
-  ?.addEventListener(
-    "click",
-    showInventory
-  );
-
-
-$("#inventoryTopBtn")
-  ?.addEventListener(
-    "click",
-    showInventory
-  );
-
-
-$("#inventoryTopBtn2")
   ?.addEventListener(
     "click",
     showInventory
@@ -2592,32 +2527,6 @@ $("#closeModal")
   );
 
 
-$("#heroOpenCases")
-  ?.addEventListener(
-    "click",
-    () => {
-
-      document
-        .querySelector(
-          ".cases-section"
-        )
-        ?.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-    }
-  );
-/* =========================
-   HEADER INVENTORY
-========================= */
-
-$("#headerInventoryBtn")
-  ?.addEventListener(
-    "click",
-    showInventory
-  );
-
-
 /* =========================
    DEPOSIT
 ========================= */
@@ -2633,16 +2542,20 @@ $("#depositBtn")
         return;
       }
 
+
       $("#depositModal")
         ?.classList
         .remove("hidden");
 
+
       const depositInfo =
         $("#depositInfo");
+
 
       if (!depositInfo) {
         return;
       }
+
 
       depositInfo.innerHTML = `
 
@@ -2651,6 +2564,7 @@ $("#depositBtn")
         ">
           Оберіть спосіб поповнення:
         </p>
+
 
         <div
           class="deposit-methods"
@@ -2674,6 +2588,7 @@ $("#depositBtn")
             🏦 ПриватБанк
           </button>
 
+
           <button
             type="button"
             onclick="
@@ -2683,6 +2598,7 @@ $("#depositBtn")
             🏦 Ощадбанк
           </button>
 
+
           <button
             type="button"
             onclick="
@@ -2691,6 +2607,7 @@ $("#depositBtn")
           >
             ₿ Крипта
           </button>
+
 
           <button
             type="button"
@@ -2705,7 +2622,6 @@ $("#depositBtn")
       `;
     }
   );
-
 
 $("#closeDeposit")
   ?.addEventListener(
@@ -2732,6 +2648,7 @@ async function depositMethod(method) {
     return;
   }
 
+
   if (method === "skins") {
 
     window.location.href =
@@ -2740,12 +2657,15 @@ async function depositMethod(method) {
     return;
   }
 
+
   const info =
     $("#depositInfo");
+
 
   if (!info) {
     return;
   }
+
 
   if (
     method === "privat" ||
@@ -2756,6 +2676,7 @@ async function depositMethod(method) {
       method === "privat"
         ? "ПриватБанк"
         : "Ощадбанк";
+
 
     info.innerHTML = `
 
@@ -2769,7 +2690,9 @@ async function depositMethod(method) {
         Поповнення через LiqPay.
       </p>
 
+
       <div
+        class="deposit-amounts"
         style="
           display:flex;
           flex-wrap:wrap;
@@ -2802,6 +2725,7 @@ async function depositMethod(method) {
     return;
   }
 
+
   if (method === "crypto") {
 
     info.innerHTML = `
@@ -2812,7 +2736,7 @@ async function depositMethod(method) {
 
       <p style="
         color:#888;
-      ">
+          ">
         Криптовалютне поповнення
         буде підключено окремо.
       </p>
@@ -2842,10 +2766,12 @@ async function startLiqPay(amount) {
         }
       );
 
+
     const form =
       document.createElement(
         "form"
       );
+
 
     form.method =
       "POST";
@@ -2855,6 +2781,7 @@ async function startLiqPay(amount) {
 
     form.style.display =
       "none";
+
 
     const dataInput =
       document.createElement(
@@ -2870,6 +2797,7 @@ async function startLiqPay(amount) {
     dataInput.value =
       result.data;
 
+
     const signatureInput =
       document.createElement(
         "input"
@@ -2884,6 +2812,7 @@ async function startLiqPay(amount) {
     signatureInput.value =
       result.signature;
 
+
     form.appendChild(
       dataInput
     );
@@ -2892,8 +2821,10 @@ async function startLiqPay(amount) {
       signatureInput
     );
 
+
     document.body
       .appendChild(form);
+
 
     form.submit();
 
@@ -2902,11 +2833,9 @@ async function startLiqPay(amount) {
     alert(
       e.message ||
       "Не вдалося створити платіж"
-    );
+           );
   }
 }
-
-
 /* =========================
    PROFILE
 ========================= */
@@ -2949,7 +2878,7 @@ const profileSteamId =
 
 
 /* =========================
-   STEAM AVATAR CLICK
+   HEADER STEAM AVATAR
 ========================= */
 
 steamAvatarBtn
@@ -2970,27 +2899,33 @@ profileBtn
   ?.addEventListener(
     "click",
     async () => {
-
-      if (!currentUser) {
+  if (!currentUser) {
 
         auth();
         return;
       }
 
+
       profileModal
         ?.classList
         .remove("hidden");
+
 
       try {
 
         const data =
           await api("/api/me");
 
-        if (steamTradeUrl) {
+
+        if (
+          steamTradeUrl &&
+          data.user?.trade_url
+        ) {
 
           steamTradeUrl.value =
-            data.user?.trade_url || "";
+            data.user.trade_url;
         }
+
 
         if (profileSteamId) {
 
@@ -3061,9 +2996,11 @@ profileTabs.forEach(
               .remove("active")
         );
 
+
         tab.classList.add(
           "active"
         );
+
 
         profileSettings
           ?.classList
@@ -3077,8 +3014,10 @@ profileTabs.forEach(
           ?.classList
           .add("hidden");
 
+
         const selected =
           tab.dataset.tab;
+
 
         if (
           selected ===
@@ -3089,6 +3028,7 @@ profileTabs.forEach(
             ?.classList
             .remove("hidden");
         }
+
 
         if (
           selected ===
@@ -3101,6 +3041,7 @@ profileTabs.forEach(
 
           loadDepositHistory();
         }
+
 
         if (
           selected ===
@@ -3133,11 +3074,13 @@ saveTradeUrl
           ?.value
           .trim() || "";
 
+
       if (tradeUrlStatus) {
 
         tradeUrlStatus
           .textContent = "";
       }
+
 
       if (!tradeUrl) {
 
@@ -3150,6 +3093,7 @@ saveTradeUrl
 
         return;
       }
+
 
       try {
 
@@ -3164,6 +3108,7 @@ saveTradeUrl
               })
           }
         );
+
 
         if (tradeUrlStatus) {
 
@@ -3195,12 +3140,15 @@ async function loadDepositHistory() {
   const box =
     $("#depositHistory");
 
+
   if (!box) {
     return;
   }
 
+
   box.innerHTML =
     "Завантаження...";
+
 
   try {
 
@@ -3209,8 +3157,10 @@ async function loadDepositHistory() {
         "/api/deposit-history"
       );
 
+
     const deposits =
       data.deposits || [];
+
 
     if (!deposits.length) {
 
@@ -3220,19 +3170,19 @@ async function loadDepositHistory() {
       return;
     }
 
+
     box.innerHTML =
       deposits.map(item => {
 
         const date =
           item.created_at
-
             ? new Date(
                 item.created_at
               ).toLocaleString(
                 "uk-UA"
               )
-
             : "";
+
 
         return `
 
@@ -3257,6 +3207,7 @@ async function loadDepositHistory() {
                 : ""
             }
 
+
             <div
               class="history-info"
             >
@@ -3268,6 +3219,7 @@ async function loadDepositHistory() {
                 }
               </strong>
 
+
               <span style="
                 color:#ffd400;
               ">
@@ -3276,12 +3228,14 @@ async function loadDepositHistory() {
                 ).toFixed(2)} ₴
               </span>
 
+
               <span>
                 Статус:
                 ${formatStatus(
                   item.status
                 )}
               </span>
+
 
               ${
                 date
@@ -3309,6 +3263,7 @@ async function loadDepositHistory() {
       e
     );
 
+
     box.innerHTML =
       "Не вдалося завантажити історію";
   }
@@ -3324,12 +3279,15 @@ async function loadWithdrawHistory() {
   const box =
     $("#withdrawHistory");
 
+
   if (!box) {
     return;
   }
 
+
   box.innerHTML =
     "Завантаження...";
+
 
   try {
 
@@ -3338,8 +3296,10 @@ async function loadWithdrawHistory() {
         "/api/withdraw-history"
       );
 
+
     const withdrawals =
       data.withdrawals || [];
+
 
     if (!withdrawals.length) {
 
@@ -3348,6 +3308,7 @@ async function loadWithdrawHistory() {
 
       return;
     }
+
 
     box.innerHTML =
       withdrawals.map(item => `
@@ -3362,6 +3323,7 @@ async function loadWithdrawHistory() {
               ${item.item_name}
             </strong>
 
+
             <span style="
               color:#ffd400;
             ">
@@ -3370,12 +3332,14 @@ async function loadWithdrawHistory() {
               ).toFixed(2)} ₴
             </span>
 
+
             <span>
               Статус:
               ${formatStatus(
                 item.status
               )}
             </span>
+
 
             ${
               item.trade_offer_id
@@ -3403,6 +3367,7 @@ async function loadWithdrawHistory() {
       e
     );
 
+
     box.innerHTML =
       "Не вдалося завантажити історію";
   }
@@ -3420,11 +3385,13 @@ function formatStatus(status) {
       status || ""
     ).toLowerCase();
 
+
   if (
     value === "pending"
   ) {
     return "🟡 Очікує";
   }
+
 
   if (
     value === "completed" ||
@@ -3434,6 +3401,7 @@ function formatStatus(status) {
     return "🟢 Виконано";
   }
 
+
   if (
     value === "rejected" ||
     value === "failed" ||
@@ -3441,6 +3409,7 @@ function formatStatus(status) {
   ) {
     return "🔴 Відхилено";
   }
+
 
   return status || "—";
 }
@@ -3458,31 +3427,14 @@ function skinImage(name) {
         item.name === name
     );
 
+
   return skin?.image || "";
 }
 
 
 /* =========================
-   CLOSE MODALS BY BACKGROUND
+   CLOSE BY BACKGROUND
 ========================= */
-
-$("#modal")
-  ?.addEventListener(
-    "click",
-    event => {
-
-      if (
-        event.target ===
-        $("#modal")
-      ) {
-
-        $("#modal")
-          .classList
-          .add("hidden");
-      }
-    }
-  );
-
 
 $("#inventory")
   ?.addEventListener(
