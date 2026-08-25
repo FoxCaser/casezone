@@ -8,7 +8,6 @@ const $ = selector =>
 const $$ = selector =>
   document.querySelectorAll(selector);
 
-
 let currentUser = null;
 let cases = [];
 let skins = [];
@@ -21,17 +20,12 @@ let activeCaseFilter = "all";
 
 async function api(url, opts = {}) {
 
-  const response = await fetch(
-    url,
-    {
-      headers: {
-        "Content-Type": "application/json"
-      },
-
-      ...opts
-    }
-  );
-
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    ...opts
+  });
 
   let data = {};
 
@@ -41,21 +35,16 @@ async function api(url, opts = {}) {
     data = {};
   }
 
-
   if (!response.ok) {
 
-    const error =
-      new Error(
-        data.error ||
-        "Помилка сервера"
-      );
+    const error = new Error(
+      data.error || "Помилка сервера"
+    );
 
-    error.status =
-      response.status;
+    error.status = response.status;
 
     throw error;
   }
-
 
   return data;
 }
@@ -81,11 +70,8 @@ async function refresh() {
       e.status === 401 ||
       e.status === 404
     ) {
-
       currentUser = null;
-
     } else {
-
       console.error(
         "User refresh error:",
         e
@@ -135,7 +121,7 @@ async function refresh() {
 
 
 /* =========================
-   CASES
+   LOAD CASES
 ========================= */
 
 async function loadCases() {
@@ -149,6 +135,89 @@ async function loadCases() {
   renderCases();
 }
 
+
+/* =========================
+   CASE COLORS
+========================= */
+
+function getCaseTheme(index) {
+
+  const themes = [
+
+    {
+      main: "#168cff",
+      dark: "#073a70",
+      glow: "rgba(22,140,255,.62)"
+    },
+
+    {
+      main: "#8d3dff",
+      dark: "#35106d",
+      glow: "rgba(141,61,255,.62)"
+    },
+
+    {
+      main: "#ff2fab",
+      dark: "#761147",
+      glow: "rgba(255,47,171,.62)"
+    },
+
+    {
+      main: "#ff3b21",
+      dark: "#72180e",
+      glow: "rgba(255,59,33,.62)"
+    },
+
+    {
+      main: "#ffd000",
+      dark: "#806900",
+      glow: "rgba(255,208,0,.65)"
+    },
+
+    {
+      main: "#16c994",
+      dark: "#075a43",
+      glow: "rgba(22,201,148,.60)"
+    }
+
+  ];
+
+  return themes[
+    index % themes.length
+  ];
+}
+
+
+/* =========================
+   CASE PREVIEW IMAGE
+========================= */
+
+function getCasePreview(c) {
+
+  if (!Array.isArray(c.items)) {
+    return "";
+  }
+
+  for (const item of c.items) {
+
+    const skin =
+      skins.find(
+        skin =>
+          skin.name === item[0]
+      );
+
+    if (skin?.image) {
+      return skin.image;
+    }
+  }
+
+  return "";
+}
+
+
+/* =========================
+   RENDER CASES
+========================= */
 
 function renderCases() {
 
@@ -206,7 +275,7 @@ function renderCases() {
     container.innerHTML = `
       <div style="
         grid-column:1/-1;
-        padding:40px;
+        padding:50px;
         text-align:center;
         color:#777;
       ">
@@ -223,115 +292,222 @@ function renderCases() {
     filteredCases
       .map((c, index) => {
 
+        const theme =
+          getCaseTheme(index);
+
+        const preview =
+          getCasePreview(c);
+
         const itemCount =
           Array.isArray(c.items)
             ? c.items.length
             : 0;
 
 
-        const previewNames =
-          Array.isArray(c.items)
-            ? c.items
-                .slice(0, 3)
-                .map(item => item[0])
-                .join(" • ")
-            : "";
-
-
         return `
-          <div
+          <article
             class="case-card"
             data-case-id="${c.id}"
+            style="
+              --case-main:${theme.main};
+              --case-dark:${theme.dark};
+              --case-glow:${theme.glow};
+            "
           >
 
             <div
+              class="cz-new-case-visual"
               style="
                 position:relative;
                 z-index:2;
-                height:135px;
+                height:155px;
                 display:grid;
                 place-items:center;
+                margin-bottom:5px;
               "
             >
 
               <div
                 style="
-                  width:118px;
-                  height:88px;
+                  position:absolute;
+                  width:135px;
+                  height:42px;
+                  bottom:13px;
+                  border-radius:50%;
+                  background:${theme.glow};
+                  filter:blur(23px);
+                  opacity:.9;
+                "
+              ></div>
+
+
+              <div
+                style="
+                  position:relative;
+                  width:135px;
+                  height:95px;
+
                   display:grid;
                   place-items:center;
-                  border-radius:15px;
-                  border:2px solid rgba(255,255,255,.18);
+
+                  border:
+                    2px solid
+                    ${theme.main};
+
+                  border-radius:14px;
+
                   background:
                     linear-gradient(
                       145deg,
-                      #252525,
+                      ${theme.main},
+                      ${theme.dark} 58%,
                       #101010
                     );
+
                   box-shadow:
-                    0 18px 35px rgba(0,0,0,.55);
-                  font-size:29px;
-                  font-weight:1000;
-                  letter-spacing:-2px;
-                  color:#fff;
+                    0 19px 30px rgba(0,0,0,.5),
+                    0 0 25px ${theme.glow};
+
+                  transform:
+                    perspective(550px)
+                    rotateX(-5deg)
+                    rotateY(-8deg);
+
+                  overflow:hidden;
                 "
               >
-                CZ
+
+                ${
+                  preview
+
+                    ? `
+                      <img
+                        src="${preview}"
+                        alt="${c.name}"
+                        style="
+                          position:absolute;
+                          width:92%;
+                          height:92%;
+                          object-fit:contain;
+                          opacity:.18;
+                          filter:
+                            grayscale(.25)
+                            brightness(1.3);
+                        "
+                      >
+                    `
+
+                    : ""
+                }
+
+
+                <div
+                  style="
+                    position:relative;
+                    z-index:2;
+
+                    font-size:34px;
+                    font-weight:1000;
+                    letter-spacing:-3px;
+
+                    color:#fff;
+
+                    text-shadow:
+                      0 0 14px
+                      ${theme.glow};
+                  "
+                >
+                  CZ
+                </div>
+
+
+                <div
+                  style="
+                    position:absolute;
+                    left:9px;
+                    bottom:7px;
+
+                    font-size:7px;
+                    font-weight:900;
+                    letter-spacing:1.3px;
+
+                    color:rgba(
+                      255,
+                      255,
+                      255,
+                      .8
+                    );
+                  "
+                >
+                  CASEZONE
+                </div>
+
               </div>
 
             </div>
 
 
-            <h3>
-              ${c.name}
-            </h3>
-
-
-            <p style="
-              margin:0 0 5px;
-              font-size:12px;
-            ">
-              ${itemCount} предметів
-            </p>
-
-
-            <p style="
-              min-height:30px;
-              margin:0 0 12px;
-              font-size:10px;
-              line-height:1.4;
-            ">
-              ${previewNames}
-            </p>
-
-
             <div style="
               position:relative;
-              z-index:2;
-              display:flex;
-              align-items:center;
-              justify-content:space-between;
-              gap:10px;
+              z-index:3;
             ">
 
-              <strong style="
-                color:#ffd400;
-                font-size:17px;
+              <h3 style="
+                margin:
+                  7px 0 5px;
               ">
-                ${Number(c.price)} ₴
-              </strong>
+                ${c.name}
+              </h3>
 
 
-              <button
-                type="button"
-                onclick="openCase('${c.id}')"
-              >
-                Відкрити
-              </button>
+              <div style="
+                color:#777;
+                font-size:10px;
+                margin-bottom:11px;
+              ">
+                ${itemCount}
+                предметів
+              </div>
+
+
+              <div style="
+                display:flex;
+                align-items:center;
+                justify-content:
+                  space-between;
+                gap:8px;
+              ">
+
+                <strong style="
+                  color:${theme.main};
+                  font-size:17px;
+                  text-shadow:
+                    0 0 12px
+                    ${theme.glow};
+                ">
+                  ${Number(c.price)} ₴
+                </strong>
+
+
+                <button
+                  type="button"
+                  onclick="
+                    openCase('${c.id}')
+                  "
+                  style="
+                    background:
+                      ${theme.main};
+                    color:#080808;
+                  "
+                >
+                  Відкрити
+                </button>
+
+              </div>
 
             </div>
 
-          </div>
+          </article>
         `;
 
       })
@@ -347,19 +523,14 @@ function filterCases(type) {
 
   activeCaseFilter = type;
 
-
-  $$(".filter").forEach(
-    button => {
-
-      button.classList.remove(
-        "active"
-      );
-    }
-  );
-
-
   const buttons =
     [...$$(".filter")];
+
+  buttons.forEach(
+    button =>
+      button.classList
+        .remove("active")
+  );
 
 
   const indexMap = {
@@ -419,18 +590,20 @@ async function openCase(id) {
 
       <div style="
         color:#ffd400;
-        font-size:11px;
+        font-size:10px;
         font-weight:900;
         letter-spacing:2px;
       ">
-        CASEZONE
+        CASEZONE DROP
       </div>
 
       <h2>
         ${selectedCase.name}
       </h2>
 
-      <p style="color:#888;">
+      <p style="
+        color:#888;
+      ">
         Відкриваємо кейс...
       </p>
 
@@ -458,7 +631,8 @@ async function openCase(id) {
 
   } catch (e) {
 
-    $("#modalContent").innerHTML = `
+    $("#modalContent")
+      .innerHTML = `
 
       <div style="
         text-align:center;
@@ -470,7 +644,7 @@ async function openCase(id) {
         </h2>
 
         <p style="
-          color:#ff5d5d;
+          color:#ff5656;
         ">
           ${e.message}
         </p>
@@ -545,6 +719,7 @@ async function openCase(id) {
     if (i === 27) {
 
       currentItem = {
+
         name:
           result.item.name,
 
@@ -567,6 +742,11 @@ async function openCase(id) {
       );
 
     } else {
+
+      if (!fakeItems.length) {
+        continue;
+      }
+
 
       currentItem =
         fakeItems[
@@ -613,7 +793,8 @@ async function openCase(id) {
       >
 
       <div style="
-        font-size:11px;
+        margin-top:5px;
+        font-size:10px;
         text-align:center;
       ">
         ${currentItem.name}
@@ -712,7 +893,7 @@ async function openCase(id) {
 
                 <div style="
                   color:#ffd400;
-                  font-size:11px;
+                  font-size:10px;
                   font-weight:900;
                   letter-spacing:2px;
                 ">
@@ -725,10 +906,7 @@ async function openCase(id) {
 
 
                 <div
-                  class="
-                    slot
-                    win
-                  "
+                  class="slot win"
                   style="
                     margin:25px auto;
                     max-width:330px;
@@ -762,11 +940,15 @@ async function openCase(id) {
 
 
                   <small style="
+                    display:block;
+                    margin-top:6px;
                     color:#ffd400;
                   ">
                     ${result.item.rarity}
                     •
-                    ${result.item.value} ₴
+                    ${Number(
+                      result.item.value
+                    ).toFixed(2)} ₴
                   </small>
 
                 </div>
@@ -776,7 +958,8 @@ async function openCase(id) {
                   type="button"
                   onclick="closeWin()"
                   style="
-                    padding:13px 22px;
+                    min-height:44px;
+                    padding:0 24px;
                     border-radius:10px;
                     background:#ffd400;
                     color:#111;
@@ -809,7 +992,7 @@ async function openCase(id) {
 
 
 /* =========================
-   WIN CLOSE
+   CLOSE WIN
 ========================= */
 
 async function closeWin() {
@@ -817,6 +1000,7 @@ async function closeWin() {
   $("#modal")
     ?.classList
     .add("hidden");
+
 
   await showInventory();
 }
@@ -833,7 +1017,8 @@ function auth() {
     .remove("hidden");
 
 
-  $("#modalContent").innerHTML = `
+  $("#modalContent")
+    .innerHTML = `
 
     <div style="
       max-width:420px;
@@ -863,7 +1048,7 @@ function auth() {
           width:100%;
           padding:13px;
           margin:6px 0;
-          border:1px solid #2c2c2c;
+          border:1px solid #303030;
           border-radius:9px;
           background:#090909;
           color:#fff;
@@ -879,7 +1064,7 @@ function auth() {
           width:100%;
           padding:13px;
           margin:6px 0;
-          border:1px solid #2c2c2c;
+          border:1px solid #303030;
           border-radius:9px;
           background:#090909;
           color:#fff;
@@ -898,7 +1083,8 @@ function auth() {
           type="button"
           onclick="login()"
           style="
-            padding:12px 18px;
+            min-height:44px;
+            padding:0 19px;
             border-radius:9px;
             background:#ffd400;
             color:#111;
@@ -913,14 +1099,15 @@ function auth() {
           type="button"
           onclick="register()"
           style="
-            padding:12px 18px;
+            min-height:44px;
+            padding:0 19px;
             border-radius:9px;
             background:#181818;
             color:#fff;
-            border:1px solid #2e2e2e;
+            border:1px solid #303030;
           "
         >
-          Створити акаунт
+          Створити
         </button>
 
       </div>
@@ -931,8 +1118,8 @@ function auth() {
         onclick="loginSteam()"
         style="
           width:100%;
+          min-height:45px;
           margin-top:10px;
-          padding:13px;
           border-radius:9px;
           background:#1b1b1b;
           color:#fff;
@@ -965,13 +1152,11 @@ async function login() {
 
         body:
           JSON.stringify({
-
             username:
               $("#u")?.value || "",
 
             password:
               $("#p")?.value || ""
-
           })
       }
     );
@@ -983,7 +1168,6 @@ async function login() {
 
 
     await refresh();
-
 
   } catch (e) {
 
@@ -1003,13 +1187,11 @@ async function register() {
 
         body:
           JSON.stringify({
-
             username:
               $("#u")?.value || "",
 
             password:
               $("#p")?.value || ""
-
           })
       }
     );
@@ -1021,7 +1203,6 @@ async function register() {
 
 
     await refresh();
-
 
   } catch (e) {
 
@@ -1050,7 +1231,6 @@ async function sellItem(id) {
 
     await showInventory();
 
-
   } catch (e) {
 
     alert(e.message);
@@ -1078,7 +1258,6 @@ async function withdrawItem(id) {
 
 
     await showInventory();
-
 
   } catch (e) {
 
@@ -1134,7 +1313,7 @@ async function showInventory() {
 
         <div style="
           grid-column:1/-1;
-          padding:40px;
+          padding:45px;
           text-align:center;
           color:#777;
         ">
@@ -1151,8 +1330,8 @@ async function showInventory() {
 
         const skin =
           skinList.find(
-            s =>
-              s.name ===
+            skin =>
+              skin.name ===
               item.item_name
           );
 
@@ -1211,7 +1390,7 @@ async function showInventory() {
               color:#ffd400;
             ">
               ${Number(
-                item.value
+                item.value || 0
               ).toFixed(2)} ₴
             </strong>
 
@@ -1248,7 +1427,6 @@ async function showInventory() {
 
       }).join("");
 
-
   } catch (e) {
 
     alert(
@@ -1260,7 +1438,7 @@ async function showInventory() {
 
 
 /* =========================
-   MAIN BUTTON EVENTS
+   MAIN BUTTONS
 ========================= */
 
 $("#authBtn")
@@ -1348,8 +1526,16 @@ $("#depositBtn")
         .remove("hidden");
 
 
-      $("#depositInfo")
-        .innerHTML = `
+      const depositInfo =
+        $("#depositInfo");
+
+
+      if (!depositInfo) {
+        return;
+      }
+
+
+      depositInfo.innerHTML = `
 
         <p style="
           color:#888;
@@ -1569,10 +1755,8 @@ async function startLiqPay(amount) {
     form.method =
       "POST";
 
-
     form.action =
       result.checkoutUrl;
-
 
     form.style.display =
       "none";
@@ -1582,7 +1766,6 @@ async function startLiqPay(amount) {
       document.createElement(
         "input"
       );
-
 
     dataInput.type =
       "hidden";
@@ -1599,7 +1782,6 @@ async function startLiqPay(amount) {
         "input"
       );
 
-
     signatureInput.type =
       "hidden";
 
@@ -1614,7 +1796,6 @@ async function startLiqPay(amount) {
       dataInput
     );
 
-
     form.appendChild(
       signatureInput
     );
@@ -1625,7 +1806,6 @@ async function startLiqPay(amount) {
 
 
     form.submit();
-
 
   } catch (e) {
 
@@ -1705,7 +1885,6 @@ profileBtn
           steamTradeUrl.value =
             data.user.trade_url;
         }
-
 
       } catch (e) {
 
@@ -1849,7 +2028,9 @@ saveTradeUrl
 
 
       if (tradeUrlStatus) {
-        tradeUrlStatus.textContent = "";
+
+        tradeUrlStatus
+          .textContent = "";
       }
 
 
@@ -1857,7 +2038,8 @@ saveTradeUrl
 
         if (tradeUrlStatus) {
 
-          tradeUrlStatus.textContent =
+          tradeUrlStatus
+            .textContent =
             "Вставте Steam Trade URL";
         }
 
@@ -1880,15 +2062,22 @@ saveTradeUrl
         );
 
 
-        tradeUrlStatus.textContent =
-          "✅ Trade URL збережено";
+        if (tradeUrlStatus) {
 
+          tradeUrlStatus
+            .textContent =
+            "✅ Trade URL збережено";
+        }
 
       } catch (e) {
 
-        tradeUrlStatus.textContent =
-          e.message ||
-          "Не вдалося зберегти Trade URL";
+        if (tradeUrlStatus) {
+
+          tradeUrlStatus
+            .textContent =
+            e.message ||
+            "Не вдалося зберегти Trade URL";
+        }
       }
     }
   );
@@ -1957,7 +2146,10 @@ async function loadDepositHistory() {
                 ? `
                   <img
                     src="${item.skin_image}"
-                    alt="${item.skin_name}"
+                    alt="${
+                      item.skin_name ||
+                      "Skin"
+                    }"
                     class="
                       history-skin-image
                     "
@@ -1999,11 +2191,13 @@ async function loadDepositHistory() {
 
               ${
                 date
+
                   ? `
                     <small>
                       ${date}
                     </small>
                   `
+
                   : ""
               }
 
@@ -2013,7 +2207,6 @@ async function loadDepositHistory() {
         `;
 
       }).join("");
-
 
   } catch (e) {
 
@@ -2119,7 +2312,6 @@ async function loadWithdrawHistory() {
 
       `).join("");
 
-
   } catch (e) {
 
     console.error(
@@ -2135,7 +2327,7 @@ async function loadWithdrawHistory() {
 
 
 /* =========================
-   STATUS TEXT
+   STATUS
 ========================= */
 
 function formatStatus(status) {
@@ -2176,7 +2368,7 @@ function formatStatus(status) {
 
 
 /* =========================
-   FALLBACK SKIN IMAGE
+   SKIN IMAGE
 ========================= */
 
 function skinImage(name) {
@@ -2193,7 +2385,7 @@ function skinImage(name) {
 
 
 /* =========================
-   CLOSE MODALS BY BACKDROP
+   CLOSE BY BACKGROUND
 ========================= */
 
 $("#inventory")
@@ -2243,7 +2435,6 @@ async function initApp() {
     await refresh();
 
     await loadCases();
-
 
   } catch (e) {
 
