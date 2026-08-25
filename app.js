@@ -874,8 +874,7 @@ async function showCaseDetails(id) {
                       object-fit:contain;
                     "
                          >
-                `
-                : `
+                ` : `
                   <div style="
                     height:92px;
                     display:grid;
@@ -1312,71 +1311,11 @@ async function startCaseOpening(
           padding:10px 0;
         ">
 
-          <!-- ЦЕНТРАЛЬНИЙ МАРКЕР РУЛЕТКИ -->
-          <div
-            class="case-spin-marker"
-            style="
-              position:absolute;
-              left:50%;
-              top:8px;
-              bottom:8px;
-              width:4px;
-              transform:translateX(-50%);
-              background:#ffd400;
-              z-index:2147483646;
-              box-shadow:
-                0 0 5px #ffd400,
-                0 0 12px #ffd400,
-                0 0 24px rgba(255,212,0,.95),
-                0 0 42px rgba(255,212,0,.55);
-              pointer-events:none;
-            "
-          ></div>
-
-          <!-- ВЕРХНЯ СТРІЛКА -->
-          <div
-            class="case-spin-marker-top"
-            style="
-              position:absolute;
-              left:50%;
-              top:0;
-              width:0;
-              height:0;
-              transform:translateX(-50%);
-              border-left:11px solid transparent;
-              border-right:11px solid transparent;
-              border-top:15px solid #ffd400;
-              z-index:2147483647;
-              filter:
-                drop-shadow(0 0 7px #ffd400);
-              pointer-events:none;
-            "
-          ></div>
-
-          <!-- НИЖНЯ СТРІЛКА -->
-          <div
-            class="case-spin-marker-bottom"
-            style="
-              position:absolute;
-              left:50%;
-              bottom:0;
-              width:0;
-              height:0;
-              transform:translateX(-50%);
-              border-left:11px solid transparent;
-              border-right:11px solid transparent;
-              border-bottom:15px solid #ffd400;
-              z-index:2147483647;
-              filter:
-                drop-shadow(0 0 7px #ffd400);
-              pointer-events:none;
-            "
-          ></div>
-
           <div
             class="reel"
             id="reel-${reelIndex}"
             style="
+              position:relative;
               display:flex;
               gap:10px;
               overflow:hidden;
@@ -1396,6 +1335,76 @@ async function startCaseOpening(
         </div>
       `
     ).join("");
+
+  /* ЖОВТА ЛІНІЯ ПОВЕРХ КОЖНОЇ РУЛЕТКИ */
+  reelsBox
+    .querySelectorAll(":scope > div")
+    .forEach(wrapper => {
+
+      wrapper.style.position = "relative";
+
+      const marker =
+        document.createElement("div");
+
+      marker.className =
+        "cz-fixed-center-marker";
+
+      marker.style.cssText = `
+        position:absolute;
+        left:50%;
+        top:10px;
+        bottom:10px;
+        width:4px;
+        transform:translateX(-50%);
+        background:#ffd400;
+        z-index:999999;
+        pointer-events:none;
+        box-shadow:
+          0 0 5px #ffd400,
+          0 0 12px #ffd400,
+          0 0 22px rgba(255,212,0,.95);
+      `;
+
+      const topArrow =
+        document.createElement("div");
+
+      topArrow.style.cssText = `
+        position:absolute;
+        left:50%;
+        top:8px;
+        transform:translate(-50%,-1px);
+        width:0;
+        height:0;
+        border-left:10px solid transparent;
+        border-right:10px solid transparent;
+        border-top:14px solid #ffd400;
+        z-index:1000000;
+        pointer-events:none;
+        filter:drop-shadow(0 0 5px #ffd400);
+      `;
+
+      const bottomArrow =
+        document.createElement("div");
+
+      bottomArrow.style.cssText = `
+        position:absolute;
+        left:50%;
+        bottom:8px;
+        transform:translate(-50%,1px);
+        width:0;
+        height:0;
+        border-left:10px solid transparent;
+        border-right:10px solid transparent;
+        border-bottom:14px solid #ffd400;
+        z-index:1000000;
+        pointer-events:none;
+        filter:drop-shadow(0 0 5px #ffd400);
+      `;
+
+      wrapper.appendChild(marker);
+      wrapper.appendChild(topArrow);
+      wrapper.appendChild(bottomArrow);
+    });
 
   results.forEach(
     (result, reelIndex) => {
@@ -1742,7 +1751,7 @@ function showMultiOpenResult(
     <div style="
       text-align:center;
       padding:12px;
-    ">
+        ">
 
       <div style="
         color:#ffd400;
@@ -2619,7 +2628,7 @@ $("#depositBtn")
 
         </div>
       `;
-    }
+         }
   );
 $("#closeDeposit")
   ?.addEventListener(
