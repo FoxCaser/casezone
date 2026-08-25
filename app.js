@@ -1584,14 +1584,15 @@ profileTabs.forEach(
         }
 
 
-        if (selected === "deposits") {
+    if (selected === "deposits") {
 
-          profileDeposits.classList.remove(
-            "hidden"
-          );
+  profileDeposits.classList.remove(
+    "hidden"
+  );
 
-        }
+  loadDepositHistory();
 
+}
 
         if (selected === "withdrawals") {
 
@@ -1650,6 +1651,92 @@ saveTradeUrl?.addEventListener(
     }
   }
 );
+/* =========================
+   ІСТОРІЯ ПОПОВНЕНЬ
+========================= */
+
+async function loadDepositHistory() {
+
+  const depositHistory =
+    document.getElementById("depositHistory");
+
+  depositHistory.innerHTML =
+    "Завантаження...";
+
+  try {
+
+    const data =
+      await api("/api/deposit-history");
+
+    const deposits =
+      data.deposits || [];
+
+    if (!deposits.length) {
+
+      depositHistory.innerHTML =
+        "Історія поповнень порожня";
+
+      return;
+    }
+
+    depositHistory.innerHTML =
+      deposits.map(item => {
+
+        const date =
+          new Date(
+            item.created_at
+          ).toLocaleString("uk-UA");
+
+        return `
+          <div class="history-item">
+
+            ${
+              item.skin_image
+                ? `<img
+                    src="${item.skin_image}"
+                    alt="${item.skin_name}"
+                    class="history-skin-image"
+                  >`
+                : ""
+            }
+
+            <div class="history-info">
+
+              <strong>
+                ${item.skin_name}
+              </strong>
+
+              <span>
+                ${Number(item.value).toFixed(2)} ₴
+              </span>
+
+              <span>
+                Статус: ${item.status}
+              </span>
+
+              <small>
+                ${date}
+              </small>
+
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
+
+  } catch (e) {
+
+    console.error(
+      "Deposit history error:",
+      e
+    );
+
+    depositHistory.innerHTML =
+      "Не вдалося завантажити історію";
+
+  }
+}
 async function initApp() {
   try {
     await refresh();
