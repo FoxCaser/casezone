@@ -2037,7 +2037,51 @@ app.get(
     }
   }
 );
+/* =========================
+   API: ІСТОРІЯ ПОПОВНЕНЬ
+========================= */
 
+app.get(
+  "/api/deposit-history",
+  auth,
+  async (req, res) => {
+
+    try {
+
+      const result = await pool.query(
+        `
+        SELECT
+          id,
+          skin_name,
+          skin_image,
+          value,
+          status,
+          created_at
+        FROM skin_deposit_requests
+        WHERE user_id = $1
+        ORDER BY created_at DESC
+        `,
+        [req.session.userId]
+      );
+
+      res.json({
+        ok: true,
+        deposits: result.rows
+      });
+
+    } catch (e) {
+
+      console.error(
+        "Deposit history error:",
+        e
+      );
+
+      res.status(500).json({
+        error: "Помилка сервера"
+      });
+    }
+  }
+);
 /* =========================
    API: ВИХІД
 ========================= */
