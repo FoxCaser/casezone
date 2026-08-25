@@ -1312,67 +1312,66 @@ async function startCaseOpening(
           padding:10px 0;
         ">
 
-          <!-- ЖОВТИЙ ЦЕНТРАЛЬНИЙ МАРКЕР -->
-          <div style="
-            position:absolute;
-            left:50%;
-            top:0;
-            bottom:0;
-            width:3px;
-            transform:translateX(-50%);
-            background:
-              linear-gradient(
-                180deg,
-                #ffe96a 0%,
-                #ffd400 35%,
-                #ffd400 65%,
-                #ffe96a 100%
-              );
-            z-index:999;
-            box-shadow:
-              0 0 7px #ffd400,
-              0 0 18px rgba(255,212,0,.85),
-              0 0 32px rgba(255,212,0,.35);
-            pointer-events:none;
-          "></div>
+          <!-- ЦЕНТРАЛЬНИЙ МАРКЕР РУЛЕТКИ -->
+          <div
+            class="case-spin-marker"
+            style="
+              position:absolute;
+              left:50%;
+              top:8px;
+              bottom:8px;
+              width:4px;
+              transform:translateX(-50%);
+              background:#ffd400;
+              z-index:2147483646;
+              box-shadow:
+                0 0 5px #ffd400,
+                0 0 12px #ffd400,
+                0 0 24px rgba(255,212,0,.95),
+                0 0 42px rgba(255,212,0,.55);
+              pointer-events:none;
+            "
+          ></div>
 
-          <!-- ВЕРХНІЙ ТРИКУТНИК -->
-          <div style="
-            position:absolute;
-            left:50%;
-            top:-1px;
-            transform:translateX(-50%);
-            width:0;
-            height:0;
-            border-left:10px solid transparent;
-            border-right:10px solid transparent;
-            border-top:14px solid #ffd400;
-            z-index:1000;
-            filter:
-              drop-shadow(
-                0 0 6px rgba(255,212,0,.8)
-              );
-            pointer-events:none;
-          "></div>
+          <!-- ВЕРХНЯ СТРІЛКА -->
+          <div
+            class="case-spin-marker-top"
+            style="
+              position:absolute;
+              left:50%;
+              top:0;
+              width:0;
+              height:0;
+              transform:translateX(-50%);
+              border-left:11px solid transparent;
+              border-right:11px solid transparent;
+              border-top:15px solid #ffd400;
+              z-index:2147483647;
+              filter:
+                drop-shadow(0 0 7px #ffd400);
+              pointer-events:none;
+            "
+          ></div>
 
-          <!-- НИЖНІЙ ТРИКУТНИК -->
-          <div style="
-            position:absolute;
-            left:50%;
-            bottom:-1px;
-            transform:translateX(-50%);
-            width:0;
-            height:0;
-            border-left:10px solid transparent;
-            border-right:10px solid transparent;
-            border-bottom:14px solid #ffd400;
-            z-index:1000;
-            filter:
-              drop-shadow(
-                0 0 6px rgba(255,212,0,.8)
-              );
-            pointer-events:none;
-          "></div>
+          <!-- НИЖНЯ СТРІЛКА -->
+          <div
+            class="case-spin-marker-bottom"
+            style="
+              position:absolute;
+              left:50%;
+              bottom:0;
+              width:0;
+              height:0;
+              transform:translateX(-50%);
+              border-left:11px solid transparent;
+              border-right:11px solid transparent;
+              border-bottom:15px solid #ffd400;
+              z-index:2147483647;
+              filter:
+                drop-shadow(0 0 7px #ffd400);
+              pointer-events:none;
+            "
+          ></div>
 
           <div
             class="reel"
@@ -1748,8 +1747,8 @@ function showMultiOpenResult(
       <div style="
         color:#ffd400;
         font-size:10px;
-         font-weight:900;
-        letter-spacing:2px;
+        font-weight:900;
+        etter-spacing:2px;
       ">
         CASEZONE DROP
       </div>
@@ -2622,7 +2621,6 @@ $("#depositBtn")
       `;
     }
   );
-
 $("#closeDeposit")
   ?.addEventListener(
     "click",
