@@ -179,6 +179,25 @@ async function initDatabase() {
     );
   `);
 
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS upgrades (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+      source_inventory_id INTEGER,
+      source_name TEXT NOT NULL,
+      source_value INTEGER NOT NULL,
+      target_name TEXT NOT NULL,
+      target_rarity TEXT NOT NULL,
+      target_value INTEGER NOT NULL,
+      chance NUMERIC(8,5) NOT NULL,
+      success BOOLEAN NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS withdrawals (
       id SERIAL PRIMARY KEY,
@@ -706,6 +725,394 @@ app.post(
     }
   }
 );
+
+/* =========================
+   UPGRADE TARGET CATALOG
+========================= */
+
+function getUpgradeCatalog() {
+
+  const unique =
+    new Map();
+
+  for (const caseData of cases) {
+
+    for (const item of caseData.items) {
+
+      const [
+        name,
+        rarity,
+        ,
+        value
+      ] = item;
+
+      if (
+        !name ||
+        !Number(value)
+      ) {
+        continue;
+      }
+
+      const existing =
+        unique.get(name);
+
+      if (
+        !existing ||
+        Number(value) >
+          Number(existing.value)
+      ) {
+
+        unique.set(
+          name,
+          {
+            name,
+            rarity,
+            value:
+              Number(value),
+            image:
+              skinImages[name] || null
+          }
+        );
+      }
+    }
+  }
+
+  return [...unique.values()]
+    .sort(
+      (a, b) =>
+        a.value - b.value
+    );
+}
+
+
+app.get(
+  "/api/upgrade-targets",
+  auth,
+  (req, res) => {
+
+    res.json(
+      getUpgradeCatalog()
+    );
+  }
+);
+
+
+/* =========================
+   UPGRADE HISTORY
+========================= */
+
+app.get(
+  "/api/upgrade-history",
+  auth,
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await pool.query(
+          `
+          SELECT
+            id,
+            source_name,
+            source_value,
+            target_name,
+            target_value,
+            chance,
+            success,
+            created_at
+          FROM upgrades
+          WHERE user_id = $1
+          ORDER BY id DESC
+          LIMIT 30
+          `,
+          [req.session.userId]
+        );
+
+      res.json({
+        upgrades:
+          result.rows
+      });
+
+    } catch (e) {
+
+      console.error(
+        "Upgrade history error:",
+        e
+      );
+
+      res.status(500).json({
+        error:
+          "Не вдалося завантажити історію"
+      });
+    }
+  }
+);
+
+
+/* =========================
+   EXECUTE UPGRADE
+========================= */
+
+app.post(
+  "/api/upgrade",
+  auth,
+  async (req, res) => {
+
+    const client =
+      await pool.connect();
+
+    try {
+
+      const inventoryId =
+        Number(
+          req.body.inventoryId
+        );
+
+      const targetName =
+        String(
+          req.body.targetName || ""
+        ).trim();
+
+      if (
+        !inventoryId ||
+        !targetName
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Виберіть обидва предмети"
+          });
+      }
+
+      const catalog =
+        getUpgradeCatalog();
+
+      const target =
+        catalog.find(
+          item =>
+            item.name ===
+            targetName
+        );
+
+      if (!target) {
+
+        return res
+          .status(404)
+          .json({
+            error:
+              "Цільовий предмет не знайдено"
+          });
+      }
+
+      await client.query(
+        "BEGIN"
+      );
+
+      const sourceResult =
+        await client.query(
+          `
+          SELECT
+            id,
+            item_name,
+            rarity,
+            value,
+            status
+          FROM inventory
+          WHERE id = $1
+            AND user_id = $2
+            AND status = 'available'
+          FOR UPDATE
+          `,
+          [
+            inventoryId,
+            req.session.userId
+          ]
+        );
+
+      const source =
+        sourceResult.rows[0];
+
+      if (!source) {
+
+        await client.query(
+          "ROLLBACK"
+        );
+
+        return res
+          .status(404)
+          .json({
+            error:
+              "Предмет уже недоступний"
+          });
+      }
+
+      if (
+        Number(target.value) <=
+        Number(source.value)
+      ) {
+
+        await client.query(
+          "ROLLBACK"
+        );
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Ціль повинна бути дорожчою"
+          });
+      }
+
+      /*
+        90% RTP для апгрейду:
+        chance =
+        source / target * 0.90
+
+        Максимум 75%,
+        мінімум 1%.
+      */
+
+      const chance =
+        Math.max(
+          0.01,
+          Math.min(
+            0.75,
+            (
+              Number(source.value) /
+              Number(target.value)
+            ) * 0.90
+          )
+        );
+
+      const roll =
+        crypto.randomInt(
+          0,
+          1000000
+        ) / 1000000;
+
+      const success =
+        roll < chance;
+
+      await client.query(
+        `
+        UPDATE inventory
+        SET status =
+          'used_upgrade'
+        WHERE id = $1
+        `,
+        [source.id]
+      );
+
+      let newItemId = null;
+
+      if (success) {
+
+        const inserted =
+          await client.query(
+            `
+            INSERT INTO inventory
+              (
+                user_id,
+                item_name,
+                rarity,
+                value,
+                status
+              )
+            VALUES
+              (
+                $1,
+                $2,
+                $3,
+                $4,
+                'available'
+              )
+            RETURNING id
+            `,
+            [
+              req.session.userId,
+              target.name,
+              target.rarity,
+              target.value
+            ]
+          );
+
+        newItemId =
+          inserted.rows[0].id;
+      }
+
+      await client.query(
+        `
+        INSERT INTO upgrades
+          (
+            user_id,
+            source_inventory_id,
+            source_name,
+            source_value,
+            target_name,
+            target_rarity,
+            target_value,
+            chance,
+            success
+          )
+        VALUES
+          (
+            $1,$2,$3,$4,$5,$6,$7,$8,$9
+          )
+        `,
+        [
+          req.session.userId,
+          source.id,
+          source.item_name,
+          Number(source.value),
+          target.name,
+          target.rarity,
+          Number(target.value),
+          chance,
+          success
+        ]
+      );
+
+      await client.query(
+        "COMMIT"
+      );
+
+      res.json({
+        success,
+        chance:
+          chance * 100,
+        target: {
+          ...target,
+          inventoryId:
+            newItemId
+        }
+      });
+
+    } catch (e) {
+
+      await client.query(
+        "ROLLBACK"
+      );
+
+      console.error(
+        "Upgrade error:",
+        e
+      );
+
+      res.status(500).json({
+        error:
+          "Помилка апгрейду"
+      });
+
+    } finally {
+
+      client.release();
+    }
+  }
+);
+
+
 app.get(
   "/api/inventory",
   auth,
