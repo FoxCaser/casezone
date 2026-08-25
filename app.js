@@ -1456,6 +1456,156 @@ async function submitSelectedDemoSkins() {
     );
   }
 }
+/* =========================
+   ПРОФІЛЬ
+========================= */
+
+const profileBtn =
+  document.getElementById("profileBtn");
+
+const profileModal =
+  document.getElementById("profileModal");
+
+const closeProfile =
+  document.getElementById("closeProfile");
+
+const profileTabs =
+  document.querySelectorAll(".profile-tab");
+
+const profileSettings =
+  document.getElementById("profileSettings");
+
+const profileDeposits =
+  document.getElementById("profileDeposits");
+
+const profileWithdrawals =
+  document.getElementById("profileWithdrawals");
+
+const steamTradeUrl =
+  document.getElementById("steamTradeUrl");
+
+const saveTradeUrl =
+  document.getElementById("saveTradeUrl");
+
+const tradeUrlStatus =
+  document.getElementById("tradeUrlStatus");
+
+
+profileBtn?.addEventListener(
+  "click",
+  async () => {
+
+    profileModal.classList.remove("hidden");
+
+    try {
+
+      const data =
+        await api("/api/me");
+
+      if (
+        data.user &&
+        data.user.steam_trade_url
+      ) {
+        steamTradeUrl.value =
+          data.user.steam_trade_url;
+      }
+
+    } catch (e) {
+
+      console.error(
+        "Profile load error:",
+        e
+      );
+    }
+  }
+);
+
+
+closeProfile?.addEventListener(
+  "click",
+  () => {
+
+    profileModal.classList.add("hidden");
+
+  }
+);
+
+
+profileModal?.addEventListener(
+  "click",
+  (e) => {
+
+    if (e.target === profileModal) {
+      profileModal.classList.add("hidden");
+    }
+
+  }
+);
+
+
+profileTabs.forEach(
+  tab => {
+
+    tab.addEventListener(
+      "click",
+      () => {
+
+        profileTabs.forEach(
+          btn =>
+            btn.classList.remove("active")
+        );
+
+        tab.classList.add("active");
+
+
+        profileSettings.classList.add(
+          "hidden"
+        );
+
+        profileDeposits.classList.add(
+          "hidden"
+        );
+
+        profileWithdrawals.classList.add(
+          "hidden"
+        );
+
+
+        const selected =
+          tab.dataset.tab;
+
+
+        if (selected === "settings") {
+
+          profileSettings.classList.remove(
+            "hidden"
+          );
+
+        }
+
+
+        if (selected === "deposits") {
+
+          profileDeposits.classList.remove(
+            "hidden"
+          );
+
+        }
+
+
+        if (selected === "withdrawals") {
+
+          profileWithdrawals.classList.remove(
+            "hidden"
+          );
+
+        }
+
+      }
+    );
+
+  }
+);
 async function initApp() {
   try {
     await refresh();
