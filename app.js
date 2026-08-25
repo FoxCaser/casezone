@@ -3597,26 +3597,26 @@ function upgradeModeData() {
   const modes = {
     "2x": {
       label:"2x",
-      min:2,
-      max:3
+      chance:50,
+      multiplier:2
     },
 
     "5x": {
       label:"5x",
-      min:5,
-      max:7
+      chance:20,
+      multiplier:5
     },
 
     "10x": {
       label:"10x",
-      min:10,
-      max:15
+      chance:10,
+      multiplier:10
     },
 
     "75": {
       label:"75%",
-      min:1.15,
-      max:1.35
+      chance:75,
+      multiplier:(100 / 75)
     }
   };
 
@@ -3639,14 +3639,22 @@ function getUpgradeTargetRange() {
     };
   }
 
+  const exact =
+    total *
+    mode.multiplier;
+
+  /*
+    Показуємо цілі максимально близько
+    до потрібного множника.
+    Допуск ±8%, щоб у списку були
+    реальні доступні предмети.
+  */
   return {
     min:
-      total *
-      mode.min,
+      exact * 0.92,
 
     max:
-      total *
-      mode.max
+      exact * 1.08
   };
 }
 
@@ -3674,36 +3682,15 @@ function getEligibleUpgradeTargets() {
 
 function calculateUpgradeChance() {
 
-  const total =
-    upgradeSourceTotal();
-
   if (
-    !total ||
+    !upgradeSourceTotal() ||
     !selectedUpgradeTarget
   ) {
     return 0;
   }
 
-  const targetValue =
-    Number(
-      selectedUpgradeTarget.value
-    );
-
-  if (
-    !targetValue ||
-    targetValue <= total
-  ) {
-    return 0;
-  }
-
-  return Math.max(
-    1,
-    Math.min(
-      75,
-      total /
-      targetValue *
-      90
-    )
+  return Number(
+    upgradeModeData().chance
   );
 }
 
@@ -4470,8 +4457,7 @@ $("#upgradeActionBtn")
 
 
 function animateUpgradePointer(
-  success,
-  chance
+  finalAngle
 ) {
 
   const pointer =
@@ -4481,55 +4467,33 @@ function animateUpgradePointer(
     return Promise.resolve();
   }
 
-  /*
-    Повільно робимо 3 повних оберти.
-    Потім зупиняємо стрілку:
-    - при успіху ближче до сектора шансу,
-    - при невдачі — поза ним.
-  */
-
-  const successArc =
-    Math.max(
-      6,
-      Math.min(
-        270,
-        chance * 3.6
-      )
-    );
-
-  let finalLocalAngle;
-
-  if (success) {
-
-    finalLocalAngle =
-      Math.max(
-        4,
-        Math.min(
-          successArc - 4,
-          successArc * .55
-        )
-      );
-
-  } else {
-
-    finalLocalAngle =
-      Math.min(
-        350,
-        successArc +
-        Math.max(
-          20,
-          (360 - successArc) * .45
-        )
-      );
-  }
-
   const start =
     upgradePointerAngle;
+
+  /*
+    Сервер повертає точний кут 0..360.
+    0° = верх круга.
+    Фіолетовий сектор теж починається зверху.
+  */
+  const normalized =
+    (
+      Number(finalAngle) % 360 + 360
+    ) % 360;
+
+  let delta =
+    normalized -
+    (
+      start % 360
+    );
+
+  if (delta < 0) {
+    delta += 360;
+  }
 
   const end =
     start +
     1080 +
-    finalLocalAngle;
+    delta;
 
   return new Promise(
     resolve => {
@@ -4558,10 +4522,10 @@ function animateUpgradePointer(
         () => {
 
           upgradePointerAngle =
-            end % 360;
+            normalized;
 
           pointer.style.transform =
-            `rotate(${upgradePointerAngle}deg)`;
+            `rotate(${normalized}deg)`;
 
           resolve();
         };
@@ -4616,8 +4580,7 @@ async function executeUpgrade() {
       );
 
     await animateUpgradePointer(
-      result.success,
-      Number(result.chance)
+      Number(result.rollAngle)
     );
 
     showUpgradeResult(
