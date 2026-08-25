@@ -311,13 +311,13 @@ a {
   isolation: isolate;
   overflow: hidden;
 
-  min-height: 280px;
+  min-height: 390px;
 
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
   align-items: center;
 
-  padding: 30px 42px;
+  padding: 52px 58px;
 
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 24px;
@@ -387,7 +387,7 @@ a {
 
   max-width: 720px;
 
-font-size: clamp(34px, 4vw, 58px);
+  font-size: clamp(42px, 5vw, 76px);
   line-height: 0.96;
 
   letter-spacing: -3px;
@@ -472,9 +472,9 @@ font-size: clamp(34px, 4vw, 58px);
 .hero-case {
   position: relative;
 
- width: 190px;
-height: 145px;
-   
+  width: 240px;
+  height: 190px;
+
   padding: 26px;
 
   display: flex;
@@ -1804,5 +1804,395 @@ height: 145px;
 
   .profile-menu {
     grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   CASEZONE FINAL HOME DESIGN — 2026-08-25
+   Макет: hero зліва, live/top справа, avatar у header
+========================================================= */
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.cz-main {
+  width: min(1500px, calc(100% - 28px));
+  margin: 0 auto;
+  padding-top: 16px;
+}
+
+.cz-header-inner {
+  width: min(1500px, calc(100% - 28px));
+  margin: 0 auto;
+}
+
+.cz-account-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.steam-avatar-btn {
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 212, 0, .20);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 40% 30%, #282828, #0c0c0c 72%);
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,.025),
+    0 0 22px rgba(255,212,0,.08);
+  cursor: pointer;
+}
+
+.steam-avatar-btn:hover {
+  border-color: rgba(255, 212, 0, .55);
+  transform: translateY(-1px);
+}
+
+.steam-avatar-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.steam-avatar-fallback {
+  font-size: 23px;
+  line-height: 1;
+}
+
+.steam-avatar-img.hidden,
+.steam-avatar-fallback.hidden {
+  display: none;
+}
+
+.cz-dashboard-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.58fr) minmax(320px, .98fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.cz-dashboard-left {
+  min-width: 0;
+}
+
+.cz-dashboard-top .cz-hero {
+  height: 100%;
+  min-height: 370px;
+  margin: 0;
+  padding: 42px 42px;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  border-radius: 17px;
+}
+
+.cz-dashboard-top .hero-content {
+  max-width: 690px;
+}
+
+.cz-dashboard-top .cz-hero h1 {
+  max-width: 680px;
+  margin-top: 18px;
+  font-size: clamp(38px, 3.8vw, 58px);
+  line-height: .98;
+  letter-spacing: -2.7px;
+}
+
+.cz-dashboard-top .sub {
+  max-width: 600px;
+  margin-top: 18px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.cz-dashboard-top .hero-open-btn {
+  margin-top: 25px;
+}
+
+.cz-dashboard-top .hero-visual {
+  min-height: 260px;
+}
+
+.cz-dashboard-top .hero-case {
+  width: 188px;
+  height: 150px;
+  padding: 20px;
+  border-radius: 17px;
+}
+
+.cz-dashboard-top .hero-case-logo {
+  font-size: 43px;
+}
+
+.cz-dashboard-side {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 16px;
+  min-width: 0;
+}
+
+.dashboard-side-card {
+  position: relative;
+  min-height: 0 !important;
+  padding: 24px !important;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  background:
+    linear-gradient(145deg, #151515, #101010);
+}
+
+.side-card-title,
+.top-card-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.side-title-line {
+  width: 4px;
+  height: 28px;
+  flex: 0 0 4px;
+  border-radius: 10px;
+  background: var(--yellow);
+  box-shadow: 0 0 13px rgba(255,212,0,.25);
+}
+
+.side-card-title h3,
+.top-card-head h3 {
+  margin: 0;
+  color: #f4f4f4;
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.dashboard-side-card .live-placeholder {
+  min-height: auto;
+  margin-top: 34px;
+  padding: 0;
+  background: transparent;
+}
+
+.dashboard-side-card .live-placeholder strong {
+  color: var(--yellow);
+  font-size: 12px;
+}
+
+.dashboard-side-card .live-placeholder span {
+  margin-top: 9px;
+  max-width: 340px;
+  color: #8d8d8d;
+  font-size: 11px;
+}
+
+.dashboard-side-card .top-empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.top-player-avatar {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+  border: 1px solid rgba(255,212,0,.2);
+  border-radius: 10px;
+  color: var(--yellow);
+  background: #181818;
+}
+
+.side-watermark {
+  position: absolute;
+  right: 24px;
+  bottom: 22px;
+  font-size: 66px;
+  opacity: .055;
+  filter: grayscale(1);
+}
+
+.side-watermark.crown {
+  font-size: 80px;
+}
+
+.cz-benefits {
+  margin-top: 16px;
+  gap: 14px;
+}
+
+.benefit-item {
+  min-height: 88px;
+  padding: 18px 22px;
+  border-radius: 14px;
+}
+
+.benefit-icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.cases-section {
+  margin-top: 20px;
+  padding: 20px 0 12px;
+  border-top: 1px solid rgba(255,255,255,.055);
+}
+
+.cases-section .section-kicker,
+.cases-section .inventory-shortcut,
+.cases-section .case-filters {
+  display: none !important;
+}
+
+.cases-section .cz-section-title {
+  margin-bottom: 18px;
+  padding-left: 18px;
+  position: relative;
+}
+
+.cases-section .cz-section-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 4px;
+  height: 29px;
+  border-radius: 10px;
+  background: var(--yellow);
+  box-shadow: 0 0 14px rgba(255,212,0,.22);
+}
+
+.cases-section .cz-section-title h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.cz-case-grid,
+.grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.case-card {
+  min-width: 0;
+  border-radius: 14px !important;
+  background: #141414 !important;
+}
+
+.cz-new-case-visual {
+  height: 165px !important;
+}
+
+.home-inventory-section {
+  display: none !important;
+}
+
+.steam-profile-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding: 14px 15px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 11px;
+  background: #101010;
+}
+
+.steam-profile-info > div {
+  min-width: 0;
+}
+
+.steam-profile-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #7e7e7e;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+#profileSteamId {
+  display: block;
+  overflow: hidden;
+  color: #fff;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.steam-profile-badge {
+  flex: 0 0 auto;
+  padding: 7px 9px;
+  border: 1px solid rgba(255,212,0,.20);
+  border-radius: 8px;
+  color: var(--yellow);
+  background: rgba(255,212,0,.055);
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 1180px) {
+  .cz-dashboard-top {
+    grid-template-columns: 1fr;
+  }
+
+  .cz-dashboard-side {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+  }
+
+  .cz-case-grid,
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .steam-avatar-btn {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+
+  .cz-dashboard-top .cz-hero {
+    min-height: auto;
+    padding: 28px 22px;
+    grid-template-columns: 1fr;
+  }
+
+  .cz-dashboard-top .hero-visual {
+    min-height: 210px;
+  }
+
+  .cz-dashboard-side {
+    grid-template-columns: 1fr;
+  }
+
+  .cz-case-grid,
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
