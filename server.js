@@ -801,6 +801,10 @@ app.get(
 
 /* =========================
    EXECUTE SELECTED TARGET UPGRADE
+   2x  = 50%
+   5x  = 20%
+   10x = 10%
+   75% = 75%
 ========================= */
 
 app.post(
@@ -855,29 +859,32 @@ app.post(
           });
       }
 
-      const modeRanges = {
+      const modeMap = {
         "2x": {
-          min:2,
-          max:3
+          chance:50,
+          multiplier:2
         },
+
         "5x": {
-          min:5,
-          max:7
+          chance:20,
+          multiplier:5
         },
+
         "10x": {
-          min:10,
-          max:15
+          chance:10,
+          multiplier:10
         },
+
         "75": {
-          min:1.15,
-          max:1.35
+          chance:75,
+          multiplier:(100 / 75)
         }
       };
 
-      const modeRange =
-        modeRanges[mode];
+      const selectedMode =
+        modeMap[mode];
 
-      if (!modeRange) {
+      if (!selectedMode) {
 
         return res
           .status(400)
@@ -964,13 +971,27 @@ app.post(
           });
       }
 
-      const minValue =
+      /*
+        Ціль має відповідати режиму.
+        Наприклад:
+        100 ₴ + 2x => приблизно 200 ₴
+        100 ₴ + 5x => приблизно 500 ₴
+        100 ₴ + 10x => приблизно 1000 ₴
+        100 ₴ + 75% => приблизно 133.33 ₴
+
+        Допуск ±8% потрібен, бо в каталозі
+        може не бути предмета рівно за потрібну суму.
+      */
+
+      const exactTarget =
         sourceValue *
-        modeRange.min;
+        selectedMode.multiplier;
+
+      const minValue =
+        exactTarget * 0.92;
 
       const maxValue =
-        sourceValue *
-        modeRange.max;
+        exactTarget * 1.08;
 
       if (
         Number(target.value) <
@@ -987,29 +1008,39 @@ app.post(
           .status(400)
           .json({
             error:
-              "Цей предмет не підходить для вибраного режиму"
+              "Цей предмет не відповідає вибраному режиму"
           });
       }
 
       const chance =
-        Math.max(
-          1,
-          Math.min(
-            75,
-            sourceValue /
-            Number(target.value) *
-            90
-          )
+        Number(
+          selectedMode.chance
         );
 
-      const roll =
+      /*
+        ОДИН серверний roll визначає ВСЕ:
+        і виграш/програш,
+        і місце зупинки стрілки.
+
+        0° = верх круга.
+        Фіолетовий сектор займає
+        chance% круга за годинниковою стрілкою.
+      */
+
+      const rollUnit =
         crypto.randomInt(
           0,
           1000000
-        ) / 1000000 * 100;
+        ) / 1000000;
+
+      const rollAngle =
+        rollUnit * 360;
+
+      const winArc =
+        chance / 100 * 360;
 
       const success =
-        roll < chance;
+        rollAngle < winArc;
 
       await client.query(
         `
@@ -1066,10 +1097,12 @@ app.post(
         success,
         chance,
         mode,
+        rollAngle,
         sourceValue,
         target: {
           ...target,
-          inventoryId:newItemId
+          inventoryId:
+            newItemId
         }
       });
 
@@ -3185,5 +3218,4 @@ app.post("/api/withdrawals/:id/status", auth, async (req, res) => {
     client.release();
   }
 });
-
 start();
