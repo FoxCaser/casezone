@@ -2001,7 +2001,12 @@ app.get(
             id,
             username,
             steam_id,
-            balance
+            balance,
+            trade_url,
+              const result =
+        await pool.query(
+          `
+    );
           FROM users
           WHERE id = $1
           `,
