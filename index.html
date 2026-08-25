@@ -1,196 +1,790 @@
 <!doctype html>
 <html lang="uk">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
   <title>CaseZone</title>
 
-  <link rel="stylesheet" href="/style.css">
+  <link
+    rel="stylesheet"
+    href="/style.css"
+  >
 </head>
 
 <body>
 
-<header>
-  <div class="logo">
-    CASE<span>ZONE</span>
-  </div>
+<!-- =========================
+     HEADER
+========================= -->
 
-  <div class="account">
-    <span id="userLabel">Гість</span>
-    <span id="balance">0 ₴</span>
-    <button id="depositBtn" class="deposit-btn">
-  ＋ Поповнити
-</button>
+<header class="cz-header">
 
-    <button id="authBtn">
-      Увійти
-    </button>
-    <button id="profileBtn" class="profile-btn">
-  👤 Профіль
-</button>
-  </div>
-</header>
+  <div class="cz-header-inner">
 
-<main>
-
-  <section class="hero">
-    <div>
-      <div class="eyebrow">
-        CS2 CASE OPENING
+    <a
+      href="/"
+      class="cz-brand"
+    >
+      <div class="cz-logo-icon">
+        CZ
       </div>
 
-      <h1>
-        ВІДКРИВАЙ.<br>
-        <span>ВИГРАВАЙ.</span>
-      </h1>
+      <div class="cz-logo-text">
+        <strong>
+          CASE<span>ZONE</span>
+        </strong>
 
-      <p class="sub">
-        Відкривай кейси, отримуй скіни та збирай власний інвентар.
-      </p>
-    </div>
-  </section>
+        <small>
+          CS2 CASE OPENING
+        </small>
+      </div>
+    </a>
 
-  <section>
 
-    <div class="section-title">
-      <h2>Кейси</h2>
+    <nav class="cz-nav">
+
+      <a
+        href="#caseSection"
+        class="cz-nav-link active"
+      >
+        Кейси
+      </a>
 
       <button
-        class="ghost"
-        id="inventoryBtn">
-        🎒 Інвентар
+        type="button"
+        class="cz-nav-link nav-button"
+        id="headerInventoryBtn"
+      >
+        Інвентар
       </button>
+
+    </nav>
+
+
+    <div class="account cz-account">
+
+      <div class="cz-account-user">
+
+        <span
+          id="userLabel"
+          class="cz-user-label"
+        >
+          Гість
+        </span>
+
+        <div class="cz-balance">
+
+          <small>
+            Баланс
+          </small>
+
+          <span id="balance">
+            0 ₴
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <button
+        id="depositBtn"
+        class="deposit-btn cz-deposit-btn"
+      >
+        ＋ Поповнити
+      </button>
+
+
+      <button
+        id="authBtn"
+        class="cz-auth-btn"
+      >
+        Увійти
+      </button>
+
+
+      <button
+        id="profileBtn"
+        class="profile-btn cz-profile-btn"
+      >
+        👤
+        <span>
+          Профіль
+        </span>
+      </button>
+
     </div>
-    
-     <div class="case-filters">
 
-  <button class="filter active" onclick="filterCases('all')">
-    Усі
-  </button>
+  </div>
 
-  <button class="filter" onclick="filterCases('cheap')">
-    💰 Дешеві
-  </button>
+</header>
 
-  <button class="filter" onclick="filterCases('premium')">
-    💎 Преміум
-  </button>
 
-  <button class="filter" onclick="filterCases('expensive')">
-    🔥 Дорогі
-  </button>
+<main class="cz-main">
 
-</div>
 
-<div
-  id="cases"
-  class="grid">
-</div>
+<!-- =========================
+     HERO
+========================= -->
 
-  </section>
+<section class="hero cz-hero">
+
+  <div class="hero-glow hero-glow-left"></div>
+  <div class="hero-glow hero-glow-right"></div>
+
+
+  <div class="hero-content">
+
+    <div class="eyebrow">
+      CASEZONE • CS2
+    </div>
+
+    <h1>
+      ВІДКРИВАЙ КЕЙСИ —
+      <span>
+        ОТРИМУЙ ТОП СКІНИ
+      </span>
+    </h1>
+
+    <p class="sub">
+      Відкривай кейси, отримуй скіни
+      та збирай власний інвентар.
+    </p>
+
+
+    <a
+      href="#caseSection"
+      class="hero-open-btn"
+    >
+      ВІДКРИТИ КЕЙСИ
+      <span>→</span>
+    </a>
+
+  </div>
+
+
+  <div class="hero-visual">
+
+    <div class="hero-case-glow"></div>
+
+    <div class="hero-case">
+
+      <div class="hero-case-top">
+        CASEZONE
+      </div>
+
+      <div class="hero-case-logo">
+        CZ
+      </div>
+
+      <div class="hero-case-bottom">
+        DROP
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================
+     ПЕРЕВАГИ
+========================= -->
+
+<section class="cz-benefits">
+
+  <div class="benefit-item">
+
+    <div class="benefit-icon">
+      ✓
+    </div>
+
+    <div>
+      <strong>
+        Чесна гра
+      </strong>
+
+      <span>
+        Прозора система дропів
+      </span>
+    </div>
+
+  </div>
+
+
+  <div class="benefit-item">
+
+    <div class="benefit-icon">
+      ⚡
+    </div>
+
+    <div>
+      <strong>
+        Швидко
+      </strong>
+
+      <span>
+        Миттєве відкриття
+      </span>
+    </div>
+
+  </div>
+
+
+  <div class="benefit-item">
+
+    <div class="benefit-icon">
+      ◈
+    </div>
+
+    <div>
+      <strong>
+        Безпека
+      </strong>
+
+      <span>
+        Захист твого акаунта
+      </span>
+    </div>
+
+  </div>
+
+
+  <div class="benefit-item">
+
+    <div class="benefit-icon">
+      24/7
+    </div>
+
+    <div>
+      <strong>
+        Підтримка
+      </strong>
+
+      <span>
+        Завжди на зв'язку
+      </span>
+    </div>
+
+  </div>
+
+</section>
+<!-- =========================
+     КЕЙСИ
+========================= -->
+
+<section
+  id="caseSection"
+  class="cases-section"
+>
+
+  <div class="section-title cz-section-title">
+
+    <div>
+
+      <span class="section-kicker">
+        CASEZONE
+      </span>
+
+      <h2>
+        Популярні кейси
+      </h2>
+
+    </div>
+
+
+    <button
+      class="ghost inventory-shortcut"
+      id="inventoryBtn"
+    >
+      🎒 Мій інвентар
+    </button>
+
+  </div>
+
+
+  <div class="case-filters">
+
+    <button
+      class="filter active"
+      onclick="filterCases('all')"
+    >
+      Усі
+    </button>
+
+    <button
+      class="filter"
+      onclick="filterCases('cheap')"
+    >
+      💰 Дешеві
+    </button>
+
+    <button
+      class="filter"
+      onclick="filterCases('premium')"
+    >
+      💎 Преміум
+    </button>
+
+    <button
+      class="filter"
+      onclick="filterCases('expensive')"
+    >
+      🔥 Дорогі
+    </button>
+
+  </div>
+
+
+  <!-- Кейси сюди завантажує app.js -->
+
+  <div
+    id="cases"
+    class="grid cz-case-grid"
+  ></div>
+
+</section>
+
+
+<!-- =========================
+     LIVE / ТОП
+========================= -->
+
+<section class="cz-community">
+
+  <div class="community-main">
+
+    <div class="section-title cz-section-title">
+
+      <div>
+
+        <span class="section-kicker">
+          COMMUNITY
+        </span>
+
+        <h2>
+          Останні дропи
+        </h2>
+
+      </div>
+
+    </div>
+
+
+    <div class="live-placeholder">
+
+      <div class="live-dot"></div>
+
+      <div>
+        <strong>
+          LIVE DROP
+        </strong>
+
+        <span>
+          Тут згодом з'являться
+          останні виграні скіни
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <aside class="top-players-card">
+
+    <div class="top-card-head">
+
+      <span>
+        ★
+      </span>
+
+      <h3>
+        ТОП ГРАВЦІВ
+      </h3>
+
+    </div>
+
+
+    <div class="top-empty">
+
+      <strong>
+        Рейтинг CaseZone
+      </strong>
+
+      <span>
+        Скоро тут будуть
+        найкращі гравці
+      </span>
+
+    </div>
+
+  </aside>
+
+</section>
+
+
+<!-- =========================
+     ІНВЕНТАР НА ГОЛОВНІЙ
+========================= -->
+
+<section class="home-inventory-section">
+
+  <div class="section-title cz-section-title">
+
+    <div>
+
+      <span class="section-kicker">
+        INVENTORY
+      </span>
+
+      <h2>
+        Твій інвентар
+      </h2>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="inventory-open-secondary"
+      id="inventoryOpenSecondary"
+    >
+      Відкрити інвентар
+      <span>→</span>
+    </button>
+
+  </div>
+
+
+  <div class="inventory-preview">
+
+    <div class="inventory-preview-icon">
+      🎒
+    </div>
+
+    <div>
+
+      <strong>
+        Усі твої скіни в одному місці
+      </strong>
+
+      <p>
+        Відкривай кейси, збирай предмети
+        та відправляй їх на Steam.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================
+     СТАТИСТИКА
+========================= -->
+
+<section class="cz-stats">
+
+  <div class="stat-card">
+
+    <span>
+      Відкрито кейсів
+    </span>
+
+    <strong>
+      CASEZONE
+    </strong>
+
+  </div>
+
+
+  <div class="stat-card">
+
+    <span>
+      Онлайн
+    </span>
+
+    <strong>
+      24/7
+    </strong>
+
+  </div>
+
+
+  <div class="stat-card">
+
+    <span>
+      Вивід
+    </span>
+
+    <strong>
+      STEAM
+    </strong>
+
+  </div>
+
+
+  <div class="stat-card">
+
+    <span>
+      Валюта
+    </span>
+
+    <strong>
+      UAH ₴
+    </strong>
+
+  </div>
+
+</section>
 
 </main>
 
-<div
-  id="inventory"
-  class="modal hidden">
 
-  <div class="modal-card">
+<!-- =========================
+     FOOTER
+========================= -->
 
-    <button
-      id="closeInv"
-      class="x">
-      ×
-    </button>
+<footer class="cz-footer">
 
-    <h2>🎒 Мій інвентар</h2>
+  <div class="footer-brand">
 
-    <div
-      id="items"
-      class="inventory">
+    <div class="cz-logo-icon">
+      CZ
+    </div>
+
+    <div>
+      <strong>
+        CASEZONE
+      </strong>
+
+      <span>
+        CS2 CASE OPENING
+      </span>
     </div>
 
   </div>
+
+
+  <div class="footer-copy">
+    © 2026 CaseZone
+  </div>
+
+</footer>
+<!-- =========================
+     МОДАЛЬНЕ ВІКНО ІНВЕНТАРЮ
+========================= -->
+
+<div
+  id="inventory"
+  class="modal hidden"
+>
+
+  <div class="modal-card inventory-modal-card">
+
+    <button
+      id="closeInv"
+      class="x"
+    >
+      ×
+    </button>
+
+
+    <div class="modal-heading">
+
+      <span class="modal-heading-icon">
+        🎒
+      </span>
+
+      <div>
+
+        <span class="section-kicker">
+          CASEZONE
+        </span>
+
+        <h2>
+          Мій інвентар
+        </h2>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="items"
+      class="inventory"
+    ></div>
+
+  </div>
+
 </div>
+
+
 <!-- =========================
      ПРОФІЛЬ
 ========================= -->
 
-<div id="profileModal" class="modal hidden">
+<div
+  id="profileModal"
+  class="modal hidden"
+>
 
   <div class="modal-card profile-card">
 
     <button
       id="closeProfile"
-      class="x">
+      class="x"
+    >
       ×
     </button>
 
-    <h2>👤 Профіль</h2>
+
+    <div class="modal-heading">
+
+      <span class="modal-heading-icon">
+        👤
+      </span>
+
+      <div>
+
+        <span class="section-kicker">
+          ACCOUNT
+        </span>
+
+        <h2>
+          Профіль
+        </h2>
+
+      </div>
+
+    </div>
+
 
     <div class="profile-layout">
+
+
+      <!-- ЛІВЕ МЕНЮ -->
 
       <div class="profile-menu">
 
         <button
           class="profile-tab active"
-          data-tab="settings">
-          ⚙️ Налаштування
+          data-tab="settings"
+        >
+          <span>⚙️</span>
+          Налаштування
         </button>
+
 
         <button
           class="profile-tab"
-          data-tab="deposits">
-          💳 Історія поповнень
+          data-tab="deposits"
+        >
+          <span>💳</span>
+          Історія поповнень
         </button>
+
 
         <button
           class="profile-tab"
-          data-tab="withdrawals">
-          📦 Історія виводу
+          data-tab="withdrawals"
+        >
+          <span>📦</span>
+          Історія виводу
         </button>
 
       </div>
 
 
+      <!-- ПРАВА ЧАСТИНА -->
+
       <div class="profile-content">
+
 
         <!-- НАЛАШТУВАННЯ -->
 
         <div
           id="profileSettings"
-          class="profile-section">
+          class="profile-section"
+        >
 
-          <h3>Налаштування</h3>
+          <div class="profile-section-title">
 
-          <label for="steamTradeUrl">
-            Steam Trade URL
-          </label>
+            <span>
+              SETTINGS
+            </span>
 
-          <input
-            id="steamTradeUrl"
-            type="text"
-            placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
-          >
+            <h3>
+              Налаштування
+            </h3>
 
-          <button
-            id="saveTradeUrl"
-            class="deposit-btn">
-            Зберегти
-          </button>
+          </div>
 
-          <p id="tradeUrlStatus"></p>
+
+          <div class="trade-url-box">
+
+            <label for="steamTradeUrl">
+              Steam Trade URL
+            </label>
+
+
+            <p>
+              Посилання використовується
+              для отримання скінів через Steam.
+            </p>
+
+
+            <input
+              id="steamTradeUrl"
+              type="text"
+              placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
+            >
+
+
+            <button
+              id="saveTradeUrl"
+              class="deposit-btn save-trade-btn"
+            >
+              Зберегти Trade URL
+            </button>
+
+
+            <p id="tradeUrlStatus"></p>
+
+          </div>
 
         </div>
 
 
-        <!-- ІСТОРІЯ ПОПОВНЕНЬ -->
+        <!-- ІСТОРІЯ ПОПОВНЕННЯ -->
 
         <div
           id="profileDeposits"
-          class="profile-section hidden">
+          class="profile-section hidden"
+        >
 
-          <h3>Історія поповнень</h3>
+          <div class="profile-section-title">
+
+            <span>
+              DEPOSITS
+            </span>
+
+            <h3>
+              Історія поповнень
+            </h3>
+
+          </div>
+
 
           <div id="depositHistory">
             Історія поповнень порожня
@@ -203,9 +797,21 @@
 
         <div
           id="profileWithdrawals"
-          class="profile-section hidden">
+          class="profile-section hidden"
+        >
 
-          <h3>Історія виводу скінів</h3>
+          <div class="profile-section-title">
+
+            <span>
+              WITHDRAWALS
+            </span>
+
+            <h3>
+              Історія виводу скінів
+            </h3>
+
+          </div>
+
 
           <div id="withdrawHistory">
             Історія виводу порожня
@@ -220,34 +826,70 @@
   </div>
 
 </div>
+<!-- =========================
+     ОСНОВНА МОДАЛКА
+========================= -->
+
 <div
   id="modal"
-  class="modal hidden">
+  class="modal hidden"
+>
 
   <div class="modal-card">
 
     <button
       id="closeModal"
-      class="x">
+      class="x"
+    >
       ×
     </button>
 
     <div id="modalContent"></div>
 
+  </div>
+
 </div>
-</div>
 
-<div id="depositModal" class="modal hidden">
 
-  <div class="modal-card">
+<!-- =========================
+     ПОПОВНЕННЯ
+========================= -->
 
-    <button id="closeDeposit" class="x">
+<div
+  id="depositModal"
+  class="modal hidden"
+>
+
+  <div class="modal-card deposit-modal-card">
+
+    <button
+      id="closeDeposit"
+      class="x"
+    >
       ×
     </button>
 
-    <h2>💰 Поповнення балансу</h2>
 
-   
+    <div class="modal-heading">
+
+      <span class="modal-heading-icon">
+        ₴
+      </span>
+
+      <div>
+
+        <span class="section-kicker">
+          BALANCE
+        </span>
+
+        <h2>
+          Поповнення балансу
+        </h2>
+
+      </div>
+
+    </div>
+
 
     <div id="depositInfo"></div>
 
@@ -255,4 +897,47 @@
 
 </div>
 
+
+<!-- =========================
+     JS ДЛЯ КНОПОК НОВОЇ ВЕРСТКИ
+========================= -->
+
+<script>
+
+  document
+    .getElementById("headerInventoryBtn")
+    ?.addEventListener(
+      "click",
+      () => {
+
+        document
+          .getElementById("inventoryBtn")
+          ?.click();
+
+      }
+    );
+
+
+  document
+    .getElementById("inventoryOpenSecondary")
+    ?.addEventListener(
+      "click",
+      () => {
+
+        document
+          .getElementById("inventoryBtn")
+          ?.click();
+
+      }
+    );
+
+</script>
+
+
+<!-- ОСНОВНИЙ JAVASCRIPT САЙТУ -->
+
 <script src="/app.js"></script>
+
+</body>
+
+</html>
