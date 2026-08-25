@@ -93,6 +93,12 @@ async function refresh() {
   const authBtn =
     $("#authBtn");
 
+  const steamAvatar =
+    $("#steamAvatar");
+
+  const steamAvatarFallback =
+    $("#steamAvatarFallback");
+
 
   if (userLabel) {
 
@@ -118,6 +124,40 @@ async function refresh() {
       currentUser
         ? "Вийти"
         : "Увійти";
+  }
+
+
+  if (
+    steamAvatar &&
+    steamAvatarFallback
+  ) {
+
+    const avatarUrl =
+      currentUser?.avatar_url || "";
+
+    if (avatarUrl) {
+
+      steamAvatar.src =
+        avatarUrl;
+
+      steamAvatar.classList
+        .remove("hidden");
+
+      steamAvatarFallback.classList
+        .add("hidden");
+
+    } else {
+
+      steamAvatar.removeAttribute(
+        "src"
+      );
+
+      steamAvatar.classList
+        .add("hidden");
+
+      steamAvatarFallback.classList
+        .remove("hidden");
+    }
   }
 }
 
@@ -850,7 +890,7 @@ async function showCaseDetails(id) {
 
             <div style="
               position:relative;
-                z-index:2;
+              z-index:2;
               margin-top:5px;
             ">
               <strong style="
@@ -1702,7 +1742,7 @@ function showMultiOpenResult(
         margin:0 0 20px;
         color:#888;
         font-size:12px;
-          ">
+      ">
         Відкрито: ${openedItems.length}
         ${openedItems.length === 1 ? "кейс" : "кейси"}
       </p>
@@ -2554,7 +2594,7 @@ $("#depositBtn")
             "
           >
             🎮 Скінами CS2
-                     </button>
+          </button>
 
         </div>
       `;
@@ -2809,6 +2849,26 @@ const saveTradeUrl =
 const tradeUrlStatus =
   $("#tradeUrlStatus");
 
+const steamAvatarBtn =
+  $("#steamAvatarBtn");
+
+const profileSteamId =
+  $("#profileSteamId");
+
+
+/* =========================
+   HEADER STEAM AVATAR
+========================= */
+
+steamAvatarBtn
+  ?.addEventListener(
+    "click",
+    () => {
+
+      profileBtn?.click();
+    }
+  );
+
 
 /* =========================
    OPEN PROFILE
@@ -2843,6 +2903,14 @@ profileBtn
 
           steamTradeUrl.value =
             data.user.trade_url;
+        }
+
+
+        if (profileSteamId) {
+
+          profileSteamId.textContent =
+            data.user?.steam_id ||
+            "Не підключено";
         }
 
       } catch (e) {
