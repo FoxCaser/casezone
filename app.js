@@ -4066,6 +4066,13 @@ let upgradePointerAngle = 0;
 let upgradeModeRules = {};
 let upgradeTargetTolerance = 0;
 
+/*
+  Visual-only upgrade result state.
+  The real win/loss still comes ONLY from result.success
+  returned by POST /api/upgrade.
+*/
+let upgradeLastResult = null;
+
 
 const homeSections = () => [
   $(".cz-live-strip"),
@@ -4673,7 +4680,130 @@ function renderUpgradeTargets() {
 }
 
 
+function clearUpgradeResultFeedback() {
+
+  upgradeLastResult = null;
+
+  const panel =
+    document.querySelector(
+      ".upgrade-target-preview"
+    );
+
+  panel
+    ?.classList
+    .remove(
+      "upgrade-result-success",
+      "upgrade-result-fail"
+    );
+}
+
+
+function renderUpgradeResultFeedback() {
+
+  const panel =
+    document.querySelector(
+      ".upgrade-target-preview"
+    );
+
+  if (!panel) {
+    return;
+  }
+
+  panel.classList.remove(
+    "upgrade-result-success",
+    "upgrade-result-fail"
+  );
+
+  if (!upgradeLastResult) {
+    return;
+  }
+
+  const won =
+    upgradeLastResult.success === true;
+
+  panel.classList.add(
+    won
+      ? "upgrade-result-success"
+      : "upgrade-result-fail"
+  );
+
+  /*
+    Keep the attempted target visible after the roll,
+    like in the approved reference.
+    This is visual only; selectedUpgradeTarget stays cleared.
+  */
+  const target =
+    upgradeLastResult.target;
+
+  if (!target) {
+    return;
+  }
+
+  $("#upgradeTargetEmpty")
+    ?.classList
+    .add("hidden");
+
+  $("#upgradeTargetSelected")
+    ?.classList
+    .remove("hidden");
+
+  const image =
+    $("#upgradeTargetImage");
+
+  if (image) {
+    image.src =
+      target.image || "";
+  }
+
+  const name =
+    $("#upgradeTargetName");
+
+  if (name) {
+    name.textContent =
+      target.name || "—";
+  }
+
+  const rarity =
+    $("#upgradeTargetRarity");
+
+  if (rarity) {
+
+    rarity.textContent =
+      target.rarity || "—";
+
+    rarity.style.color =
+      getDropRarityColor(
+        target.rarity
+      );
+  }
+
+  const priceText =
+    Number(
+      target.value || 0
+    ).toFixed(2) +
+    " Core Coins";
+
+  const price =
+    $("#upgradeTargetPrice");
+
+  if (price) {
+    price.textContent =
+      priceText;
+  }
+
+  const range =
+    $("#upgradeTargetRange");
+
+  if (range) {
+    range.textContent =
+      priceText;
+  }
+}
+
+
 function toggleUpgradeSource(id) {
+
+  clearUpgradeResultFeedback();
 
   if (upgradeBusy) {
     return;
@@ -4733,6 +4863,8 @@ function toggleUpgradeSource(id) {
 
 function removeUpgradeSource(id) {
 
+  clearUpgradeResultFeedback();
+
   if (upgradeBusy) {
     return;
   }
@@ -4756,6 +4888,8 @@ function removeUpgradeSource(id) {
 
 function chooseUpgradeTarget(name) {
 
+  clearUpgradeResultFeedback();
+
   if (upgradeBusy) {
     return;
   }
@@ -4776,6 +4910,8 @@ $("#changeUpgradeTargetBtn")
   ?.addEventListener(
     "click",
     () => {
+
+      clearUpgradeResultFeedback();
 
       selectedUpgradeTarget = null;
 
@@ -4800,6 +4936,8 @@ $("#clearUpgradeSelection")
         return;
       }
 
+      clearUpgradeResultFeedback();
+
       selectedUpgradeSources = [];
       selectedUpgradeTarget = null;
 
@@ -4822,6 +4960,8 @@ $$(".upgrade-preset-btn")
           if (upgradeBusy) {
             return;
           }
+
+          clearUpgradeResultFeedback();
 
           upgradeMode =
             button.dataset.mode;
@@ -4984,6 +5124,8 @@ function refreshUpgradeSelection() {
       target
         ? `Ціль: ${target.name} • шанс ${chance.toFixed(2)}%`
         : "Оберіть свої предмети та ціль справа";
+
+  renderUpgradeResultFeedback();
 }
 
 
@@ -5198,15 +5340,21 @@ async function executeUpgrade() {
       stopAngle
     );
 
-    showUpgradeResult(
-      result
-    );
+    /*
+      The backend result is authoritative:
+      success === true  -> green
+      success === false -> red
+    */
+    upgradeLastResult =
+      result;
 
     selectedUpgradeSources = [];
     selectedUpgradeTarget = null;
 
     await refresh();
     await loadUpgradeData();
+
+    renderUpgradeResultFeedback();
 
   } catch (e) {
 
@@ -5226,106 +5374,6 @@ async function executeUpgrade() {
   }
 }
 
-
-function showUpgradeResult(result) {
-
-  const overlay =
-    document.createElement(
-      "div"
-    );
-
-  overlay.className =
-    "upgrade-result-overlay";
-
-  const color =
-    result.success
-      ? "#16c994"
-      : "#eb4b4b";
-
-  overlay.innerHTML = `
-    <div
-      class="upgrade-result-card"
-      style="
-        border-color:${color}55;
-        box-shadow:
-          0 0 45px ${color}18;
-      "
-    >
-
-      <div style="
-        color:${color};
-        font-size:10px;
-        font-weight:900;
-        letter-spacing:1.7px;
-      ">
-        ${
-          result.success
-            ? "UPGRADE SUCCESS"
-            : "UPGRADE FAILED"
-        }
-      </div>
-
-      ${
-        result.success
-          ? `
-            <img
-              src="${result.target.image || ""}"
-              alt="${result.target.name}"
-            >
-          `
-          : `
-            <div style="
-              font-size:52px;
-              margin:25px 0;
-              color:#eb4b4b;
-            ">
-              ✕
-            </div>
-          `
-      }
-
-      <h2>
-        ${
-          result.success
-            ? "Апгрейд успішний!"
-            : "Не пощастило"
-        }
-      </h2>
-
-      <p>
-        ${
-          result.success
-            ? `Ти отримав ${result.target.name} за ${Number(result.target.value).toFixed(2)} Core Coins`
-            : "Використані предмети втрачено."
-        }
-      </p>
-
-      <p>
-        Шанс:
-        ${Number(result.chance).toFixed(2)}%
-      </p>
-
-      <button
-        type="button"
-        onclick="
-          this
-            .closest(
-              '.upgrade-result-overlay'
-            )
-            .remove()
-        "
-      >
-        Продовжити
-      </button>
-
-    </div>
-  `;
-
-  document.body
-    .appendChild(
-      overlay
-    );
-}
 
 
 initApp();
