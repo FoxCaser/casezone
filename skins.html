@@ -6,7 +6,7 @@
     name="viewport"
     content="width=device-width, initial-scale=1.0"
   >
-  <title>PAY BY SKINS — CASEZONE</title>
+  <title>PAY BY SKINS — CaSeZoNe</title>
   <link rel="icon" href="/favicon.ico">
 
   <style>
@@ -1272,6 +1272,31 @@
       }
     }
   </style>
+
+  <style>
+    .cz-logo.cz-logo-case{
+      width:38px !important;
+      height:34px !important;
+      padding:0 !important;
+      overflow:visible !important;
+      border:0 !important;
+      border-radius:0 !important;
+      background:transparent !important;
+    }
+
+    .cz-logo.cz-logo-case img{
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:contain;
+      filter:drop-shadow(0 0 7px rgba(255,212,0,.22));
+    }
+
+    .cz-brand strong span{
+      color:#ffd400;
+    }
+  </style>
+
 </head>
 
 <body>
@@ -1282,12 +1307,15 @@
       class="cz-brand"
       href="/"
     >
-      <span class="cz-logo">
-        CZ
+      <span class="cz-logo cz-logo-case">
+        <img
+          src="/casezone-c2-logo.png"
+          alt="C2 CaSeZoNe"
+        >
       </span>
 
       <strong>
-        CASE<span>ZONE</span>
+        CaSe<span>ZoNe</span>
       </strong>
     </a>
 
@@ -1628,7 +1656,7 @@
       <div>
 
         <strong>
-          CASEZONE © 2026
+          CaSeZoNe © 2026
         </strong>
 
         <span>
@@ -2238,7 +2266,7 @@
                           ? (
                               price > 0
                                 ? "Можна вибрати"
-                                : "Немає оцінки CASEZONE"
+                                : "Немає оцінки CaSeZoNe"
                             )
                           : "Не можна передати"
                       }
