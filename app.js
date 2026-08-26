@@ -3100,116 +3100,267 @@ $("#closeModal")
 
 /* =========================
    DEPOSIT
+   Full-screen design.
+   LiqPay + skins logic preserved.
 ========================= */
+
+const depositModal =
+  $("#depositModal");
+
+const closeDeposit =
+  $("#closeDeposit");
+
+const depositAmountInput =
+  $("#depositAmountInput");
+
+const depositCardPayBtn =
+  $("#depositCardPayBtn");
+
+const depositSkinsBtn =
+  $("#depositSkinsBtn");
+
+const depositCardStatus =
+  $("#depositCardStatus");
+
+
+function setDepositAmount(value) {
+
+  const amount =
+    Math.max(
+      1,
+      Math.round(
+        Number(value) || 0
+      )
+    );
+
+
+  if (depositAmountInput) {
+
+    depositAmountInput.value =
+      String(amount);
+  }
+
+
+  $$(".cz-deposit-quick-btn")
+    .forEach(button => {
+
+      button.classList.toggle(
+        "active",
+        Number(
+          button.dataset.depositAmount
+        ) === amount
+      );
+    });
+
+
+  if (depositCardStatus) {
+
+    depositCardStatus.textContent =
+      "";
+  }
+}
+
+
+function openDepositPage() {
+
+  if (!currentUser) {
+
+    auth();
+    return;
+  }
+
+
+  $("#profileModal")
+    ?.classList
+    .add("hidden");
+
+
+  $("#inventory")
+    ?.classList
+    .add("hidden");
+
+
+  depositModal
+    ?.classList
+    .remove("hidden");
+
+
+  setDepositAmount(100);
+
+
+  setTimeout(
+    () => {
+
+      depositAmountInput
+        ?.focus();
+    },
+    80
+  );
+}
+
 
 $("#depositBtn")
   ?.addEventListener(
     "click",
-    () => {
-
-      if (!currentUser) {
-
-        auth();
-        return;
-      }
-
-
-      $("#depositModal")
-        ?.classList
-        .remove("hidden");
-
-
-      const depositInfo =
-        $("#depositInfo");
-
-
-      if (!depositInfo) {
-        return;
-      }
-
-
-      depositInfo.innerHTML = `
-
-        <p style="
-          color:#888;
-        ">
-          Оберіть спосіб поповнення:
-        </p>
-
-
-        <div
-          class="deposit-methods"
-          style="
-            display:grid;
-            grid-template-columns:
-              repeat(
-                auto-fit,
-                minmax(150px,1fr)
-              );
-            gap:9px;
-          "
-        >
-
-          <button
-            type="button"
-            onclick="
-              depositMethod('privat')
-            "
-          >
-            🏦 ПриватБанк
-          </button>
-
-
-          <button
-            type="button"
-            onclick="
-              depositMethod('oschad')
-            "
-          >
-            🏦 Ощадбанк
-          </button>
-
-
-          <button
-            type="button"
-            onclick="
-              depositMethod('crypto')
-            "
-          >
-            ₿ Крипта
-          </button>
-
-
-          <button
-            type="button"
-            onclick="
-              depositMethod('skins')
-            "
-          >
-            🎮 Скінами CS2
-          </button>
-
-        </div>
-      `;
-    }
+    openDepositPage
   );
-$("#closeDeposit")
+
+
+closeDeposit
   ?.addEventListener(
     "click",
     () => {
 
-      $("#depositModal")
+      depositModal
         ?.classList
         .add("hidden");
     }
   );
 
 
+$$(".cz-deposit-quick-btn")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        setDepositAmount(
+          button.dataset
+            .depositAmount
+        );
+      }
+    );
+  });
+
+
+depositAmountInput
+  ?.addEventListener(
+    "input",
+    () => {
+
+      const amount =
+        Math.round(
+          Number(
+            depositAmountInput.value
+          ) || 0
+        );
+
+
+      $$(".cz-deposit-quick-btn")
+        .forEach(button => {
+
+          button.classList.toggle(
+            "active",
+            Number(
+              button.dataset
+                .depositAmount
+            ) === amount
+          );
+        });
+
+
+      if (depositCardStatus) {
+
+        depositCardStatus.textContent =
+          "";
+      }
+    }
+  );
+
+
+depositAmountInput
+  ?.addEventListener(
+    "keydown",
+    event => {
+
+      if (event.key === "Enter") {
+
+        depositCardPayBtn
+          ?.click();
+      }
+    }
+  );
+
+
+depositCardPayBtn
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      const amount =
+        Math.round(
+          Number(
+            depositAmountInput
+              ?.value || 0
+          )
+        );
+
+
+      if (
+        !Number.isFinite(amount) ||
+        amount < 1
+      ) {
+
+        if (depositCardStatus) {
+
+          depositCardStatus.textContent =
+            "Введіть коректну суму поповнення.";
+        }
+
+        depositAmountInput
+          ?.focus();
+
+        return;
+      }
+
+
+      if (depositCardStatus) {
+
+        depositCardStatus.textContent =
+          "Переходимо до безпечної оплати...";
+      }
+
+
+      await startLiqPay(
+        amount
+      );
+    }
+  );
+
+
+depositSkinsBtn
+  ?.addEventListener(
+    "click",
+    () => {
+
+      if (!currentUser) {
+
+        depositModal
+          ?.classList
+          .add("hidden");
+
+        auth();
+
+        return;
+      }
+
+
+      window.location.href =
+        "/skins.html";
+    }
+  );
+
+
+/*
+  Compatibility wrapper:
+  old code or future buttons can still call depositMethod().
+*/
 async function depositMethod(method) {
 
   if (!currentUser) {
 
-    $("#depositModal")
+    depositModal
       ?.classList
       .add("hidden");
 
@@ -3228,89 +3379,31 @@ async function depositMethod(method) {
   }
 
 
-  const info =
-    $("#depositInfo");
-
-
-  if (!info) {
-    return;
-  }
-
-
+  /*
+    Privat/Oschad used the same LiqPay checkout in the old UI.
+    We now open the unified card payment screen instead.
+  */
   if (
     method === "privat" ||
     method === "oschad"
   ) {
 
-    const bankName =
-      method === "privat"
-        ? "ПриватБанк"
-        : "Ощадбанк";
-
-
-    info.innerHTML = `
-
-      <h3>
-        🏦 ${bankName}
-      </h3>
-
-      <p style="
-        color:#888;
-      ">
-        Поповнення через LiqPay.
-      </p>
-
-
-      <div
-        class="deposit-amounts"
-        style="
-          display:flex;
-          flex-wrap:wrap;
-          gap:8px;
-        "
-      >
-
-        ${[
-          100,
-          250,
-          500,
-          1000,
-          2500
-        ].map(amount => `
-
-          <button
-            type="button"
-            onclick="
-              startLiqPay(${amount})
-            "
-          >
-            ${amount} ₴
-          </button>
-
-        `).join("")}
-
-      </div>
-    `;
-
+    openDepositPage();
     return;
   }
 
 
-  if (method === "crypto") {
+  if (
+    method === "crypto"
+  ) {
 
-    info.innerHTML = `
+    if (depositCardStatus) {
 
-      <h3>
-        ₿ Крипта
-      </h3>
+      depositCardStatus.textContent =
+        "Криптовалютне поповнення буде підключено окремо.";
+    }
 
-      <p style="
-        color:#888;
-          ">
-        Криптовалютне поповнення
-        буде підключено окремо.
-      </p>
-    `;
+    openDepositPage();
   }
 }
 
