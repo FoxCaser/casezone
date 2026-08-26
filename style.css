@@ -4405,7 +4405,7 @@ textarea {
   border: 0 !important;
   background:
     conic-gradient(
-      from -90deg,
+      from 0deg,
       #8d3dff 0%,
       #8d3dff calc(var(--chance) * 1%),
       #282c36 calc(var(--chance) * 1%),
@@ -4466,34 +4466,10 @@ textarea {
 .upgrade-chance-circle {
   background:
     conic-gradient(
-      from -90deg,
+      from 0deg,
       #8d3dff 0%,
       #8d3dff calc(var(--chance) * 1%),
       #282c36 calc(var(--chance) * 1%),
       #282c36 100%
     ) !important;
-}
-
-/* =========================================================
-   UPGRADE — FINAL SYNC
-   2x = 50%, 5x = 20%, 10x = 10%, 75% = 75%
-========================================================= */
-
-/* Сектор завжди починається зверху та дорівнює --chance */
-.upgrade-chance-circle {
-  background:
-    conic-gradient(
-      from -90deg,
-      #8d3dff 0%,
-      #8d3dff calc(var(--chance) * 1%),
-      #282c36 calc(var(--chance) * 1%),
-      #282c36 100%
-    ) !important;
-}
-
-/* Плавна зміна сектора при перемиканні режиму */
-.upgrade-chance-circle {
-  transition:
-    background .18s ease,
-    box-shadow .18s ease;
 }
