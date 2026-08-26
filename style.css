@@ -12551,3 +12551,76 @@ strong {
     height:39px !important;
   }
 }
+
+
+/* =========================================================
+   CaSeZoNe — EXACT APPROVED BRAND LOGO
+   Only header/footer branding. Site logic is untouched.
+========================================================= */
+
+.cz-brand.cz-brand-exact {
+  width: 178px !important;
+  min-width: 178px !important;
+  height: 54px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+
+  gap: 0 !important;
+  overflow: hidden !important;
+
+  background: transparent !important;
+}
+
+.cz-brand-exact-img {
+  width: 178px !important;
+  height: auto !important;
+  max-height: 54px !important;
+
+  display: block !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+
+  filter: none !important;
+}
+
+.cz-footer-brand-exact {
+  gap: 12px !important;
+}
+
+.cz-footer-brand-exact-img {
+  width: 190px !important;
+  height: auto !important;
+  max-height: 62px !important;
+
+  display: block !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+}
+
+@media (max-width: 700px) {
+  .cz-brand.cz-brand-exact {
+    width: 145px !important;
+    min-width: 145px !important;
+    height: 46px !important;
+  }
+
+  .cz-brand-exact-img {
+    width: 145px !important;
+    max-height: 46px !important;
+  }
+
+  .cz-footer-brand-exact-img {
+    width: 160px !important;
+    max-height: 52px !important;
+  }
+}
