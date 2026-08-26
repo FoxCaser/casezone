@@ -1528,7 +1528,7 @@
 
 
 <!-- =========================
-     ПОПОВНЕННЯ
+     ПОВНОЕКРАННЕ ПОПОВНЕННЯ
 ========================= -->
 
 <div
@@ -1536,38 +1536,329 @@
   class="modal hidden"
 >
 
-  <div class="modal-card deposit-modal-card">
+  <div class="modal-card deposit-modal-card cz-deposit-modal-card">
 
     <button
       id="closeDeposit"
-      class="x"
+      class="x cz-deposit-close"
+      type="button"
+      aria-label="Закрити поповнення"
     >
       ×
     </button>
 
 
-    <div class="modal-heading">
+    <main class="cz-deposit-page">
 
-      <span class="modal-heading-icon">
-        ₴
-      </span>
+      <section class="cz-deposit-shell">
 
-      <div>
+        <header class="cz-deposit-heading">
 
-        <span class="section-kicker">
-          BALANCE
-        </span>
-
-        <h2>
-          Поповнення балансу
-        </h2>
-
-      </div>
-
-    </div>
+          <span class="cz-deposit-heading-icon">
+            ₴
+          </span>
 
 
-    <div id="depositInfo"></div>
+          <div>
+
+            <span class="cz-deposit-kicker">
+              BALANCE
+            </span>
+
+            <h2>
+              Поповнення балансу
+            </h2>
+
+          </div>
+
+        </header>
+
+
+        <p class="cz-deposit-subtitle">
+          Оберіть спосіб поповнення:
+        </p>
+
+
+        <div
+          id="depositInfo"
+          class="cz-deposit-method-grid"
+        >
+
+          <!-- CARD / LIQPAY -->
+          <article class="cz-deposit-method-card cz-deposit-card-method">
+
+            <div class="cz-deposit-method-head">
+
+              <div>
+
+                <span class="cz-deposit-method-icon">
+                  ▣
+                </span>
+
+                <div>
+
+                  <strong>
+                    Поповнення картою
+                  </strong>
+
+                  <small>
+                    Visa, Mastercard
+                  </small>
+
+                </div>
+
+              </div>
+
+
+              <div class="cz-deposit-card-logos">
+
+                <b class="visa">
+                  VISA
+                </b>
+
+                <span class="mastercard">
+                  <i></i>
+                  <i></i>
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <label
+              for="depositAmountInput"
+              class="cz-deposit-field-label"
+            >
+              Сума поповнення
+            </label>
+
+
+            <div class="cz-deposit-amount-field">
+
+              <span class="cz-deposit-currency-mark">
+                ₴
+              </span>
+
+              <input
+                id="depositAmountInput"
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+                placeholder="Введіть суму"
+                autocomplete="off"
+              >
+
+              <span>
+                UAH
+              </span>
+
+            </div>
+
+
+            <div class="cz-deposit-quick-label">
+              Швидкий вибір
+            </div>
+
+
+            <div class="cz-deposit-quick-grid">
+
+              <button
+                class="cz-deposit-quick-btn"
+                type="button"
+                data-deposit-amount="100"
+              >
+                100 ₴
+              </button>
+
+              <button
+                class="cz-deposit-quick-btn"
+                type="button"
+                data-deposit-amount="500"
+              >
+                500 ₴
+              </button>
+
+              <button
+                class="cz-deposit-quick-btn"
+                type="button"
+                data-deposit-amount="1000"
+              >
+                1000 ₴
+              </button>
+
+              <button
+                class="cz-deposit-quick-btn"
+                type="button"
+                data-deposit-amount="1500"
+              >
+                1500 ₴
+              </button>
+
+            </div>
+
+
+            <button
+              id="depositCardPayBtn"
+              class="cz-deposit-main-btn"
+              type="button"
+            >
+              Поповнити
+            </button>
+
+
+            <div class="cz-deposit-secure-note">
+              <span>
+                ♙
+              </span>
+
+              Ваш платіж захищено та обробляється безпечно
+            </div>
+
+
+            <p
+              id="depositCardStatus"
+              class="cz-deposit-status"
+            ></p>
+
+          </article>
+
+
+          <!-- SKINS -->
+          <article class="cz-deposit-method-card cz-deposit-skins-method">
+
+            <div class="cz-deposit-method-head">
+
+              <div>
+
+                <span class="cz-deposit-method-icon skins">
+                  ◈
+                </span>
+
+                <div>
+
+                  <strong>
+                    Поповнення скінами
+                  </strong>
+
+                  <small>
+                    Pay by Skins
+                  </small>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="cz-pay-skins-logo">
+
+              <div class="cz-pay-skins-symbol">
+                P
+              </div>
+
+              <div>
+
+                <strong>
+                  PAY BY
+                </strong>
+
+                <b>
+                  SKINS
+                </b>
+
+                <small>
+                  BY CASEZONE
+                </small>
+
+              </div>
+
+            </div>
+
+
+            <div class="cz-deposit-trade-warning">
+
+              <span>
+                ⚠
+              </span>
+
+              <div>
+
+                <strong>
+                  Зважай на нові правила Steam Trade Protection
+                </strong>
+
+                <p>
+                  Депозит буде зараховано протягом 8 днів.
+                  У певних випадках депозит може бути зарахований миттєво.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <button
+              id="depositSkinsBtn"
+              class="cz-deposit-main-btn"
+              type="button"
+            >
+              TOP UP
+            </button>
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <footer class="cz-deposit-footer">
+
+        <div>
+
+          <strong>
+            CASEZONE © 2026
+          </strong>
+
+          <span>
+            Усі права захищені
+          </span>
+
+        </div>
+
+
+        <nav>
+
+          <a href="#">
+            Угода користувача
+          </a>
+
+          <a href="#">
+            Політика конфіденційності
+          </a>
+
+          <a href="#">
+            Контакти
+          </a>
+
+          <a href="#">
+            FAQ
+          </a>
+
+        </nav>
+
+
+        <div class="cz-deposit-socials">
+          <span>◉</span>
+          <span>➤</span>
+        </div>
+
+      </footer>
+
+    </main>
 
   </div>
 
