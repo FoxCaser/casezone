@@ -2417,7 +2417,506 @@ async function withdrawItem(id) {
 
 /* =========================
    INVENTORY
+   Full-screen UI only.
+   Sell/withdraw API logic remains unchanged.
 ========================= */
+
+let inventoryItemsCache = [];
+let inventorySkinsCache = [];
+let inventoryViewMode = "compact";
+
+
+function normalizeInventoryRarity(value) {
+
+  return String(value || "")
+    .trim()
+    .toLowerCase();
+}
+
+
+function inventoryRaritySlug(value) {
+
+  return normalizeInventoryRarity(value)
+    .replace(
+      /[^a-z0-9]+/g,
+      "-"
+    );
+}
+
+
+function splitInventoryItemName(value) {
+
+  const full =
+    String(value || "Предмет")
+      .trim();
+
+  const parts =
+    full
+      .split("|")
+      .map(part => part.trim());
+
+  return {
+    full,
+    weapon:
+      parts[0] || full,
+    finish:
+      parts.length > 1
+        ? parts.slice(1).join(" | ")
+        : ""
+  };
+}
+
+
+function buildInventoryRarityFilter() {
+
+  const select =
+    $("#inventoryRarityFilter");
+
+  if (!select) {
+    return;
+  }
+
+  const previous =
+    select.value || "all";
+
+  const rarities =
+    Array.from(
+      new Set(
+        inventoryItemsCache
+          .map(item =>
+            String(item.rarity || "")
+              .trim()
+          )
+          .filter(Boolean)
+      )
+    )
+      .sort(
+        (a,b) =>
+          a.localeCompare(
+            b,
+            "uk"
+          )
+      );
+
+  select.innerHTML = `
+    <option value="all">
+      Всі предмети
+    </option>
+
+    ${rarities.map(rarity => `
+      <option
+        value="${escapeHomeHtml(
+          normalizeInventoryRarity(
+            rarity
+          )
+        )}"
+      >
+        ${escapeHomeHtml(rarity)}
+      </option>
+    `).join("")}
+  `;
+
+  const previousStillExists =
+    Array.from(select.options)
+      .some(
+        option =>
+          option.value === previous
+      );
+
+  select.value =
+    previousStillExists
+      ? previous
+      : "all";
+}
+
+
+function updateInventorySummary() {
+
+  const count =
+    inventoryItemsCache.length;
+
+  const total =
+    inventoryItemsCache.reduce(
+      (sum,item) =>
+        sum +
+        Number(item.value || 0),
+      0
+    );
+
+  const countBox =
+    $("#inventoryCount");
+
+  if (countBox) {
+    countBox.textContent =
+      String(count);
+  }
+
+  const totalBox =
+    $("#inventoryTotalValue");
+
+  if (totalBox) {
+
+    totalBox.textContent =
+      total.toFixed(2) +
+      " Core Coins";
+  }
+}
+
+
+function renderInventoryItems() {
+
+  const itemsBox =
+    $("#items");
+
+  if (!itemsBox) {
+    return;
+  }
+
+  const search =
+    String(
+      $("#inventorySearch")
+        ?.value || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  const rarityFilter =
+    $("#inventoryRarityFilter")
+      ?.value || "all";
+
+  const sort =
+    $("#inventorySort")
+      ?.value || "value-desc";
+
+
+  let visibleItems =
+    inventoryItemsCache
+      .filter(item => {
+
+        const matchesSearch =
+          !search ||
+          String(
+            item.item_name || ""
+          )
+            .toLowerCase()
+            .includes(search);
+
+        const matchesRarity =
+          rarityFilter === "all" ||
+          normalizeInventoryRarity(
+            item.rarity
+          ) === rarityFilter;
+
+        return (
+          matchesSearch &&
+          matchesRarity
+        );
+      });
+
+
+  visibleItems =
+    [...visibleItems]
+      .sort((a,b) => {
+
+        if (sort === "value-asc") {
+
+          return (
+            Number(a.value || 0) -
+            Number(b.value || 0)
+          );
+        }
+
+        if (sort === "newest") {
+
+          return (
+            Number(b.id || 0) -
+            Number(a.id || 0)
+          );
+        }
+
+        if (sort === "name") {
+
+          return String(
+            a.item_name || ""
+          )
+            .localeCompare(
+              String(
+                b.item_name || ""
+              ),
+              "uk"
+            );
+        }
+
+        return (
+          Number(b.value || 0) -
+          Number(a.value || 0)
+        );
+      });
+
+
+  itemsBox.classList.toggle(
+    "comfort-view",
+    inventoryViewMode === "comfort"
+  );
+
+
+  if (!visibleItems.length) {
+
+    itemsBox.innerHTML = `
+      <div class="cz-inventory-empty">
+
+        <span>
+          ◇
+        </span>
+
+        <strong>
+          Предметів не знайдено
+        </strong>
+
+        <small>
+          Змініть пошук або фільтр.
+        </small>
+
+      </div>
+    `;
+
+    return;
+  }
+
+
+  itemsBox.innerHTML =
+    visibleItems
+      .map((item,index) => {
+
+        const skin =
+          inventorySkinsCache.find(
+            skin =>
+              skin.name ===
+              item.item_name
+          );
+
+        const image =
+          skin?.image || "";
+
+        const rarity =
+          String(
+            item.rarity || "Default"
+          );
+
+        const raritySlug =
+          inventoryRaritySlug(
+            rarity
+          );
+
+        const rarityColor =
+          getDropRarityColor(
+            rarity,
+            index
+          );
+
+        const name =
+          splitInventoryItemName(
+            item.item_name
+          );
+
+        return `
+          <article
+            class="
+              cz-inventory-card
+              item
+              rarity-${raritySlug}
+            "
+            style="
+              --inventory-rarity:
+              ${rarityColor};
+            "
+            title="${escapeHomeHtml(name.full)}"
+          >
+
+            <div class="cz-inventory-card-top">
+
+              <span class="cz-inventory-card-value">
+                ${Number(
+                  item.value || 0
+                ).toFixed(2)}
+                Core Coins
+              </span>
+
+              <span
+                class="cz-inventory-card-lock"
+                aria-hidden="true"
+              >
+                ◇
+              </span>
+
+            </div>
+
+
+            <div class="cz-inventory-card-image">
+
+              ${
+                image
+                  ? `
+                    <img
+                      src="${image}"
+                      alt="${escapeHomeHtml(name.full)}"
+                      loading="lazy"
+                    >
+                  `
+                  : `
+                    <span class="cz-inventory-no-image">
+                      Немає фото
+                    </span>
+                  `
+              }
+
+            </div>
+
+
+            <div class="cz-inventory-card-copy">
+
+              <strong>
+                ${escapeHomeHtml(name.weapon)}
+              </strong>
+
+              ${
+                name.finish
+                  ? `
+                    <b>
+                      ${escapeHomeHtml(name.finish)}
+                    </b>
+                  `
+                  : ""
+              }
+
+              <span>
+                ${escapeHomeHtml(rarity)}
+              </span>
+
+            </div>
+
+
+            <div class="cz-inventory-card-actions">
+
+              <button
+                type="button"
+                class="cz-inventory-withdraw"
+                onclick="
+                  withdrawItem(${Number(item.id)})
+                "
+              >
+                Вивести
+              </button>
+
+              <button
+                type="button"
+                class="cz-inventory-sell"
+                onclick="
+                  sellItem(${Number(item.id)})
+                "
+              >
+                Продати
+              </button>
+
+            </div>
+
+          </article>
+        `;
+
+      })
+      .join("");
+}
+
+
+function bindInventoryControls() {
+
+  const search =
+    $("#inventorySearch");
+
+  const rarity =
+    $("#inventoryRarityFilter");
+
+  const sort =
+    $("#inventorySort");
+
+  const compact =
+    $("#inventoryViewCompact");
+
+  const comfort =
+    $("#inventoryViewComfort");
+
+  const refreshButton =
+    $("#inventoryRefreshBtn");
+
+
+  if (search) {
+
+    search.oninput =
+      renderInventoryItems;
+  }
+
+
+  if (rarity) {
+
+    rarity.onchange =
+      renderInventoryItems;
+  }
+
+
+  if (sort) {
+
+    sort.onchange =
+      renderInventoryItems;
+  }
+
+
+  if (compact) {
+
+    compact.onclick = () => {
+
+      inventoryViewMode =
+        "compact";
+
+      compact.classList.add(
+        "active"
+      );
+
+      comfort
+        ?.classList
+        .remove("active");
+
+      renderInventoryItems();
+    };
+  }
+
+
+  if (comfort) {
+
+    comfort.onclick = () => {
+
+      inventoryViewMode =
+        "comfort";
+
+      comfort.classList.add(
+        "active"
+      );
+
+      compact
+        ?.classList
+        .remove("active");
+
+      renderInventoryItems();
+    };
+  }
+
+
+  if (refreshButton) {
+
+    refreshButton.onclick =
+      showInventory;
+  }
+}
+
 
 async function showInventory() {
 
@@ -2428,160 +2927,81 @@ async function showInventory() {
   }
 
 
+  const inventoryModal =
+    $("#inventory");
+
+  inventoryModal
+    ?.classList
+    .remove("hidden");
+
+
+  const itemsBox =
+    $("#items");
+
+  if (itemsBox) {
+
+    itemsBox.innerHTML = `
+      <div class="cz-inventory-loading">
+        Завантаження інвентарю...
+      </div>
+    `;
+  }
+
+
   try {
 
-    const items =
-      await api(
-        "/api/inventory"
-      );
+    const [
+      items,
+      skinList
+    ] =
+      await Promise.all([
+        api("/api/inventory"),
+        api("/api/skins")
+      ]);
 
 
-    const skinList =
-      await api(
-        "/api/skins"
-      );
+    inventoryItemsCache =
+      Array.isArray(items)
+        ? items
+        : [];
 
 
-    $("#inventory")
-      ?.classList
-      .remove("hidden");
+    inventorySkinsCache =
+      Array.isArray(skinList)
+        ? skinList
+        : [];
 
 
-    const itemsBox =
-      $("#items");
+    updateInventorySummary();
 
+    buildInventoryRarityFilter();
 
-    if (!itemsBox) {
-      return;
-    }
+    bindInventoryControls();
 
+    renderInventoryItems();
 
-    if (!items.length) {
-
-      itemsBox.innerHTML = `
-
-        <div style="
-          grid-column:1/-1;
-          padding:45px;
-          text-align:center;
-          color:#777;
-        ">
-          Інвентар порожній.
-        </div>
-      `;
-
-      return;
-    }
-
-
-    itemsBox.innerHTML =
-      items.map(item => {
-
-        const skin =
-          skinList.find(
-            skin =>
-              skin.name ===
-              item.item_name
-          );
-
-
-        const image =
-          skin?.image || "";
-
-
-        const rarity =
-          String(
-            item.rarity || ""
-          )
-            .toLowerCase()
-            .replace(
-              /[^a-z0-9]+/g,
-              "-"
-            );
-
-
-        return `
-
-          <div
-            class="
-              item
-              rarity-${rarity}
-            "
-          >
-
-            <img
-              src="${image}"
-              alt="${item.item_name}"
-            >
-
-
-            <strong style="
-              display:block;
-              margin-top:8px;
-            ">
-              ${item.item_name}
-            </strong>
-
-
-            <span style="
-              display:block;
-              margin-top:5px;
-              color:#777;
-              font-size:11px;
-            ">
-              ${item.rarity}
-            </span>
-
-
-            <strong style="
-              display:block;
-              margin-top:5px;
-              color:#ffd400;
-            ">
-              ${Number(
-                item.value || 0
-              ).toFixed(2)} Core Coins
-            </strong>
-
-
-            <div style="
-              display:grid;
-              gap:7px;
-              margin-top:12px;
-            ">
-
-              <button
-                type="button"
-                onclick="
-                  sellItem(${item.id})
-                "
-              >
-                Продати
-              </button>
-
-
-              <button
-                type="button"
-                onclick="
-                  withdrawItem(${item.id})
-                "
-              >
-                Вивести на Steam
-              </button>
-
-            </div>
-
-          </div>
-        `;
-
-      }).join("");
 
   } catch (e) {
 
-    alert(
-      e.message ||
-      "Не вдалося завантажити інвентар"
-    );
+    if (itemsBox) {
+
+      itemsBox.innerHTML = `
+        <div class="cz-inventory-empty error">
+
+          <strong>
+            Не вдалося завантажити інвентар
+          </strong>
+
+          <small>
+            ${escapeHomeHtml(
+              e.message ||
+              "Помилка сервера"
+            )}
+          </small>
+
+        </div>
+      `;
+    }
   }
 }
 
@@ -2627,6 +3047,30 @@ $("#inventoryBtn")
   ?.addEventListener(
     "click",
     showInventory
+  );
+
+
+$("#casesNavBtn")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      $("#inventory")
+        ?.classList
+        .add("hidden");
+    }
+  );
+
+
+$("#upgradeNavBtn")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      $("#inventory")
+        ?.classList
+        .add("hidden");
+    }
   );
 
 
