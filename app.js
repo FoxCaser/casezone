@@ -3682,10 +3682,7 @@ function getEligibleUpgradeTargets() {
 
 function calculateUpgradeChance() {
 
-  if (
-    !upgradeSourceTotal() ||
-    !selectedUpgradeTarget
-  ) {
+  if (!upgradeSourceTotal()) {
     return 0;
   }
 
@@ -4475,13 +4472,31 @@ function animateUpgradePointer(
     0° = верх круга.
     Фіолетовий сектор теж починається зверху.
   */
-  const normalized =
+  const serverAngle =
     (
       Number(finalAngle) % 360 + 360
     ) % 360;
 
+  /*
+    ВАЖЛИВО:
+    Сервер: 0° = верх круга.
+    Наш CSS-трикутник у rotate(0deg)
+    фізично знаходиться знизу.
+
+    Тому для картинки додаємо 180°.
+    Тепер:
+    - серверний виграшний сектор,
+    - фіолетовий сектор,
+    - місце зупинки стрілки
+    збігаються 1 в 1.
+  */
+  const visualAngle =
+    (
+      serverAngle + 180
+    ) % 360;
+
   let delta =
-    normalized -
+    visualAngle -
     (
       start % 360
     );
@@ -4522,10 +4537,10 @@ function animateUpgradePointer(
         () => {
 
           upgradePointerAngle =
-            normalized;
+            visualAngle;
 
           pointer.style.transform =
-            `rotate(${normalized}deg)`;
+            `rotate(${visualAngle}deg)`;
 
           resolve();
         };
