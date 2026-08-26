@@ -7615,3 +7615,104 @@ body {
     height:210px !important;
   }
 }
+
+
+/* =========================================================
+   CASEZONE HERO EXACT FIX
+   Причина старого вигляду:
+   /gold-case.jpg — квадратне зображення з готовим фоном.
+   На desktop використовуємо затверджений широкий банер.
+   Інші блоки головної, кейси та апгрейд не змінюються.
+========================================================= */
+
+@media (min-width: 901px) {
+
+  .cz-hero-v5 {
+    position:relative !important;
+
+    width:100% !important;
+    height:auto !important;
+    min-height:0 !important;
+    aspect-ratio:1277 / 253 !important;
+
+    padding:0 !important;
+
+    overflow:hidden !important;
+
+    border:
+      1px solid rgba(255,212,0,.10) !important;
+
+    border-radius:10px !important;
+
+    background:
+      #080a0d
+      url("/casezone-hero-v5.png")
+      center center / 100% 100%
+      no-repeat !important;
+
+    box-shadow:
+      0 16px 42px
+      rgba(0,0,0,.26) !important;
+  }
+
+
+  /* Усі декоративні шари старого hero вимикаються,
+     бо вони вже є всередині затвердженого банера. */
+  .cz-hero-v5::before,
+  .cz-hero-v5::after,
+  .cz-hero-v5-shade,
+  .cz-hero-v5-particles,
+  .cz-hero-v5-visual {
+    display:none !important;
+  }
+
+
+  /* HTML-контент зберігаємо в DOM,
+     але не дублюємо поверх картинки. */
+  .cz-hero-v5-content {
+    position:static !important;
+  }
+
+  .cz-hero-v5-content > h1,
+  .cz-hero-v5-content > p,
+  .cz-hero-v5-trust {
+    visibility:hidden !important;
+    opacity:0 !important;
+  }
+
+
+  /* Кнопка на банері намальована у самій картинці.
+     Цей невидимий anchor лежить точно поверх неї,
+     тому клік "Відкрити" продовжує працювати. */
+  .cz-hero-v5-open {
+    position:absolute !important;
+
+    left:10.05% !important;
+    bottom:1.8% !important;
+
+    width:21.8% !important;
+    height:18.2% !important;
+    min-height:0 !important;
+
+    margin:0 !important;
+    padding:0 !important;
+
+    opacity:0 !important;
+
+    z-index:20 !important;
+
+    pointer-events:auto !important;
+
+    cursor:pointer !important;
+  }
+}
+
+
+/* На мобільному залишається існуючий адаптивний HTML hero,
+   щоб нічого не ламалось через дуже вузький екран. */
+@media (max-width: 900px) {
+
+  .cz-hero-v5 {
+    aspect-ratio:auto !important;
+  }
+}
