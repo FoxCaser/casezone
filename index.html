@@ -845,7 +845,7 @@
 </footer>
 
 <!-- =========================
-     МОДАЛЬНЕ ВІКНО ІНВЕНТАРЮ
+     ПОВНОЕКРАННИЙ ІНВЕНТАР
 ========================= -->
 
 <div
@@ -857,37 +857,149 @@
 
     <button
       id="closeInv"
-      class="x"
+      class="x inventory-close"
+      type="button"
+      aria-label="Закрити інвентар"
     >
       ×
     </button>
 
 
-    <div class="modal-heading">
+    <section class="cz-inventory-page">
 
-      <span class="modal-heading-icon">
-        🎒
-      </span>
+      <header class="cz-inventory-titlebar">
 
-      <div>
+        <div class="cz-inventory-title">
 
-        <span class="section-kicker">
-          CASEZONE
-        </span>
+          <span class="cz-inventory-title-icon">
+            ▣
+          </span>
 
-        <h2>
-          Мій інвентар
-        </h2>
+          <h2>
+            Мій інвентар
+          </h2>
+
+        </div>
+
+
+        <div class="cz-inventory-summary">
+
+          <span>
+            Всього предметів:
+            <strong id="inventoryCount">
+              0
+            </strong>
+          </span>
+
+          <span>
+            Загальна вартість:
+            <strong id="inventoryTotalValue">
+              0.00 Core Coins
+            </strong>
+          </span>
+
+        </div>
+
+      </header>
+
+
+      <div class="cz-inventory-toolbar">
+
+        <label class="cz-inventory-search">
+
+          <span>
+            ⌕
+          </span>
+
+          <input
+            id="inventorySearch"
+            type="search"
+            placeholder="Пошук предметів..."
+            autocomplete="off"
+          >
+
+        </label>
+
+
+        <select
+          id="inventoryRarityFilter"
+          class="cz-inventory-select"
+          aria-label="Фільтр рідкості"
+        >
+          <option value="all">
+            Всі предмети
+          </option>
+        </select>
+
+
+        <div class="cz-inventory-toolbar-spacer"></div>
+
+
+        <select
+          id="inventorySort"
+          class="cz-inventory-select cz-inventory-sort"
+          aria-label="Сортування"
+        >
+          <option value="value-desc">
+            Вартість: від більшої
+          </option>
+
+          <option value="value-asc">
+            Вартість: від меншої
+          </option>
+
+          <option value="newest">
+            Спочатку нові
+          </option>
+
+          <option value="name">
+            За назвою
+          </option>
+        </select>
+
+
+        <div
+          class="cz-inventory-view-switch"
+          aria-label="Розмір карток"
+        >
+
+          <button
+            id="inventoryViewCompact"
+            class="active"
+            type="button"
+            title="Компактні картки"
+          >
+            ▦
+          </button>
+
+          <button
+            id="inventoryViewComfort"
+            type="button"
+            title="Більші картки"
+          >
+            ▥
+          </button>
+
+        </div>
+
+
+        <button
+          id="inventoryRefreshBtn"
+          class="cz-inventory-refresh"
+          type="button"
+        >
+          ↻ Оновити
+        </button>
 
       </div>
 
-    </div>
 
+      <div
+        id="items"
+        class="inventory cz-inventory-grid"
+      ></div>
 
-    <div
-      id="items"
-      class="inventory"
-    ></div>
+    </section>
 
   </div>
 
