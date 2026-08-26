@@ -158,7 +158,7 @@
 
 
 <!-- =========================
-     HOME V4 — LIVE TOP DROPS
+     HOME V5 — LIVE TOP DROPS
 ========================= -->
 
 <section
@@ -169,8 +169,8 @@
     <span class="cz-live-red-dot"></span>
 
     <div>
-      <strong>ОСТАННІ ВЕЛИКІ ДРОПИ</strong>
-      <small>LIVE</small>
+      <strong>ОСТАННІ<br>ВЕЛИКІ ДРОПИ</strong>
+      <small>● LIVE</small>
     </div>
   </div>
 
@@ -188,110 +188,119 @@
 
 
 <!-- =========================
-     HOME V4 — HERO + TOP PLAYERS
+     HOME V5 — FULL-WIDTH HERO
 ========================= -->
 
-<section class="cz-dashboard-top cz-home-only">
+<section class="cz-hero-v5 cz-home-only">
 
-  <div class="cz-dashboard-left">
+  <div class="cz-hero-v5-particles">
+    <i></i><i></i><i></i><i></i><i></i><i></i>
+    <i></i><i></i><i></i><i></i><i></i><i></i>
+  </div>
 
-    <section class="cz-hero-v4">
+  <div class="cz-hero-v5-shade"></div>
 
-      <div class="cz-hero-v4-particles">
-        <i></i><i></i><i></i><i></i><i></i><i></i>
-        <i></i><i></i><i></i><i></i><i></i><i></i>
-      </div>
+  <div class="cz-hero-v5-content">
 
-      <div class="cz-hero-v4-content">
+    <h1>
+      Відкривай <span>кейси</span>
+    </h1>
 
-        <span class="cz-hero-v4-kicker">
-          ◈ CASEZONE • CS2
-        </span>
+    <p>
+      Отримуй топові скіни CS2 за кожне відкриття
+    </p>
 
-        <h1>
-          ВІДКРИВАЙ
-          <span>КЕЙСИ</span>
-        </h1>
+    <div class="cz-hero-v5-trust">
 
-        <p>
-          Отримуй топові скіни CS2 за кожне відкриття
-          та збирай власний інвентар.
-        </p>
+      <span>
+        <b>◎</b>
+        <i>
+          <strong>Чесні шанси</strong>
+          <small>Прозорі відсотки дропу</small>
+        </i>
+      </span>
 
-        <div class="cz-hero-v4-trust">
+      <span>
+        <b>♢</b>
+        <i>
+          <strong>Миттєві виплати</strong>
+          <small>Скіни одразу у інвентар</small>
+        </i>
+      </span>
 
-          <span>
-            <b>◎</b>
-            Чесні шанси
-          </span>
+      <span>
+        <b>◉</b>
+        <i>
+          <strong>Підтримка 24/7</strong>
+          <small>Ми завжди на зв'язку</small>
+        </i>
+      </span>
 
-          <span>
-            <b>✓</b>
-            Миттєво в інвентар
-          </span>
+    </div>
 
-          <span>
-            <b>◉</b>
-            Підтримка 24/7
-          </span>
+    <a
+      href="#caseSection"
+      class="cz-hero-v5-open"
+    >
+      <span>▣</span>
+      Відкрити
+    </a>
 
-        </div>
-
-        <a
-          href="#caseSection"
-          class="cz-hero-v4-open"
-        >
-          <span>▣</span>
-          ВІДКРИТИ
-          <b>→</b>
-        </a>
-
-      </div>
-
-
-      <div class="cz-hero-v4-visual">
-
-        <div class="cz-hero-v4-ring ring-a"></div>
-        <div class="cz-hero-v4-ring ring-b"></div>
-        <div class="cz-hero-v4-aura"></div>
-
-        <img
-          src="/gold-case.jpg"
-          alt="CASEZONE case"
-          class="cz-hero-v4-case"
-          onerror="this.style.display='none'"
-        >
-
-        <div class="cz-hero-v4-cz">
-          CZ
-        </div>
-
-      </div>
-
-    </section>
+  </div>
 
 
-    <!-- STATS directly under hero -->
-    <section class="cz-stats cz-home-main-stats">
+  <div class="cz-hero-v5-visual">
 
-      <article class="cz-stat-v4">
-        <div class="cz-stat-v4-icon">◉</div>
+    <div class="cz-hero-v5-floor"></div>
+    <div class="cz-hero-v5-ring ring-1"></div>
+    <div class="cz-hero-v5-ring ring-2"></div>
+    <div class="cz-hero-v5-glow"></div>
+
+    <img
+      src="/gold-case.jpg"
+      alt="CASEZONE"
+      class="cz-hero-v5-case"
+      onerror="this.style.display='none'"
+    >
+
+    <div class="cz-hero-v5-logo">
+      CZ
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================
+     HOME V5 — CONTENT GRID
+========================= -->
+
+<section class="cz-home-v5-grid cz-home-only">
+
+  <div class="cz-home-v5-left">
+
+    <!-- compact stats -->
+    <section class="cz-stats cz-home-main-stats cz-home-v5-stats">
+
+      <article class="cz-stat-v5">
+        <div class="cz-stat-v5-icon">👥</div>
         <div>
           <span>Онлайн</span>
           <strong id="homeOnlineStat">0</strong>
         </div>
       </article>
 
-      <article class="cz-stat-v4">
-        <div class="cz-stat-v4-icon">▣</div>
+      <article class="cz-stat-v5">
+        <div class="cz-stat-v5-icon">▣</div>
         <div>
           <span>Відкрито кейсів</span>
           <strong id="homeCasesOpenedStat">0</strong>
         </div>
       </article>
 
-      <article class="cz-stat-v4">
-        <div class="cz-stat-v4-icon">⌁</div>
+      <article class="cz-stat-v5">
+        <div class="cz-stat-v5-icon">⌁</div>
         <div>
           <span>Видано скінів</span>
           <strong id="homeSkinsIssuedStat">0</strong>
@@ -300,22 +309,114 @@
 
     </section>
 
+
+    <!-- popular + new -->
+    <section
+      id="caseSection"
+      class="cases-section cz-home-case-showcase cz-home-case-showcase-v5"
+    >
+
+      <div class="cz-home-cases-column">
+
+        <div class="cz-cases-v5-head">
+
+          <div>
+            <span>🔥</span>
+            <strong>Популярні кейси</strong>
+          </div>
+
+          <button
+            class="ghost inventory-shortcut"
+            id="inventoryBtn"
+          >
+            Переглянути всі ›
+          </button>
+
+        </div>
+
+        <div class="case-filters cz-case-filters-v5">
+
+          <button
+            class="filter active"
+            onclick="filterCases('all')"
+          >
+            Усі
+          </button>
+
+          <button
+            class="filter"
+            onclick="filterCases('cheap')"
+          >
+            Дешеві
+          </button>
+
+          <button
+            class="filter"
+            onclick="filterCases('premium')"
+          >
+            Преміум
+          </button>
+
+          <button
+            class="filter"
+            onclick="filterCases('expensive')"
+          >
+            Дорогі
+          </button>
+
+        </div>
+
+        <div
+          id="cases"
+          class="grid cz-case-grid cz-case-grid-v4 cz-case-grid-v5"
+        ></div>
+
+      </div>
+
+
+      <div class="cz-home-cases-column">
+
+        <div class="cz-cases-v5-head">
+
+          <div>
+            <span>★</span>
+            <strong>Нові кейси</strong>
+          </div>
+
+          <span class="cz-new-cases-note">
+            Переглянути всі ›
+          </span>
+
+        </div>
+
+        <div
+          id="newCases"
+          class="grid cz-case-grid cz-case-grid-v4 cz-case-grid-v5"
+        ></div>
+
+      </div>
+
+    </section>
+
   </div>
 
 
-  <aside class="cz-dashboard-side">
+  <!-- right ranking -->
+  <aside class="cz-home-v5-right">
 
-    <section class="cz-top-players-v4">
+    <section class="cz-top-players-v5">
 
-      <div class="cz-top-players-v4-head">
+      <div class="cz-top-players-v5-head">
+
         <div>
-          <span>♛</span>
-          <strong>ТОП ГРАВЦІВ</strong>
+          <span>🏆</span>
+          <strong>Топ гравців</strong>
         </div>
 
         <small>
-          за виграшами
+          За тиждень⌄
         </small>
+
       </div>
 
       <div
@@ -327,8 +428,8 @@
         </div>
       </div>
 
-      <div class="cz-top-v4-footer">
-        РЕЙТИНГ CASEZONE
+      <div class="cz-top-v5-footer">
+        Переглянути рейтинг
       </div>
 
     </section>
@@ -339,125 +440,24 @@
 
 
 <!-- =========================
-     HOME V4 — CASE SHOWCASE
+     HOME V5 — BENEFITS
 ========================= -->
 
-<section
-  id="caseSection"
-  class="cases-section cz-home-case-showcase"
->
-
-  <div class="cz-home-cases-column">
-
-    <div class="cz-cases-v4-head">
-
-      <div>
-        <span class="cz-section-v4-icon">🔥</span>
-
-        <div>
-          <small>CASEZONE</small>
-          <h2>Популярні кейси</h2>
-        </div>
-      </div>
-
-      <button
-        class="ghost inventory-shortcut"
-        id="inventoryBtn"
-      >
-        🎒 Мій інвентар
-      </button>
-
-    </div>
-
-
-    <div class="case-filters cz-case-filters-v4">
-
-      <button
-        class="filter active"
-        onclick="filterCases('all')"
-      >
-        Усі
-      </button>
-
-      <button
-        class="filter"
-        onclick="filterCases('cheap')"
-      >
-        Дешеві
-      </button>
-
-      <button
-        class="filter"
-        onclick="filterCases('premium')"
-      >
-        Преміум
-      </button>
-
-      <button
-        class="filter"
-        onclick="filterCases('expensive')"
-      >
-        Дорогі
-      </button>
-
-    </div>
-
-    <div
-      id="cases"
-      class="grid cz-case-grid cz-case-grid-v4"
-    ></div>
-
-  </div>
-
-
-  <div class="cz-home-cases-column">
-
-    <div class="cz-cases-v4-head">
-
-      <div>
-        <span class="cz-section-v4-icon">★</span>
-
-        <div>
-          <small>СВІЖЕ</small>
-          <h2>Нові кейси</h2>
-        </div>
-      </div>
-
-      <span class="cz-new-cases-note">
-        Останні додані
-      </span>
-
-    </div>
-
-    <div
-      id="newCases"
-      class="grid cz-case-grid cz-case-grid-v4"
-    ></div>
-
-  </div>
-
-</section>
-
-
-<!-- =========================
-     HOME V4 — BENEFITS
-========================= -->
-
-<section class="cz-benefits cz-benefits-v4">
+<section class="cz-benefits cz-benefits-v5 cz-home-only">
 
   <div class="benefit-item">
-    <div class="benefit-icon">⚡</div>
+    <div class="benefit-icon">🚀</div>
     <div>
-      <strong>Миттєві предмети</strong>
-      <span>Скін одразу зʼявляється у твоєму інвентарі</span>
+      <strong>Миттєві виплати</strong>
+      <span>Скіни одразу зараховуються у ваш інвентар без затримок</span>
     </div>
   </div>
 
   <div class="benefit-item">
-    <div class="benefit-icon">◈</div>
+    <div class="benefit-icon">🛡</div>
     <div>
       <strong>Чесні шанси</strong>
-      <span>Зрозумілі відсотки та серверний результат</span>
+      <span>Перевірені алгоритми. Прозорі відсотки дропу</span>
     </div>
   </div>
 
@@ -465,31 +465,23 @@
     <div class="benefit-icon">🔒</div>
     <div>
       <strong>Безпечний апгрейд</strong>
-      <span>Результат апгрейду визначається на сервері</span>
+      <span>Захищена система апгрейдів та шансів</span>
+    </div>
+  </div>
+
+  <div class="benefit-item">
+    <div class="benefit-icon">🎧</div>
+    <div>
+      <strong>Підтримка 24/7</strong>
+      <span>Професійна підтримка завжди поруч</span>
     </div>
   </div>
 
   <div class="benefit-item">
     <div class="benefit-icon">◉</div>
     <div>
-      <strong>Підтримка 24/7</strong>
-      <span>Допомога з профілем, інвентарем і виводом</span>
-    </div>
-  </div>
-
-  <div class="benefit-item">
-    <div class="benefit-icon">◎</div>
-    <div>
       <strong>Live дропи</strong>
-      <span>Останні виграші рухаються у стрічці в реальному часі</span>
-    </div>
-  </div>
-
-  <div class="benefit-item">
-    <div class="benefit-icon">✓</div>
-    <div>
-      <strong>Steam профіль</strong>
-      <span>Профіль, баланс та інвентар в одному місці</span>
+      <span>Живі стріми дропів прямо на сайті</span>
     </div>
   </div>
 
@@ -800,12 +792,12 @@
 
 
 <!-- =========================
-     FOOTER V4
+     FOOTER V5
 ========================= -->
 
-<footer class="cz-footer cz-footer-v4">
+<footer class="cz-footer cz-footer-v5">
 
-  <div class="cz-footer-v4-brand">
+  <div class="cz-footer-v5-brand">
 
     <div class="cz-logo-icon">
       CZ
@@ -815,38 +807,39 @@
       <strong>
         CASE<span>ZONE</span>
       </strong>
-
       <small>
-        CS2 CASE OPENING
+        Найкращий кейс-сайт для CS2.<br>
+        Чесно. Швидко. Безпечно.
       </small>
     </div>
 
   </div>
 
 
-  <div class="cz-footer-v4-socials">
-
+  <div class="cz-footer-v5-socials">
     <span>Ми в соцмережах</span>
 
     <div>
       <a href="#" onclick="return false;">Discord</a>
       <a href="#" onclick="return false;">Telegram</a>
       <a href="#" onclick="return false;">YouTube</a>
+      <a href="#" onclick="return false;">VK</a>
       <a href="#" onclick="return false;">Steam</a>
     </div>
-
   </div>
 
 
-  <nav class="cz-footer-v4-links">
+  <nav class="cz-footer-v5-links">
     <a href="#" onclick="return false;">Правила</a>
     <a href="#" onclick="return false;">Підтримка</a>
-    <a href="#" onclick="return false;">Політика</a>
+    <a href="#" onclick="return false;">Партнерська програма</a>
+    <a href="#" onclick="return false;">AML Policy</a>
   </nav>
 
 
   <div class="cz-footer-copy">
-    © 2026 CaseZone
+    © 2026 CaseZone<br>
+    Усі права захищено.
   </div>
 
 </footer>
