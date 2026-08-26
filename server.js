@@ -2903,6 +2903,171 @@ async function getSteamProfileData(
 
 
 /* =========================
+   API: PROFILE DASHBOARD
+   Read-only profile statistics.
+   Does not modify balance, inventory, openings or upgrades.
+========================= */
+
+app.get(
+  "/api/profile-dashboard",
+  auth,
+  async (req, res) => {
+
+    try {
+
+      const userId =
+        req.session.userId;
+
+      const [
+        statsResult,
+        bestDropResult,
+        withdrawalsResult
+      ] =
+        await Promise.all([
+
+          pool.query(
+            `
+            SELECT
+              (
+                SELECT COUNT(*)::int
+                FROM openings
+                WHERE user_id = $1
+              ) AS cases_opened,
+
+              (
+                SELECT COUNT(*)::int
+                FROM upgrades
+                WHERE user_id = $1
+              ) AS upgrades_count,
+
+              (
+                SELECT COUNT(*)::int
+                FROM upgrades
+                WHERE user_id = $1
+                  AND success = TRUE
+              ) AS upgrade_wins
+            `,
+            [userId]
+          ),
+
+
+          pool.query(
+            `
+            SELECT
+              id,
+              item_name,
+              rarity,
+              value,
+              created_at
+            FROM openings
+            WHERE user_id = $1
+            ORDER BY
+              value DESC,
+              id DESC
+            LIMIT 1
+            `,
+            [userId]
+          ),
+
+
+          pool.query(
+            `
+            SELECT
+              id,
+              item_name,
+              value,
+              status,
+              created_at
+            FROM withdrawals
+            WHERE user_id = $1
+            ORDER BY id DESC
+            LIMIT 12
+            `,
+            [userId]
+          )
+
+        ]);
+
+
+      const stats =
+        statsResult.rows[0] || {
+          cases_opened: 0,
+          upgrades_count: 0,
+          upgrade_wins: 0
+        };
+
+
+      const bestDropRow =
+        bestDropResult.rows[0] || null;
+
+
+      const bestDrop =
+        bestDropRow
+          ? {
+              ...bestDropRow,
+              image:
+                skinImages[
+                  bestDropRow.item_name
+                ] || null
+            }
+          : null;
+
+
+      const withdrawals =
+        withdrawalsResult.rows.map(
+          item => ({
+            ...item,
+            image:
+              skinImages[
+                item.item_name
+              ] || null
+          })
+        );
+
+
+      res.json({
+        ok: true,
+
+        stats: {
+          casesOpened:
+            Number(
+              stats.cases_opened || 0
+            ),
+
+          upgradesCount:
+            Number(
+              stats.upgrades_count || 0
+            ),
+
+          upgradeWins:
+            Number(
+              stats.upgrade_wins || 0
+            )
+        },
+
+        bestDrop,
+        withdrawals
+      });
+
+
+    } catch (e) {
+
+      console.error(
+        "Profile dashboard error:",
+        e
+      );
+
+
+      res.status(500).json({
+        error:
+          "Не вдалося завантажити профіль"
+      });
+    }
+  }
+);
+
+
+/* =========================
    API: ПОТОЧНИЙ КОРИСТУВАЧ
 ========================= */
 
