@@ -115,7 +115,7 @@ async function refresh() {
     balance.textContent =
       Number(
         currentUser?.balance || 0
-      ).toFixed(2) + " ₴";
+      ).toFixed(2) + " Core Coins";
   }
 
 
@@ -409,7 +409,7 @@ function renderCaseCard(
         </div>
 
         <strong class="cz-case-price-v4">
-          ${Number(caseData.price).toFixed(2)} ₴
+          ${Number(caseData.price).toFixed(2)} Core Coins
         </strong>
 
         <button
@@ -849,7 +849,7 @@ async function showCaseDetails(id) {
           "
         >
           🔓 Відкрити x1 —
-          ${Number(selectedCase.price).toFixed(0)} ₴
+          ${Number(selectedCase.price).toFixed(0)} Core Coins
         </button>
 
       </div>
@@ -1086,7 +1086,7 @@ function setCaseOpenQuantity(
       selectedOpenQuantity;
 
     openButton.innerHTML =
-      `🔓 Відкрити x${selectedOpenQuantity} — ${total.toFixed(0)} ₴`;
+      `🔓 Відкрити x${selectedOpenQuantity} — ${total.toFixed(0)} Core Coins`;
   }
 }
 
@@ -1215,7 +1215,7 @@ async function startCaseOpening(
   ) {
 
     alert(
-      `Недостатньо коштів. Потрібно ${totalPrice.toFixed(2)} ₴`
+      `Недостатньо коштів. Потрібно ${totalPrice.toFixed(2)} Core Coins`
     );
 
     return;
@@ -1931,7 +1931,7 @@ function showMultiOpenResult(
               ">
                 ${Number(
                   item.value || 0
-                ).toFixed(2)} ₴
+                ).toFixed(2)} Core Coins
               </strong>
 
             </div>
@@ -1989,7 +1989,7 @@ function showMultiOpenResult(
           "
         >
           🛒 Продати за
-          ${totalValue.toFixed(2)} ₴
+          ${totalValue.toFixed(2)} Core Coins
         </button>
 
       </div>
@@ -2496,7 +2496,7 @@ async function showInventory() {
             ">
               ${Number(
                 item.value || 0
-              ).toFixed(2)} ₴
+              ).toFixed(2)} Core Coins
             </strong>
 
 
@@ -3307,7 +3307,7 @@ async function loadDepositHistory() {
               ">
                 ${Number(
                   item.value || 0
-                ).toFixed(2)} ₴
+                ).toFixed(2)} Core Coins
               </span>
 
 
@@ -3411,7 +3411,7 @@ async function loadWithdrawHistory() {
             ">
               ${Number(
                 item.value || 0
-              ).toFixed(2)} ₴
+              ).toFixed(2)} Core Coins
             </span>
 
 
@@ -3724,7 +3724,7 @@ function renderHomeDrops(drops) {
             </strong>
 
             <span class="cz-live-drop-price">
-              ${value.toFixed(2)} ₴
+              ${value.toFixed(2)} Core Coins
             </span>
 
             <span class="cz-live-drop-meta">
@@ -3887,7 +3887,7 @@ function renderHomeTopPlayers(players) {
               </div>
 
               <strong class="cz-top-player-value">
-                ${total.toFixed(2)} ₴
+                ${total.toFixed(2)} Core Coins
               </strong>
 
             </div>
@@ -4337,7 +4337,7 @@ function renderSelectedUpgradeSkins() {
           <div class="upgrade-selected-card">
 
             <span class="selected-price">
-              ${Number(item.value).toFixed(2)} ₴
+              ${Number(item.value).toFixed(2)} Core Coins
             </span>
 
             <button
@@ -4483,7 +4483,7 @@ function renderUpgradeInventory() {
         >
 
           <span class="item-price">
-            ${Number(item.value).toFixed(2)} ₴
+            ${Number(item.value).toFixed(2)} Core Coins
           </span>
 
           <img
@@ -4604,7 +4604,7 @@ function renderUpgradeTargets() {
         >
 
           <span class="item-price">
-            ${Number(item.value).toFixed(2)} ₴
+            ${Number(item.value).toFixed(2)} Core Coins
           </span>
 
           <img
@@ -4820,11 +4820,11 @@ function refreshUpgradeSelection() {
 
   $("#upgradeSelectedTotal")
     .textContent =
-      total.toFixed(2) + " ₴";
+      total.toFixed(2) + " Core Coins";
 
   $("#upgradeSourcePrice")
     .textContent =
-      total.toFixed(2) + " ₴";
+      total.toFixed(2) + " Core Coins";
 
   const {
     min,
@@ -4835,7 +4835,7 @@ function refreshUpgradeSelection() {
   $("#upgradeTargetRangeText")
     .textContent =
       total
-        ? `Доступні цілі: ${min.toFixed(2)} ₴ — ${max.toFixed(2)} ₴`
+        ? `Доступні цілі: ${min.toFixed(2)} Core Coins — ${max.toFixed(2)} Core Coins`
         : "Оберіть свої предмети";
 
   const target =
@@ -4878,19 +4878,19 @@ function refreshUpgradeSelection() {
       .textContent =
         Number(
           target.value
-        ).toFixed(2) + " ₴";
+        ).toFixed(2) + " Core Coins";
 
     $("#upgradeTargetRange")
       .textContent =
         Number(
           target.value
-        ).toFixed(2) + " ₴";
+        ).toFixed(2) + " Core Coins";
 
   } else {
 
     $("#upgradeTargetPrice")
       .textContent =
-        "0.00 ₴";
+        "0.00 Core Coins";
   }
 
   const chance =
@@ -5251,7 +5251,7 @@ function showUpgradeResult(result) {
       <p>
         ${
           result.success
-            ? `Ти отримав ${result.target.name} за ${Number(result.target.value).toFixed(2)} ₴`
+            ? `Ти отримав ${result.target.name} за ${Number(result.target.value).toFixed(2)} Core Coins`
             : "Використані предмети втрачено."
         }
       </p>
