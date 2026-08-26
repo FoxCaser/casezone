@@ -4025,10 +4025,9 @@ let upgradeTargetTolerance = 0;
 
 const homeSections = () => [
   $(".cz-live-strip"),
-  $(".cz-dashboard-top"),
-  $(".cz-benefits"),
-  $(".cases-section"),
-  $(".cz-stats")
+  $(".cz-hero-v5"),
+  $(".cz-home-v5-grid"),
+  $(".cz-benefits-v5")
 ].filter(Boolean);
 
 
