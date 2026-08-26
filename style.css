@@ -5361,3 +5361,14 @@ textarea {
       27px minmax(0,1fr) auto;
   }
 }
+
+
+/* =========================================================
+   HOME / UPGRADE VISIBILITY FIX
+   Домашній банер і LIVE-стрічка не показуються у вкладці Апгрейд.
+========================================================= */
+
+.cz-dashboard-top.hidden,
+.cz-live-strip.hidden {
+  display: none !important;
+}
