@@ -1,141 +1,1602 @@
 <!DOCTYPE html>
 <html lang="uk">
-
 <head>
   <meta charset="UTF-8">
-
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
   >
+  <title>PAY BY SKINS — CASEZONE</title>
+  <link rel="icon" href="/favicon.ico">
 
-  <title>Pay by Skins — CASEZONE</title>
+  <style>
+    :root{
+      --bg:#03080d;
+      --panel:#071017;
+      --panel-2:#081119;
+      --line:rgba(255,255,255,.075);
+      --line-soft:rgba(255,255,255,.045);
+      --text:#f2f4f6;
+      --muted:#69737d;
+      --yellow:#ffd400;
+      --yellow-soft:rgba(255,212,0,.08);
+      --green:#4de06d;
+      --red:#ff5862;
+      --radius:8px;
+    }
 
-  <link
-    rel="stylesheet"
-    href="/style.css"
-  >
+    *{
+      box-sizing:border-box;
+    }
+
+    html,
+    body{
+      margin:0;
+      min-height:100%;
+      background:var(--bg);
+      color:var(--text);
+      font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(
+          ellipse 55% 38% at 50% -10%,
+          rgba(255,212,0,.025),
+          transparent 72%
+        ),
+        linear-gradient(
+          180deg,
+          #050b10,
+          #03080d
+        );
+    }
+
+    button,
+    input,
+    select{
+      font:inherit;
+    }
+
+    button{
+      cursor:pointer;
+    }
+
+    .hidden{
+      display:none !important;
+    }
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    .cz-header{
+      position:sticky;
+      top:0;
+      z-index:100;
+
+      height:64px;
+
+      display:flex;
+      align-items:center;
+
+      gap:22px;
+
+      padding:
+        0 max(18px,2.3vw);
+
+      border-bottom:
+        1px solid var(--line-soft);
+
+      background:
+        rgba(3,8,13,.96);
+
+      backdrop-filter:
+        blur(12px);
+    }
+
+    .cz-brand{
+      display:flex;
+      align-items:center;
+
+      gap:9px;
+
+      color:#fff;
+
+      text-decoration:none;
+    }
+
+    .cz-logo{
+      width:31px;
+      height:31px;
+
+      display:grid;
+      place-items:center;
+
+      border:
+        1px solid rgba(255,212,0,.7);
+
+      border-radius:7px;
+
+      color:#111;
+
+      background:var(--yellow);
+
+      font-size:11px;
+      font-weight:1000;
+    }
+
+    .cz-brand strong{
+      font-size:14px;
+      font-weight:950;
+      letter-spacing:.2px;
+    }
+
+    .cz-brand strong span{
+      color:var(--yellow);
+    }
+
+    .cz-nav{
+      display:flex;
+      align-items:stretch;
+
+      height:100%;
+
+      gap:8px;
+
+      margin-left:18px;
+    }
+
+    .cz-nav a{
+      position:relative;
+
+      display:flex;
+      align-items:center;
+
+      padding:0 12px;
+
+      color:#9099a2;
+
+      text-decoration:none;
+
+      font-size:9px;
+      font-weight:800;
+    }
+
+    .cz-nav a:hover{
+      color:#fff;
+    }
+
+    .cz-header-spacer{
+      flex:1;
+    }
+
+    .cz-user{
+      display:flex;
+      align-items:center;
+
+      gap:9px;
+    }
+
+    .cz-avatar{
+      width:35px;
+      height:35px;
+
+      display:grid;
+      place-items:center;
+
+      overflow:hidden;
+
+      border:
+        2px solid
+        rgba(255,212,0,.75);
+
+      border-radius:50%;
+
+      background:
+        #342510;
+    }
+
+    .cz-avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .cz-avatar-fallback{
+      font-size:17px;
+    }
+
+    .cz-balance{
+      display:grid;
+      gap:1px;
+
+      min-width:145px;
+    }
+
+    .cz-balance small{
+      color:#626b74;
+
+      font-size:7px;
+      font-weight:800;
+    }
+
+    .cz-balance strong{
+      color:var(--yellow);
+
+      font-size:10px;
+      font-weight:950;
+    }
+
+    .cz-topup{
+      min-height:34px;
+
+      padding:0 14px;
+
+      border:1px solid var(--yellow);
+      border-radius:6px;
+
+      color:#090b0c;
+      background:var(--yellow);
+
+      font-size:8px;
+      font-weight:1000;
+    }
+
+    .cz-logout{
+      min-height:32px;
+
+      padding:0 8px;
+
+      border:0;
+
+      color:#a6adb4;
+      background:transparent;
+
+      font-size:8px;
+      font-weight:800;
+    }
+
+    /* =========================
+       PAGE
+    ========================= */
+
+    .cz-page{
+      width:
+        min(
+          1540px,
+          calc(100% - 34px)
+        );
+
+      min-height:
+        calc(100vh - 64px);
+
+      display:flex;
+      flex-direction:column;
+
+      margin:0 auto;
+    }
+
+    .cz-page-title{
+      min-height:78px;
+
+      display:flex;
+      align-items:center;
+
+      gap:13px;
+    }
+
+    .cz-back{
+      width:34px;
+      height:34px;
+
+      display:grid;
+      place-items:center;
+
+      border:
+        1px solid var(--line);
+
+      border-radius:7px;
+
+      color:#8a939c;
+      background:#071017;
+
+      text-decoration:none;
+
+      font-size:16px;
+    }
+
+    .cz-pay-logo{
+      width:34px;
+      height:34px;
+
+      display:grid;
+      place-items:center;
+
+      color:var(--yellow);
+
+      font-size:25px;
+      font-weight:1000;
+    }
+
+    .cz-page-title-copy h1{
+      margin:0;
+
+      font-size:18px;
+      font-weight:950;
+
+      letter-spacing:.35px;
+    }
+
+    .cz-page-title-copy p{
+      margin:4px 0 0;
+
+      color:#69727b;
+
+      font-size:8px;
+    }
+
+    /* =========================
+       LAYOUT
+    ========================= */
+
+    .cz-layout{
+      display:grid;
+
+      grid-template-columns:
+        minmax(0,1.4fr)
+        minmax(350px,1fr);
+
+      gap:15px;
+
+      flex:1;
+    }
+
+    .cz-left{
+      min-width:0;
+
+      display:grid;
+      gap:12px;
+
+      align-content:start;
+    }
+
+    .cz-panel{
+      border:
+        1px solid var(--line);
+
+      border-radius:var(--radius);
+
+      background:
+        radial-gradient(
+          ellipse 80% 70% at 50% 0%,
+          rgba(255,255,255,.014),
+          transparent 70%
+        ),
+        var(--panel);
+    }
+
+    /* =========================
+       TRADE URL
+    ========================= */
+
+    .cz-trade{
+      padding:15px;
+    }
+
+    .cz-label{
+      display:block;
+
+      color:#9fa7af;
+
+      font-size:8px;
+      font-weight:950;
+
+      text-transform:uppercase;
+
+      letter-spacing:.28px;
+    }
+
+    .cz-help{
+      display:block;
+
+      margin-top:5px;
+
+      color:#5f6871;
+
+      font-size:7px;
+      line-height:1.35;
+    }
+
+    .cz-trade-row{
+      display:grid;
+
+      grid-template-columns:
+        1fr 105px;
+
+      gap:9px;
+
+      margin-top:10px;
+    }
+
+    .cz-input{
+      width:100%;
+      height:36px;
+
+      padding:0 10px;
+
+      border:
+        1px solid var(--line);
+
+      border-radius:6px;
+
+      outline:0;
+
+      color:#d9dde0;
+      background:#050b10;
+
+      font-size:8px;
+    }
+
+    .cz-input:focus{
+      border-color:
+        rgba(255,212,0,.32);
+    }
+
+    .cz-save{
+      border:
+        1px solid
+        rgba(255,212,0,.54);
+
+      border-radius:6px;
+
+      color:var(--yellow);
+
+      background:
+        rgba(255,212,0,.055);
+
+      font-size:8px;
+      font-weight:950;
+    }
+
+    .cz-save:hover{
+      background:
+        rgba(255,212,0,.10);
+    }
+
+    .cz-trade-status{
+      min-height:12px;
+
+      margin:
+        7px 0 0;
+
+      color:#7e8790;
+
+      font-size:7px;
+    }
+
+    .cz-trade-status.ok{
+      color:var(--green);
+    }
+
+    .cz-trade-status.error{
+      color:var(--red);
+    }
+
+    /* =========================
+       INVENTORY
+    ========================= */
+
+    .cz-inventory-panel{
+      padding:
+        13px 13px
+        10px;
+    }
+
+    .cz-inventory-title{
+      display:flex;
+      align-items:center;
+
+      gap:6px;
+
+      margin-bottom:10px;
+    }
+
+    .cz-refresh{
+      width:23px;
+      height:23px;
+
+      display:grid;
+      place-items:center;
+
+      padding:0;
+
+      border:0;
+
+      color:#6b747d;
+      background:transparent;
+
+      font-size:13px;
+    }
+
+    .cz-tools{
+      display:grid;
+
+      grid-template-columns:
+        minmax(0,1fr)
+        145px
+        145px;
+
+      gap:7px;
+
+      margin-bottom:9px;
+    }
+
+    .cz-search{
+      position:relative;
+    }
+
+    .cz-search span{
+      position:absolute;
+
+      left:9px;
+      top:50%;
+
+      transform:
+        translateY(-50%);
+
+      color:#65707a;
+
+      font-size:13px;
+    }
+
+    .cz-search input{
+      padding-left:28px;
+    }
+
+    .cz-select{
+      width:100%;
+      height:36px;
+
+      padding:
+        0 27px 0 9px;
+
+      border:
+        1px solid var(--line);
+
+      border-radius:6px;
+
+      outline:0;
+
+      color:#9ba3ab;
+      background:#050b10;
+
+      font-size:8px;
+    }
+
+    .cz-inventory-message{
+      min-height:350px;
+
+      display:grid;
+      place-items:center;
+
+      color:#66707a;
+
+      font-size:9px;
+
+      text-align:center;
+    }
+
+    .cz-source-note{
+      display:none;
+
+      margin:
+        -2px 0
+        9px;
+
+      padding:
+        7px 9px;
+
+      border:
+        1px solid
+        rgba(255,212,0,.13);
+
+      border-radius:6px;
+
+      color:#a48c31;
+      background:
+        rgba(255,212,0,.025);
+
+      font-size:7px;
+    }
+
+    .cz-source-note.show{
+      display:block;
+    }
+
+    .cz-grid{
+      display:grid;
+
+      grid-template-columns:
+        repeat(4,minmax(0,1fr));
+
+      gap:7px;
+    }
+
+    .cz-skin{
+      --rarity:#8b5cf6;
+
+      position:relative;
+
+      min-width:0;
+      min-height:137px;
+
+      display:flex;
+      flex-direction:column;
+
+      overflow:hidden;
+
+      padding:7px;
+
+      border:
+        1px solid var(--line);
+
+      border-radius:6px;
+
+      background:
+        radial-gradient(
+          ellipse 84% 70% at 50% 34%,
+          color-mix(
+            in srgb,
+            var(--rarity) 5%,
+            transparent
+          ),
+          transparent 70%
+        ),
+        var(--panel-2);
+
+      transition:
+        border-color .14s ease,
+        transform .14s ease,
+        box-shadow .14s ease;
+    }
+
+    .cz-skin.selectable{
+      cursor:pointer;
+    }
+
+    .cz-skin.selectable:hover{
+      border-color:
+        color-mix(
+          in srgb,
+          var(--rarity) 35%,
+          rgba(255,255,255,.08)
+        );
+
+      transform:
+        translateY(-1px);
+    }
+
+    .cz-skin.selected{
+      border-color:
+        rgba(255,212,0,.55);
+
+      box-shadow:
+        inset 0 0 22px
+        rgba(255,212,0,.045);
+    }
+
+    .cz-skin.unpriced{
+      opacity:.58;
+    }
+
+    .cz-skin-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+
+      gap:5px;
+
+      color:#858d95;
+
+      font-size:7px;
+    }
+
+    .cz-skin-top b{
+      padding:
+        2px 4px;
+
+      border-radius:4px;
+
+      color:#aab1b8;
+      background:
+        rgba(255,255,255,.045);
+
+      font-size:6px;
+      font-weight:800;
+    }
+
+    .cz-skin-image{
+      height:71px;
+
+      display:grid;
+      place-items:center;
+
+      padding:2px 5px;
+    }
+
+    .cz-skin-image img{
+      width:100%;
+      height:68px;
+
+      object-fit:contain;
+
+      filter:
+        drop-shadow(
+          0 8px 10px
+          rgba(0,0,0,.38)
+        );
+    }
+
+    .cz-skin-copy{
+      min-width:0;
+    }
+
+    .cz-skin-copy strong{
+      display:block;
+
+      overflow:hidden;
+
+      min-height:19px;
+
+      color:#dfe3e6;
+
+      font-size:7px;
+      line-height:1.2;
+
+      text-overflow:ellipsis;
+
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+    }
+
+    .cz-skin-copy span{
+      display:block;
+
+      margin-top:4px;
+
+      color:var(--yellow);
+
+      font-size:7.5px;
+      font-weight:950;
+    }
+
+    .cz-skin-copy small{
+      display:block;
+
+      margin-top:3px;
+
+      overflow:hidden;
+
+      color:#626c75;
+
+      font-size:6px;
+
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .cz-pagination{
+      min-height:37px;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      gap:5px;
+
+      padding-top:10px;
+    }
+
+    .cz-page-btn{
+      min-width:25px;
+      height:25px;
+
+      padding:0 7px;
+
+      border:
+        1px solid var(--line);
+
+      border-radius:5px;
+
+      color:#818a93;
+      background:#050a0f;
+
+      font-size:7px;
+    }
+
+    .cz-page-btn.active{
+      border-color:
+        var(--yellow);
+
+      color:#111;
+      background:
+        var(--yellow);
+
+      font-weight:950;
+    }
+
+    /* =========================
+       SELECTED
+    ========================= */
+
+    .cz-selected-panel{
+      position:sticky;
+      top:79px;
+
+      min-height:
+        calc(100vh - 170px);
+
+      display:flex;
+      flex-direction:column;
+
+      padding:15px;
+
+      align-self:start;
+    }
+
+    .cz-selected-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+
+      gap:10px;
+
+      padding-bottom:11px;
+
+      border-bottom:
+        1px solid var(--line-soft);
+    }
+
+    .cz-selected-total{
+      color:var(--yellow);
+
+      font-size:10px;
+      font-weight:950;
+    }
+
+    .cz-selected-body{
+      flex:1;
+
+      min-height:265px;
+
+      display:flex;
+      flex-direction:column;
+    }
+
+    .cz-selected-empty{
+      flex:1;
+
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+
+      gap:8px;
+
+      color:#606a73;
+
+      text-align:center;
+    }
+
+    .cz-selected-empty-icon{
+      width:72px;
+      height:72px;
+
+      display:grid;
+      place-items:center;
+
+      border:
+        1px solid
+        rgba(255,255,255,.09);
+
+      border-radius:18px;
+
+      color:#58636d;
+
+      font-size:31px;
+
+      transform:
+        rotate(-8deg);
+    }
+
+    .cz-selected-empty strong{
+      color:#8a929b;
+
+      font-size:9px;
+    }
+
+    .cz-selected-empty small{
+      max-width:230px;
+
+      color:#555f69;
+
+      font-size:7px;
+      line-height:1.45;
+    }
+
+    .cz-selected-list{
+      display:grid;
+
+      gap:6px;
+
+      padding:
+        10px 0;
+    }
+
+    .cz-selected-item{
+      display:grid;
+
+      grid-template-columns:
+        58px 1fr auto;
+
+      align-items:center;
+
+      gap:8px;
+
+      min-height:58px;
+
+      padding:6px;
+
+      border:
+        1px solid var(--line);
+
+      border-radius:6px;
+
+      background:#060c11;
+    }
+
+    .cz-selected-item img{
+      width:58px;
+      height:44px;
+
+      object-fit:contain;
+    }
+
+    .cz-selected-item-copy{
+      min-width:0;
+    }
+
+    .cz-selected-item-copy strong{
+      display:block;
+
+      overflow:hidden;
+
+      color:#dbe0e3;
+
+      font-size:7.5px;
+
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .cz-selected-item-copy span{
+      display:block;
+
+      margin-top:4px;
+
+      color:var(--yellow);
+
+      font-size:7.5px;
+      font-weight:900;
+    }
+
+    .cz-remove{
+      width:24px;
+      height:24px;
+
+      display:grid;
+      place-items:center;
+
+      padding:0;
+
+      border:
+        1px solid
+        rgba(255,255,255,.07);
+
+      border-radius:5px;
+
+      color:#7b858e;
+      background:transparent;
+
+      font-size:12px;
+    }
+
+    .cz-warning{
+      display:grid;
+
+      grid-template-columns:
+        25px 1fr;
+
+      gap:9px;
+
+      margin-top:auto;
+
+      padding:12px;
+
+      border:
+        1px solid
+        rgba(255,212,0,.20);
+
+      border-radius:7px;
+
+      color:#ad9539;
+
+      background:
+        rgba(255,212,0,.035);
+    }
+
+    .cz-warning > span{
+      color:var(--yellow);
+
+      font-size:15px;
+    }
+
+    .cz-warning strong{
+      display:block;
+
+      color:#d0b33d;
+
+      font-size:7px;
+      line-height:1.35;
+    }
+
+    .cz-warning p{
+      margin:
+        4px 0 0;
+
+      color:#8d7b37;
+
+      font-size:7px;
+      line-height:1.45;
+    }
+
+    .cz-main-topup{
+      width:100%;
+      min-height:47px;
+
+      margin-top:13px;
+
+      border:
+        1px solid var(--yellow);
+
+      border-radius:6px;
+
+      color:#090b0c;
+      background:
+        linear-gradient(
+          180deg,
+          #ffdc27,
+          #ffc900
+        );
+
+      font-size:10px;
+      font-weight:1000;
+    }
+
+    .cz-main-topup:disabled{
+      cursor:not-allowed;
+      opacity:.42;
+    }
+
+    .cz-submit-status{
+      min-height:13px;
+
+      margin:
+        8px 0 0;
+
+      color:#7d858e;
+
+      font-size:7px;
+      text-align:center;
+    }
+
+    .cz-submit-status.ok{
+      color:var(--green);
+    }
+
+    .cz-submit-status.error{
+      color:var(--red);
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    .cz-footer{
+      min-height:56px;
+
+      display:grid;
+
+      grid-template-columns:
+        1fr auto 1fr;
+
+      align-items:center;
+
+      gap:20px;
+
+      margin-top:12px;
+
+      padding:
+        12px 3px;
+
+      border-top:
+        1px solid var(--line-soft);
+
+      color:#555f68;
+
+      font-size:7px;
+    }
+
+    .cz-footer > div:first-child{
+      display:grid;
+      gap:2px;
+    }
+
+    .cz-footer strong{
+      color:#8d959d;
+      font-size:7px;
+    }
+
+    .cz-footer nav{
+      display:flex;
+      gap:20px;
+    }
+
+    .cz-footer a{
+      color:#5d6670;
+      text-decoration:none;
+    }
+
+    .cz-footer a:hover{
+      color:var(--yellow);
+    }
+
+    .cz-social{
+      display:flex;
+      justify-content:flex-end;
+
+      gap:8px;
+
+      font-size:13px;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width:1000px){
+      .cz-layout{
+        grid-template-columns:1fr;
+      }
+
+      .cz-selected-panel{
+        position:static;
+        min-height:430px;
+      }
+
+      .cz-grid{
+        grid-template-columns:
+          repeat(4,minmax(0,1fr));
+      }
+    }
+
+    @media (max-width:760px){
+      .cz-header{
+        gap:8px;
+        padding:0 10px;
+      }
+
+      .cz-nav{
+        display:none;
+      }
+
+      .cz-balance{
+        min-width:0;
+      }
+
+      .cz-balance small{
+        display:none;
+      }
+
+      .cz-topup{
+        display:none;
+      }
+
+      .cz-page{
+        width:
+          calc(100% - 14px);
+      }
+
+      .cz-tools{
+        grid-template-columns:
+          1fr 1fr;
+      }
+
+      .cz-search{
+        grid-column:1 / -1;
+      }
+
+      .cz-grid{
+        grid-template-columns:
+          repeat(3,minmax(0,1fr));
+      }
+
+      .cz-footer{
+        grid-template-columns:1fr;
+        text-align:center;
+      }
+
+      .cz-footer nav{
+        flex-wrap:wrap;
+        justify-content:center;
+      }
+
+      .cz-social{
+        justify-content:center;
+      }
+    }
+
+    @media (max-width:500px){
+      .cz-grid{
+        grid-template-columns:
+          repeat(2,minmax(0,1fr));
+      }
+
+      .cz-trade-row{
+        grid-template-columns:1fr;
+      }
+
+      .cz-tools{
+        grid-template-columns:1fr;
+      }
+
+      .cz-search{
+        grid-column:auto;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-  <main class="skins-page">
+  <header class="cz-header">
 
-    <header class="skins-header">
+    <a
+      class="cz-brand"
+      href="/"
+    >
+      <span class="cz-logo">
+        CZ
+      </span>
 
-      <h1>
-        PAY BY SKINS
-      </h1>
+      <strong>
+        CASE<span>ZONE</span>
+      </strong>
+    </a>
 
-      <div class="skins-subtitle">
 
-        <span>
-          CASEZONE
-        </span>
+    <nav class="cz-nav">
 
-        <span>
-          DEPOSIT: DEMO
-        </span>
+      <a href="/">
+        Кейси
+      </a>
 
-        <span>
-          ORDER TYPE: DEFAULT
+      <a href="/">
+        Апгрейд
+      </a>
+
+      <a href="/">
+        Інвентар
+      </a>
+
+      <a href="/">
+        Профіль
+      </a>
+
+    </nav>
+
+
+    <div class="cz-header-spacer"></div>
+
+
+    <div class="cz-user">
+
+      <div class="cz-avatar">
+
+        <img
+          id="userAvatar"
+          class="hidden"
+          alt="avatar"
+        >
+
+        <span
+          id="avatarFallback"
+          class="cz-avatar-fallback"
+        >
+          🦁
         </span>
 
       </div>
 
-    </header>
+
+      <div class="cz-balance">
+
+        <small>
+          БАЛАНС
+        </small>
+
+        <strong id="headerBalance">
+          0.00 Core Coins
+        </strong>
+
+      </div>
 
 
-    <div class="skins-warning">
+      <button
+        id="headerTopup"
+        class="cz-topup"
+        type="button"
+      >
+        + Поповнити
+      </button>
 
-      ⚠️ Demo mode. Select skins from the inventory below.
+
+      <button
+        id="logoutBtn"
+        class="cz-logout"
+        type="button"
+      >
+        ↪ Вийти
+      </button>
 
     </div>
 
-
-    <section class="skins-columns">
-
-
-      <!-- LEFT -->
-
-      <div class="skins-inventory-panel">
-
-        <h3>
-          INSERT YOUR TRADE URL
-        </h3>
+  </header>
 
 
-        <input
-          id="steamTradeUrl"
-          class="trade-input"
-          type="text"
-          placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
-        >
+  <main class="cz-page">
+
+    <section class="cz-page-title">
+
+      <a
+        href="/"
+        class="cz-back"
+        aria-label="Назад"
+      >
+        ←
+      </a>
 
 
-        <div class="skin-tools">
+      <span class="cz-pay-logo">
+        ↻
+      </span>
 
-          <input
-            id="skinSearch"
-            type="text"
-            placeholder="Search your inventory..."
+
+      <div class="cz-page-title-copy">
+
+        <h1>
+          PAY BY SKINS
+        </h1>
+
+        <p>
+          Миттєве поповнення балансу за допомогою ваших скінів
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <section class="cz-layout">
+
+      <div class="cz-left">
+
+        <article class="cz-panel cz-trade">
+
+          <span class="cz-label">
+            ВСТАВТЕ СВОЮ ТОРГОВУ URL
+          </span>
+
+          <span class="cz-help">
+            Знайти її можна тут: Steam → Інвентар → Пропозиції обміну → Хто може надсилати мені пропозиції обміну?
+          </span>
+
+
+          <div class="cz-trade-row">
+
+            <input
+              id="tradeUrl"
+              class="cz-input"
+              type="text"
+              placeholder="https://steamcommunity.com/tradeoffer/new/?partner=XXXXXXXX&token=XXXXXXXX"
+              autocomplete="off"
+            >
+
+
+            <button
+              id="saveTradeUrl"
+              class="cz-save"
+              type="button"
+            >
+              ЗБЕРЕГТИ
+            </button>
+
+          </div>
+
+
+          <p
+            id="tradeStatus"
+            class="cz-trade-status"
+          ></p>
+
+        </article>
+
+
+        <article class="cz-panel cz-inventory-panel">
+
+          <div class="cz-inventory-title">
+
+            <span class="cz-label">
+              ВАШІ СКІНИ
+            </span>
+
+
+            <button
+              id="refreshInventory"
+              class="cz-refresh"
+              type="button"
+              title="Оновити інвентар"
+            >
+              ↻
+            </button>
+
+          </div>
+
+
+          <div class="cz-tools">
+
+            <label class="cz-search">
+
+              <span>
+                ⌕
+              </span>
+
+              <input
+                id="skinSearch"
+                class="cz-input"
+                type="search"
+                placeholder="Пошук скінів..."
+                autocomplete="off"
+              >
+
+            </label>
+
+
+            <select
+              id="skinFilter"
+              class="cz-select"
+            >
+              <option value="all">
+                Всі скіни
+              </option>
+
+              <option value="tradable">
+                Можна передати
+              </option>
+
+              <option value="priced">
+                Є оцінка
+              </option>
+            </select>
+
+
+            <select
+              id="skinSort"
+              class="cz-select"
+            >
+              <option value="price-desc">
+                Ціна: ↓
+              </option>
+
+              <option value="price-asc">
+                Ціна: ↑
+              </option>
+
+              <option value="name">
+                Назва: A-Z
+              </option>
+            </select>
+
+          </div>
+
+
+          <div
+            id="sourceNote"
+            class="cz-source-note"
+          ></div>
+
+
+          <div
+            id="inventoryBox"
+            class="cz-inventory-message"
           >
-
-          <select id="skinSort">
-
-            <option value="price">
-              Highest price
-            </option>
-
-            <option value="name">
-              Name A-Z
-            </option>
-
-          </select>
-
-        </div>
+            Завантаження Steam-інвентарю...
+          </div>
 
 
-        <div
-          id="demoInventory"
-          class="skin-grid"
-        >
+          <div
+            id="pagination"
+            class="cz-pagination hidden"
+          ></div>
 
-          Завантаження скінів...
-
-        </div>
+        </article>
 
       </div>
 
 
-      <!-- RIGHT -->
+      <aside class="cz-panel cz-selected-panel">
 
-      <div class="skins-selected-panel">
+        <div class="cz-selected-head">
 
-        <h3>
-
-          SELECTED
-          <span id="selectedCount">
-            0
+          <span class="cz-label">
+            ВИБРАНО
+            <strong id="selectedCount">
+              0
+            </strong>
+            ТОВАРІВ
           </span>
 
-          ITEMS FOR
 
-          <span id="selectedTotal">
-            0.00
-          </span> ₴
+          <strong
+            id="selectedTotal"
+            class="cz-selected-total"
+          >
+            0.00 Core Coins
+          </strong>
 
-        </h3>
+        </div>
 
 
         <div
-          id="selectedSkins"
-          class="selected-skins"
-        >
+          id="selectedBody"
+          class="cz-selected-body"
+        ></div>
 
-          <div class="selected-empty">
 
-            Select the skins that you want to deposit
+        <div class="cz-warning">
+
+          <span>
+            ⚠
+          </span>
+
+
+          <div>
+
+            <strong>
+              Зважай на нові правила Steam Trade Protection
+            </strong>
+
+            <p>
+              Депозит буде зараховано протягом 8 днів.
+              У певних випадках депозит може бути зарахований миттєво.
+            </p>
 
           </div>
 
@@ -143,21 +1604,1480 @@
 
 
         <button
-          id="skinsTopupButton"
-          class="skin-topup-button"
+          id="topupBtn"
+          class="cz-main-topup"
+          type="button"
+          disabled
         >
           TOP UP
         </button>
 
-      </div>
+
+        <p
+          id="submitStatus"
+          class="cz-submit-status"
+        ></p>
+
+      </aside>
 
     </section>
+
+
+    <footer class="cz-footer">
+
+      <div>
+
+        <strong>
+          CASEZONE © 2026
+        </strong>
+
+        <span>
+          Усі права захищені
+        </span>
+
+      </div>
+
+
+      <nav>
+
+        <a href="#">
+          Угода користувача
+        </a>
+
+        <a href="#">
+          Політика конфіденційності
+        </a>
+
+        <a href="#">
+          Контакти
+        </a>
+
+        <a href="#">
+          FAQ
+        </a>
+
+      </nav>
+
+
+      <div class="cz-social">
+        <span>◉</span>
+        <span>➤</span>
+      </div>
+
+    </footer>
 
   </main>
 
 
-  <script src="/skins.js"></script>
+  <script>
+    const $ =
+      selector =>
+        document.querySelector(
+          selector
+        );
+
+
+    const escapeHtml =
+      value =>
+        String(value ?? "")
+          .replaceAll(
+            "&",
+            "&amp;"
+          )
+          .replaceAll(
+            "<",
+            "&lt;"
+          )
+          .replaceAll(
+            ">",
+            "&gt;"
+          )
+          .replaceAll(
+            '"',
+            "&quot;"
+          )
+          .replaceAll(
+            "'",
+            "&#039;"
+          );
+
+
+    async function api(
+      url,
+      options = {}
+    ) {
+
+      const response =
+        await fetch(
+          url,
+          {
+            credentials:
+              "same-origin",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+
+              ...(
+                options.headers ||
+                {}
+              )
+            },
+
+            ...options
+          }
+        );
+
+
+      let data = {};
+
+
+      try {
+
+        data =
+          await response.json();
+
+      } catch {
+        data = {};
+      }
+
+
+      if (!response.ok) {
+
+        const error =
+          new Error(
+            data.error ||
+            `HTTP ${response.status}`
+          );
+
+        error.status =
+          response.status;
+
+        throw error;
+      }
+
+
+      return data;
+    }
+
+
+    let currentUser = null;
+    let inventory = [];
+    let selected = [];
+    let currentPage = 1;
+
+    const PAGE_SIZE = 12;
+
+
+    function rarityColor(
+      rarity
+    ) {
+
+      const value =
+        String(
+          rarity || ""
+        )
+          .toLowerCase();
+
+
+      if (
+        value.includes(
+          "contraband"
+        )
+      ) {
+        return "#e6ad25";
+      }
+
+
+      if (
+        value.includes(
+          "covert"
+        ) ||
+        value.includes(
+          "extraordinary"
+        )
+      ) {
+        return "#eb4b4b";
+      }
+
+
+      if (
+        value.includes(
+          "classified"
+        )
+      ) {
+        return "#d32ce6";
+      }
+
+
+      if (
+        value.includes(
+          "restricted"
+        )
+      ) {
+        return "#8847ff";
+      }
+
+
+      if (
+        value.includes(
+          "mil-spec"
+        )
+      ) {
+        return "#4b69ff";
+      }
+
+
+      return "#8b95a1";
+    }
+
+
+    function itemCondition(
+      item
+    ) {
+
+      if (item.exterior) {
+
+        const exterior =
+          String(
+            item.exterior
+          )
+            .toLowerCase();
+
+
+        if (
+          exterior.includes(
+            "factory"
+          )
+        ) {
+          return "FN";
+        }
+
+        if (
+          exterior.includes(
+            "minimal"
+          )
+        ) {
+          return "MW";
+        }
+
+        if (
+          exterior.includes(
+            "field"
+          )
+        ) {
+          return "FT";
+        }
+
+        if (
+          exterior.includes(
+            "well"
+          )
+        ) {
+          return "WW";
+        }
+
+        if (
+          exterior.includes(
+            "battle"
+          )
+        ) {
+          return "BS";
+        }
+      }
+
+
+      const name =
+        String(
+          item.name || ""
+        );
+
+
+      if (
+        name.includes(
+          "(Factory New)"
+        )
+      ) {
+        return "FN";
+      }
+
+
+      if (
+        name.includes(
+          "(Minimal Wear)"
+        )
+      ) {
+        return "MW";
+      }
+
+
+      if (
+        name.includes(
+          "(Field-Tested)"
+        )
+      ) {
+        return "FT";
+      }
+
+
+      if (
+        name.includes(
+          "(Well-Worn)"
+        )
+      ) {
+        return "WW";
+      }
+
+
+      if (
+        name.includes(
+          "(Battle-Scarred)"
+        )
+      ) {
+        return "BS";
+      }
+
+
+      return "—";
+    }
+
+
+    function visibleInventory() {
+
+      const search =
+        String(
+          $("#skinSearch")
+            ?.value || ""
+        )
+          .trim()
+          .toLowerCase();
+
+
+      const filter =
+        $("#skinFilter")
+          ?.value || "all";
+
+
+      const sort =
+        $("#skinSort")
+          ?.value || "price-desc";
+
+
+      let result =
+        inventory.filter(
+          item => {
+
+            const matchesSearch =
+              !search ||
+              String(
+                item.name || ""
+              )
+                .toLowerCase()
+                .includes(search);
+
+
+            const matchesFilter =
+              filter === "all" ||
+              (
+                filter ===
+                  "tradable" &&
+                item.tradable
+              ) ||
+              (
+                filter ===
+                  "priced" &&
+                Number(
+                  item.price || 0
+                ) > 0
+              );
+
+
+            return (
+              matchesSearch &&
+              matchesFilter
+            );
+          }
+        );
+
+
+      result =
+        [...result]
+          .sort(
+            (a,b) => {
+
+              if (
+                sort ===
+                "price-asc"
+              ) {
+
+                return (
+                  Number(
+                    a.price || 0
+                  ) -
+                  Number(
+                    b.price || 0
+                  )
+                );
+              }
+
+
+              if (
+                sort ===
+                "name"
+              ) {
+
+                return String(
+                  a.name || ""
+                )
+                  .localeCompare(
+                    String(
+                      b.name || ""
+                    ),
+                    "uk"
+                  );
+              }
+
+
+              return (
+                Number(
+                  b.price || 0
+                ) -
+                Number(
+                  a.price || 0
+                )
+              );
+            }
+          );
+
+
+      return result;
+    }
+
+
+    function renderInventory() {
+
+      const box =
+        $("#inventoryBox");
+
+
+      const pagination =
+        $("#pagination");
+
+
+      const filtered =
+        visibleInventory();
+
+
+      const totalPages =
+        Math.max(
+          1,
+          Math.ceil(
+            filtered.length /
+            PAGE_SIZE
+          )
+        );
+
+
+      currentPage =
+        Math.min(
+          currentPage,
+          totalPages
+        );
+
+
+      const start =
+        (
+          currentPage - 1
+        ) *
+        PAGE_SIZE;
+
+
+      const pageItems =
+        filtered.slice(
+          start,
+          start +
+          PAGE_SIZE
+        );
+
+
+      if (
+        !pageItems.length
+      ) {
+
+        box.className =
+          "cz-inventory-message";
+
+        box.innerHTML =
+          `
+            <div>
+              Скінів не знайдено.
+              <br>
+              <small>
+                Перевірте пошук, фільтр або відкритість Steam-інвентарю.
+              </small>
+            </div>
+          `;
+
+
+        pagination
+          .classList
+          .add("hidden");
+
+        return;
+      }
+
+
+      box.className =
+        "cz-grid";
+
+
+      box.innerHTML =
+        pageItems
+          .map(
+            item => {
+
+              const selectedItem =
+                selected.some(
+                  selectedItem =>
+                    selectedItem
+                      .assetid ===
+                    item.assetid
+                );
+
+
+              const price =
+                Number(
+                  item.price || 0
+                );
+
+
+              const selectable =
+                Boolean(
+                  item.tradable
+                ) &&
+                price > 0;
+
+
+              return `
+                <article
+                  class="
+                    cz-skin
+                    ${selectable
+                      ? "selectable"
+                      : "unpriced"}
+                    ${selectedItem
+                      ? "selected"
+                      : ""}
+                  "
+                  style="
+                    --rarity:
+                    ${rarityColor(
+                      item.rarity
+                    )};
+                  "
+                  ${selectable
+                    ? `onclick="toggleSkin('${escapeHtml(item.assetid)}')"`
+                    : ""}
+                >
+
+                  <div class="cz-skin-top">
+
+                    <b>
+                      ${itemCondition(
+                        item
+                      )}
+                    </b>
+
+                    <span>
+                      ◇
+                    </span>
+
+                  </div>
+
+
+                  <div class="cz-skin-image">
+
+                    ${
+                      item.image
+                        ? `
+                          <img
+                            src="${escapeHtml(
+                              item.image
+                            )}"
+                            alt="${escapeHtml(
+                              item.name
+                            )}"
+                            loading="lazy"
+                          >
+                        `
+                        : "◇"
+                    }
+
+                  </div>
+
+
+                  <div class="cz-skin-copy">
+
+                    <strong>
+                      ${escapeHtml(
+                        item.name
+                      )}
+                    </strong>
+
+                    <span>
+                      ${
+                        price > 0
+                          ? `${price.toFixed(2)} Core Coins`
+                          : "Ціна не визначена"
+                      }
+                    </span>
+
+                    <small>
+                      ${
+                        item.tradable
+                          ? (
+                              price > 0
+                                ? "Можна вибрати"
+                                : "Немає оцінки CASEZONE"
+                            )
+                          : "Не можна передати"
+                      }
+                    </small>
+
+                  </div>
+
+                </article>
+              `;
+            }
+          )
+          .join("");
+
+
+      renderPagination(
+        totalPages
+      );
+    }
+
+
+    function renderPagination(
+      totalPages
+    ) {
+
+      const box =
+        $("#pagination");
+
+
+      if (
+        totalPages <= 1
+      ) {
+
+        box
+          .classList
+          .add("hidden");
+
+        return;
+      }
+
+
+      box
+        .classList
+        .remove("hidden");
+
+
+      const pages =
+        [];
+
+
+      const add =
+        page => {
+
+          if (
+            page >= 1 &&
+            page <=
+              totalPages &&
+            !pages.includes(
+              page
+            )
+          ) {
+
+            pages.push(
+              page
+            );
+          }
+        };
+
+
+      add(1);
+      add(
+        currentPage - 1
+      );
+      add(
+        currentPage
+      );
+      add(
+        currentPage + 1
+      );
+      add(
+        totalPages
+      );
+
+
+      pages.sort(
+        (a,b) =>
+          a - b
+      );
+
+
+      let html = "";
+      let previous = 0;
+
+
+      for (
+        const page
+        of pages
+      ) {
+
+        if (
+          previous &&
+          page -
+            previous >
+            1
+        ) {
+
+          html += `
+            <span class="cz-page-btn">
+              …
+            </span>
+          `;
+        }
+
+
+        html += `
+          <button
+            class="
+              cz-page-btn
+              ${page ===
+                currentPage
+                  ? "active"
+                  : ""}
+            "
+            type="button"
+            onclick="setPage(${page})"
+          >
+            ${page}
+          </button>
+        `;
+
+
+        previous =
+          page;
+      }
+
+
+      if (
+        currentPage <
+        totalPages
+      ) {
+
+        html += `
+          <button
+            class="cz-page-btn"
+            type="button"
+            onclick="
+              setPage(
+                ${Math.min(
+                  totalPages,
+                  currentPage + 1
+                )}
+              )
+            "
+          >
+            ›
+          </button>
+        `;
+      }
+
+
+      box.innerHTML =
+        html;
+    }
+
+
+    function setPage(page) {
+
+      currentPage =
+        Number(page) || 1;
+
+      renderInventory();
+    }
+
+
+    function toggleSkin(
+      assetid
+    ) {
+
+      const item =
+        inventory.find(
+          item =>
+            String(
+              item.assetid
+            ) ===
+            String(
+              assetid
+            )
+        );
+
+
+      if (
+        !item ||
+        !item.tradable ||
+        Number(
+          item.price || 0
+        ) <= 0
+      ) {
+        return;
+      }
+
+
+      const index =
+        selected.findIndex(
+          selectedItem =>
+            selectedItem
+              .assetid ===
+            item.assetid
+        );
+
+
+      if (
+        index >= 0
+      ) {
+
+        selected.splice(
+          index,
+          1
+        );
+
+      } else {
+
+        selected.push(
+          item
+        );
+      }
+
+
+      renderInventory();
+
+      renderSelected();
+    }
+
+
+    function removeSelected(
+      assetid
+    ) {
+
+      selected =
+        selected.filter(
+          item =>
+            String(
+              item.assetid
+            ) !==
+            String(
+              assetid
+            )
+        );
+
+
+      renderInventory();
+
+      renderSelected();
+    }
+
+
+    function renderSelected() {
+
+      const body =
+        $("#selectedBody");
+
+
+      const count =
+        selected.length;
+
+
+      const total =
+        selected.reduce(
+          (sum,item) =>
+            sum +
+            Number(
+              item.price || 0
+            ),
+          0
+        );
+
+
+      $("#selectedCount")
+        .textContent =
+          String(count);
+
+
+      $("#selectedTotal")
+        .textContent =
+          total.toFixed(2) +
+          " Core Coins";
+
+
+      $("#topupBtn")
+        .disabled =
+          count === 0;
+
+
+      if (!count) {
+
+        body.innerHTML = `
+          <div class="cz-selected-empty">
+
+            <div class="cz-selected-empty-icon">
+              🛒
+            </div>
+
+            <strong>
+              Виберіть скіни з інвентарю
+            </strong>
+
+            <small>
+              Оберіть скіни, які хочете використати для поповнення балансу
+            </small>
+
+          </div>
+        `;
+
+        return;
+      }
+
+
+      body.innerHTML = `
+        <div class="cz-selected-list">
+
+          ${selected.map(item => `
+            <div class="cz-selected-item">
+
+              ${
+                item.image
+                  ? `
+                    <img
+                      src="${escapeHtml(
+                        item.image
+                      )}"
+                      alt="${escapeHtml(
+                        item.name
+                      )}"
+                    >
+                  `
+                  : `
+                    <div></div>
+                  `
+              }
+
+              <div class="cz-selected-item-copy">
+
+                <strong>
+                  ${escapeHtml(
+                    item.name
+                  )}
+                </strong>
+
+                <span>
+                  ${Number(
+                    item.price || 0
+                  ).toFixed(2)}
+                  Core Coins
+                </span>
+
+              </div>
+
+              <button
+                class="cz-remove"
+                type="button"
+                onclick="
+                  removeSelected(
+                    '${escapeHtml(
+                      item.assetid
+                    )}'
+                  )
+                "
+              >
+                ×
+              </button>
+
+            </div>
+          `).join("")}
+
+        </div>
+      `;
+    }
+
+
+    async function saveTradeUrl() {
+
+      const tradeUrl =
+        String(
+          $("#tradeUrl")
+            ?.value || ""
+        )
+          .trim();
+
+
+      const status =
+        $("#tradeStatus");
+
+
+      status.className =
+        "cz-trade-status";
+
+
+      if (!tradeUrl) {
+
+        status.textContent =
+          "Вставте Steam Trade URL.";
+
+        status.classList
+          .add("error");
+
+        return;
+      }
+
+
+      try {
+
+        await api(
+          "/api/trade-url",
+          {
+            method:"POST",
+
+            body:
+              JSON.stringify({
+                tradeUrl
+              })
+          }
+        );
+
+
+        status.textContent =
+          "✓ Trade URL збережено";
+
+        status.classList
+          .add("ok");
+
+
+      } catch (error) {
+
+        status.textContent =
+          error.message;
+
+        status.classList
+          .add("error");
+      }
+    }
+
+
+    async function loadUser() {
+
+      try {
+
+        const result =
+          await api(
+            "/api/me"
+          );
+
+
+        currentUser =
+          result.user ||
+          null;
+
+
+        if (
+          !currentUser
+        ) {
+          throw new Error(
+            "Необхідно увійти"
+          );
+        }
+
+
+        $("#headerBalance")
+          .textContent =
+            Number(
+              currentUser.balance ||
+              0
+            ).toFixed(2) +
+            " Core Coins";
+
+
+        if (
+          currentUser.trade_url
+        ) {
+
+          $("#tradeUrl")
+            .value =
+              currentUser
+                .trade_url;
+        }
+
+
+        if (
+          currentUser.avatar_url
+        ) {
+
+          const avatar =
+            $("#userAvatar");
+
+
+          avatar.src =
+            currentUser.avatar_url;
+
+
+          avatar
+            .classList
+            .remove("hidden");
+
+
+          $("#avatarFallback")
+            .classList
+            .add("hidden");
+        }
+
+
+      } catch (error) {
+
+        if (
+          error.status === 401
+        ) {
+
+          window.location.href =
+            "/auth/steam";
+
+          return;
+        }
+
+
+        throw error;
+      }
+    }
+
+
+    async function loadInventory() {
+
+      const box =
+        $("#inventoryBox");
+
+
+      const note =
+        $("#sourceNote");
+
+
+      box.className =
+        "cz-inventory-message";
+
+
+      box.textContent =
+        "Завантаження Steam-інвентарю...";
+
+
+      note.classList
+        .remove("show");
+
+
+      note.textContent =
+        "";
+
+
+      try {
+
+        const result =
+          await api(
+            "/api/my-steam-inventory"
+          );
+
+
+        inventory =
+          Array.isArray(
+            result.items
+          )
+            ? result.items
+            : [];
+
+
+        selected =
+          selected.filter(
+            selectedItem =>
+              inventory.some(
+                item =>
+                  item.assetid ===
+                  selectedItem.assetid
+              )
+          );
+
+
+        currentPage = 1;
+
+
+        if (
+          result.warning
+        ) {
+
+          note.textContent =
+            result.warning;
+
+          note.classList
+            .add("show");
+        }
+
+
+        renderInventory();
+
+        renderSelected();
+
+
+      } catch (error) {
+
+        inventory = [];
+        selected = [];
+
+
+        box.className =
+          "cz-inventory-message";
+
+
+        box.innerHTML = `
+          <div>
+            <strong style="color:#ff626b;">
+              ${escapeHtml(
+                error.message
+              )}
+            </strong>
+
+            <br><br>
+
+            <small>
+              Переконайтеся, що Steam-інвентар відкритий для всіх.
+            </small>
+          </div>
+        `;
+
+
+        $("#pagination")
+          .classList
+          .add("hidden");
+
+
+        renderSelected();
+      }
+    }
+
+
+    async function submitDeposit() {
+
+      if (
+        !selected.length
+      ) {
+        return;
+      }
+
+
+      const button =
+        $("#topupBtn");
+
+
+      const status =
+        $("#submitStatus");
+
+
+      button.disabled =
+        true;
+
+
+      status.className =
+        "cz-submit-status";
+
+
+      status.textContent =
+        "Створюємо заявку...";
+
+
+      try {
+
+        let created = 0;
+
+
+        for (
+          const item
+          of selected
+        ) {
+
+          await api(
+            "/api/skin-deposit",
+            {
+              method:"POST",
+
+              body:
+                JSON.stringify({
+                  skinName:
+                    item.name,
+
+                  value:
+                    Number(
+                      item.price
+                    ),
+
+                  assetid:
+                    item.assetid,
+
+                  image:
+                    item.image || null
+                })
+            }
+          );
+
+
+          created += 1;
+        }
+
+
+        status.textContent =
+          `✓ Створено заявок: ${created}`;
+
+        status.classList
+          .add("ok");
+
+
+        selected = [];
+
+        renderSelected();
+
+        renderInventory();
+
+
+      } catch (error) {
+
+        status.textContent =
+          error.message ||
+          "Не вдалося створити заявку";
+
+        status.classList
+          .add("error");
+
+      } finally {
+
+        button.disabled =
+          selected.length === 0;
+      }
+    }
+
+
+    async function logout() {
+
+      try {
+
+        await api(
+          "/api/logout",
+          {
+            method:"POST"
+          }
+        );
+
+      } catch {}
+
+
+      window.location.href =
+        "/";
+    }
+
+
+    $("#saveTradeUrl")
+      .addEventListener(
+        "click",
+        saveTradeUrl
+      );
+
+
+    $("#refreshInventory")
+      .addEventListener(
+        "click",
+        loadInventory
+      );
+
+
+    $("#skinSearch")
+      .addEventListener(
+        "input",
+        () => {
+          currentPage = 1;
+          renderInventory();
+        }
+      );
+
+
+    $("#skinFilter")
+      .addEventListener(
+        "change",
+        () => {
+          currentPage = 1;
+          renderInventory();
+        }
+      );
+
+
+    $("#skinSort")
+      .addEventListener(
+        "change",
+        () => {
+          currentPage = 1;
+          renderInventory();
+        }
+      );
+
+
+    $("#topupBtn")
+      .addEventListener(
+        "click",
+        submitDeposit
+      );
+
+
+    $("#logoutBtn")
+      .addEventListener(
+        "click",
+        logout
+      );
+
+
+    $("#headerTopup")
+      .addEventListener(
+        "click",
+        () => {
+          window.location.href =
+            "/";
+        }
+      );
+
+
+    (async () => {
+
+      try {
+
+        await loadUser();
+
+        await loadInventory();
+
+      } catch (error) {
+
+        console.error(
+          "PAY BY SKINS init error:",
+          error
+        );
+      }
+
+    })();
+  </script>
 
 </body>
-
 </html>
