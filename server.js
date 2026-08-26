@@ -198,6 +198,32 @@ async function initDatabase() {
     );
   `);
 
+
+  await pool.query(`
+    ALTER TABLE upgrades
+    ADD COLUMN IF NOT EXISTS mode TEXT;
+  `);
+
+  await pool.query(`
+    ALTER TABLE upgrades
+    ADD COLUMN IF NOT EXISTS roll_value NUMERIC(12,8);
+  `);
+
+  await pool.query(`
+    ALTER TABLE upgrades
+    ADD COLUMN IF NOT EXISTS roll_angle NUMERIC(12,8);
+  `);
+
+  await pool.query(`
+    ALTER TABLE upgrades
+    ADD COLUMN IF NOT EXISTS animation_angle NUMERIC(12,8);
+  `);
+
+  await pool.query(`
+    ALTER TABLE upgrades
+    ADD COLUMN IF NOT EXISTS source_inventory_ids JSONB;
+  `);
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS withdrawals (
       id SERIAL PRIMARY KEY,
@@ -565,10 +591,6 @@ VALUES
     }
   }
 );
-app.get("/api/cases", (req, res) => {
-  res.json(cases);
-});
-
 app.post(
   "/api/open/:caseId",
   auth,
@@ -727,6 +749,41 @@ app.post(
 );
 
 /* =========================
+   UPGRADE CONFIG
+   SINGLE SOURCE OF RULES — BACKEND
+========================= */
+
+const UPGRADE_TARGET_TOLERANCE = 0.08;
+const UPGRADE_ROLL_SCALE = 1000000;
+
+const UPGRADE_MODES = Object.freeze({
+  "2x": Object.freeze({
+    label: "2x",
+    chance: 50,
+    multiplier: 2
+  }),
+
+  "5x": Object.freeze({
+    label: "5x",
+    chance: 20,
+    multiplier: 5
+  }),
+
+  "10x": Object.freeze({
+    label: "10x",
+    chance: 10,
+    multiplier: 10
+  }),
+
+  "75": Object.freeze({
+    label: "75%",
+    chance: 75,
+    multiplier: 100 / 75
+  })
+});
+
+
+/* =========================
    UPGRADE CATALOG
 ========================= */
 
@@ -751,7 +808,8 @@ function getUpgradeCatalog() {
 
       if (
         !name ||
-        !numericValue
+        !Number.isFinite(numericValue) ||
+        numericValue <= 0
       ) {
         continue;
       }
@@ -762,7 +820,7 @@ function getUpgradeCatalog() {
       if (
         !existing ||
         numericValue >
-        Number(existing.value)
+          Number(existing.value)
       ) {
 
         unique.set(
@@ -770,7 +828,7 @@ function getUpgradeCatalog() {
           {
             name,
             rarity,
-            value:numericValue,
+            value: numericValue,
             image:
               skinImages[name] || null
           }
@@ -787,6 +845,39 @@ function getUpgradeCatalog() {
 }
 
 
+function getUpgradeModePublicConfig() {
+
+  return Object.fromEntries(
+    Object.entries(UPGRADE_MODES)
+      .map(
+        ([key, value]) => [
+          key,
+          {
+            label: value.label,
+            chance: value.chance,
+            multiplier: value.multiplier
+          }
+        ]
+      )
+  );
+}
+
+
+app.get(
+  "/api/upgrade-config",
+  auth,
+  (req,res) => {
+
+    res.json({
+      modes:
+        getUpgradeModePublicConfig(),
+      targetTolerance:
+        UPGRADE_TARGET_TOLERANCE
+    });
+  }
+);
+
+
 app.get(
   "/api/upgrade-targets",
   auth,
@@ -800,11 +891,8 @@ app.get(
 
 
 /* =========================
-   EXECUTE SELECTED TARGET UPGRADE
-   2x  = 50%
-   5x  = 20%
-   10x = 10%
-   75% = 75%
+   EXECUTE UPGRADE
+   RESULT IS DECIDED ONLY ON BACKEND
 ========================= */
 
 app.post(
@@ -815,16 +903,27 @@ app.post(
     const client =
       await pool.connect();
 
+    let transactionStarted = false;
+
     try {
 
-      const inventoryIds =
+      const rawInventoryIds =
         Array.isArray(
           req.body.inventoryIds
         )
           ? req.body.inventoryIds
-              .map(Number)
-              .filter(Boolean)
           : [];
+
+      const inventoryIds =
+        [...new Set(
+          rawInventoryIds
+            .map(Number)
+            .filter(
+              id =>
+                Number.isInteger(id) &&
+                id > 0
+            )
+        )];
 
       const targetName =
         String(
@@ -833,19 +932,21 @@ app.post(
 
       const mode =
         String(
-          req.body.mode || "2x"
+          req.body.mode || ""
         );
 
       if (
         !inventoryIds.length ||
-        inventoryIds.length > 5
+        inventoryIds.length > 5 ||
+        inventoryIds.length !==
+          rawInventoryIds.length
       ) {
 
         return res
           .status(400)
           .json({
             error:
-              "Виберіть від 1 до 5 предметів"
+              "Виберіть від 1 до 5 різних предметів"
           });
       }
 
@@ -859,30 +960,8 @@ app.post(
           });
       }
 
-      const modeMap = {
-        "2x": {
-          chance:50,
-          multiplier:2
-        },
-
-        "5x": {
-          chance:20,
-          multiplier:5
-        },
-
-        "10x": {
-          chance:10,
-          multiplier:10
-        },
-
-        "75": {
-          chance:75,
-          multiplier:(100 / 75)
-        }
-      };
-
       const selectedMode =
-        modeMap[mode];
+        UPGRADE_MODES[mode];
 
       if (!selectedMode) {
 
@@ -890,7 +969,7 @@ app.post(
           .status(400)
           .json({
             error:
-              "Невідомий режим"
+              "Невідомий режим апгрейду"
           });
       }
 
@@ -898,6 +977,13 @@ app.post(
         "BEGIN"
       );
 
+      transactionStarted = true;
+
+      /*
+        Lock source inventory rows.
+        This prevents the same inventory item
+        from being used by two concurrent requests.
+      */
       const sourceResult =
         await client.query(
           `
@@ -928,6 +1014,8 @@ app.post(
           "ROLLBACK"
         );
 
+        transactionStarted = false;
+
         return res
           .status(400)
           .json({
@@ -947,6 +1035,25 @@ app.post(
           0
         );
 
+      if (
+        !Number.isFinite(sourceValue) ||
+        sourceValue <= 0
+      ) {
+
+        await client.query(
+          "ROLLBACK"
+        );
+
+        transactionStarted = false;
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Некоректна вартість вибраних предметів"
+          });
+      }
+
       const catalog =
         getUpgradeCatalog();
 
@@ -963,6 +1070,8 @@ app.post(
           "ROLLBACK"
         );
 
+        transactionStarted = false;
+
         return res
           .status(404)
           .json({
@@ -972,37 +1081,33 @@ app.post(
       }
 
       /*
-        Ціль має відповідати режиму.
-        Наприклад:
-        100 ₴ + 2x => приблизно 200 ₴
-        100 ₴ + 5x => приблизно 500 ₴
-        100 ₴ + 10x => приблизно 1000 ₴
-        100 ₴ + 75% => приблизно 133.33 ₴
-
-        Допуск ±8% потрібен, бо в каталозі
-        може не бути предмета рівно за потрібну суму.
+        Backend revalidates target value.
+        Frontend cannot replace price/chance.
       */
-
-      const exactTarget =
+      const exactTargetValue =
         sourceValue *
         selectedMode.multiplier;
 
-      const minValue =
-        exactTarget * 0.92;
+      const minTargetValue =
+        exactTargetValue *
+        (1 - UPGRADE_TARGET_TOLERANCE);
 
-      const maxValue =
-        exactTarget * 1.08;
+      const maxTargetValue =
+        exactTargetValue *
+        (1 + UPGRADE_TARGET_TOLERANCE);
 
       if (
         Number(target.value) <
-          minValue ||
+          minTargetValue ||
         Number(target.value) >
-          maxValue
+          maxTargetValue
       ) {
 
         await client.query(
           "ROLLBACK"
         );
+
+        transactionStarted = false;
 
         return res
           .status(400)
@@ -1018,20 +1123,32 @@ app.post(
         );
 
       /*
-        ОДИН серверний roll визначає ВСЕ:
-        і виграш/програш,
-        і місце зупинки стрілки.
-
-        0° = верх круга.
-        Фіолетовий сектор займає
-        chance% круга за годинниковою стрілкою.
+        THE ONLY RANDOMNESS IN UPGRADE.
+        It runs only on the server.
       */
-
-      const rollUnit =
+      const rollInt =
         crypto.randomInt(
           0,
-          1000000
-        ) / 1000000;
+          UPGRADE_ROLL_SCALE
+        );
+
+      const chanceThreshold =
+        Math.floor(
+          chance /
+          100 *
+          UPGRADE_ROLL_SCALE
+        );
+
+      const success =
+        rollInt <
+        chanceThreshold;
+
+      const rollUnit =
+        rollInt /
+        UPGRADE_ROLL_SCALE;
+
+      const rollValue =
+        rollUnit * 100;
 
       const rollAngle =
         rollUnit * 360;
@@ -1039,8 +1156,76 @@ app.post(
       const winArc =
         chance / 100 * 360;
 
-      const success =
-        rollAngle < winArc;
+      /*
+        Animation stop also comes from backend
+        and is derived from the same rollInt.
+
+        On success it is safely INSIDE win zone.
+        On failure it is safely OUTSIDE win zone.
+      */
+      const edgePadding =
+        Math.min(
+          8,
+          winArc / 4,
+          (360 - winArc) / 4
+        );
+
+      let animationAngle;
+
+      if (success) {
+
+        const relative =
+          chanceThreshold > 1
+            ? rollInt /
+              (chanceThreshold - 1)
+            : 0.5;
+
+        const startAngle =
+          edgePadding;
+
+        const endAngle =
+          winArc -
+          edgePadding;
+
+        animationAngle =
+          startAngle +
+          (
+            endAngle -
+            startAngle
+          ) *
+          relative;
+
+      } else {
+
+        const lossCount =
+          UPGRADE_ROLL_SCALE -
+          chanceThreshold;
+
+        const relative =
+          lossCount > 1
+            ? (
+                rollInt -
+                chanceThreshold
+              ) /
+              (lossCount - 1)
+            : 0.5;
+
+        const startAngle =
+          winArc +
+          edgePadding;
+
+        const endAngle =
+          360 -
+          edgePadding;
+
+        animationAngle =
+          startAngle +
+          (
+            endAngle -
+            startAngle
+          ) *
+          relative;
+      }
 
       await client.query(
         `
@@ -1089,28 +1274,105 @@ app.post(
           inserted.rows[0].id;
       }
 
+      /*
+        Audit result is written BEFORE COMMIT.
+      */
+      const auditResult =
+        await client.query(
+          `
+          INSERT INTO upgrades
+            (
+              user_id,
+              source_inventory_id,
+              source_name,
+              source_value,
+              target_name,
+              target_rarity,
+              target_value,
+              chance,
+              success,
+              mode,
+              roll_value,
+              roll_angle,
+              animation_angle,
+              source_inventory_ids
+            )
+          VALUES
+            (
+              $1,$2,$3,$4,$5,$6,$7,
+              $8,$9,$10,$11,$12,$13,$14
+            )
+          RETURNING id
+          `,
+          [
+            req.session.userId,
+            inventoryIds[0],
+            sources
+              .map(
+                item =>
+                  item.item_name
+              )
+              .join(" + "),
+            sourceValue,
+            target.name,
+            target.rarity,
+            Number(target.value),
+            chance,
+            success,
+            mode,
+            rollValue,
+            rollAngle,
+            animationAngle,
+            JSON.stringify(inventoryIds)
+          ]
+        );
+
+      const upgradeId =
+        auditResult.rows[0].id;
+
       await client.query(
         "COMMIT"
       );
 
+      transactionStarted = false;
+
       res.json({
+        upgradeId,
         success,
         chance,
         mode,
-        rollAngle,
         sourceValue,
+
         target: {
           ...target,
           inventoryId:
             newItemId
+        },
+
+        animation: {
+          stopAngle:
+            animationAngle,
+          winZoneStart:
+            0,
+          winZoneEnd:
+            winArc
         }
       });
 
     } catch (e) {
 
-      await client.query(
-        "ROLLBACK"
-      );
+      if (transactionStarted) {
+        try {
+          await client.query(
+            "ROLLBACK"
+          );
+        } catch (rollbackError) {
+          console.error(
+            "Upgrade rollback error:",
+            rollbackError
+          );
+        }
+      }
 
       console.error(
         "Upgrade error:",
