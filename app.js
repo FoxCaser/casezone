@@ -3470,6 +3470,378 @@ $("#depositModal")
 
 
 /* =========================
+   HOME DASHBOARD V3
+   Recent drops + top players
+========================= */
+
+function escapeHomeHtml(value) {
+
+  return String(
+    value ?? ""
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+}
+
+
+function homeTimeAgo(value) {
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "";
+  }
+
+  const seconds =
+    Math.max(
+      0,
+      Math.floor(
+        (
+          Date.now() -
+          date.getTime()
+        ) /
+        1000
+      )
+    );
+
+  if (seconds < 60) {
+    return "щойно";
+  }
+
+  const minutes =
+    Math.floor(
+      seconds / 60
+    );
+
+  if (minutes < 60) {
+    return `${minutes} хв тому`;
+  }
+
+  const hours =
+    Math.floor(
+      minutes / 60
+    );
+
+  if (hours < 24) {
+    return `${hours} год тому`;
+  }
+
+  const days =
+    Math.floor(
+      hours / 24
+    );
+
+  return `${days} дн тому`;
+}
+
+
+function renderHomeDrops(drops) {
+
+  const track =
+    $("#liveDropsTrack");
+
+  if (!track) {
+    return;
+  }
+
+  if (
+    !Array.isArray(drops) ||
+    !drops.length
+  ) {
+
+    track.classList
+      .remove("is-moving");
+
+    track.innerHTML = `
+      <div class="cz-live-loading">
+        Поки немає останніх дропів.
+      </div>
+    `;
+
+    return;
+  }
+
+  const cards =
+    drops.map(item => {
+
+      const name =
+        escapeHomeHtml(
+          item.item_name
+        );
+
+      const username =
+        escapeHomeHtml(
+          item.username ||
+          "Гравець"
+        );
+
+      const image =
+        escapeHomeHtml(
+          item.image || ""
+        );
+
+      const value =
+        Number(
+          item.value || 0
+        );
+
+      const ago =
+        escapeHomeHtml(
+          homeTimeAgo(
+            item.created_at
+          )
+        );
+
+      return `
+        <article class="cz-live-drop-card">
+
+          <div class="cz-live-drop-image">
+            ${
+              image
+                ? `
+                  <img
+                    src="${image}"
+                    alt="${name}"
+                    loading="lazy"
+                  >
+                `
+                : ""
+            }
+          </div>
+
+          <div class="cz-live-drop-info">
+
+            <strong class="cz-live-drop-name">
+              ${name}
+            </strong>
+
+            <span class="cz-live-drop-price">
+              ${value.toFixed(2)} ₴
+            </span>
+
+            <span class="cz-live-drop-meta">
+              <b>${username}</b>
+              <span>•</span>
+              <span>${ago}</span>
+            </span>
+
+          </div>
+
+        </article>
+      `;
+    }).join("");
+
+  /*
+    Two identical sets make a seamless
+    CSS marquee. No randomness is used.
+  */
+  track.innerHTML = `
+    <div class="cz-live-set">
+      ${cards}
+    </div>
+
+    <div
+      class="cz-live-set"
+      aria-hidden="true"
+    >
+      ${cards}
+    </div>
+  `;
+
+  track.classList
+    .remove("is-moving");
+
+  /*
+    Restart CSS animation only after
+    the DOM has been painted.
+  */
+  requestAnimationFrame(
+    () => {
+
+      requestAnimationFrame(
+        () => {
+          track.classList
+            .add("is-moving");
+        }
+      );
+    }
+  );
+}
+
+
+function renderHomeTopPlayers(players) {
+
+  const box =
+    $("#topPlayersList");
+
+  if (!box) {
+    return;
+  }
+
+  if (
+    !Array.isArray(players) ||
+    !players.length
+  ) {
+
+    box.innerHTML = `
+      <div class="cz-top-empty-v3">
+        Топ гравців зʼявиться
+        після перших відкриттів.
+      </div>
+    `;
+
+    return;
+  }
+
+  box.innerHTML =
+    players
+      .slice(0,5)
+      .map(
+        (player,index) => {
+
+          const username =
+            escapeHomeHtml(
+              player.username ||
+              "Гравець"
+            );
+
+          const total =
+            Number(
+              player.total_value || 0
+            );
+
+          const openings =
+            Number(
+              player.openings_count || 0
+            );
+
+          return `
+            <div class="cz-top-player-row">
+
+              <span class="cz-top-rank">
+                ${index + 1}
+              </span>
+
+              <div class="cz-top-player-main">
+
+                <strong class="cz-top-player-name">
+                  ${username}
+                </strong>
+
+                <small class="cz-top-player-count">
+                  ${openings} відкриттів
+                </small>
+
+              </div>
+
+              <strong class="cz-top-player-value">
+                ${total.toFixed(2)} ₴
+              </strong>
+
+            </div>
+          `;
+        }
+      )
+      .join("");
+}
+
+
+async function loadHomeDashboard() {
+
+  const dropsTarget =
+    $("#liveDropsTrack");
+
+  const playersTarget =
+    $("#topPlayersList");
+
+  if (
+    !dropsTarget &&
+    !playersTarget
+  ) {
+    return;
+  }
+
+  try {
+
+    const data =
+      await api(
+        "/api/home-dashboard"
+      );
+
+    renderHomeDrops(
+      data.drops || []
+    );
+
+    renderHomeTopPlayers(
+      data.topPlayers || []
+    );
+
+  } catch (e) {
+
+    console.error(
+      "Home dashboard error:",
+      e
+    );
+
+    if (dropsTarget) {
+
+      dropsTarget.classList
+        .remove("is-moving");
+
+      dropsTarget.innerHTML = `
+        <div class="cz-live-loading">
+          Не вдалося завантажити дропи.
+        </div>
+      `;
+    }
+
+    if (playersTarget) {
+
+      playersTarget.innerHTML = `
+        <div class="cz-top-empty-v3">
+          Не вдалося завантажити топ.
+        </div>
+      `;
+    }
+  }
+}
+
+
+$("#promoDepositBtn")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      $("#depositBtn")
+        ?.click();
+    }
+  );
+
+
+/* =========================
    INIT
 ========================= */
 
@@ -3480,6 +3852,17 @@ async function initApp() {
     await refresh();
 
     await loadCases();
+
+    await loadHomeDashboard();
+
+    /*
+      Refresh public home data periodically.
+      The moving animation itself is CSS.
+    */
+    setInterval(
+      loadHomeDashboard,
+      30000
+    );
 
   } catch (e) {
 
@@ -3508,6 +3891,7 @@ let upgradeTargetTolerance = 0;
 
 
 const homeSections = () => [
+  $(".cz-live-strip"),
   $(".cz-dashboard-top"),
   $(".cz-benefits"),
   $(".cases-section"),
