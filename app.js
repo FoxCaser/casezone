@@ -593,7 +593,124 @@ function filterCases(type) {
 }
 /* =========================
    CASE DETAILS / POSSIBLE DROPS
+   Full-screen visual redesign.
+   Opening/balance/server logic is unchanged.
 ========================= */
+
+function getCaseOpeningStats(caseData) {
+
+  const items =
+    Array.isArray(caseData?.items)
+      ? caseData.items
+      : [];
+
+  const validItems =
+    items
+      .map(item => ({
+        item,
+        weight:Number(item?.[2] || 0)
+      }))
+      .filter(
+        entry =>
+          Number.isFinite(entry.weight) &&
+          entry.weight > 0
+      );
+
+  const totalWeight =
+    validItems.reduce(
+      (sum,entry) =>
+        sum + entry.weight,
+      0
+    );
+
+  if (!totalWeight) {
+    return {
+      knifeChance:0,
+      secretChance:0
+    };
+  }
+
+  const knifeChance =
+    validItems
+      .filter(({item}) => {
+
+        const name =
+          String(item?.[0] || "")
+            .toLowerCase();
+
+        return (
+          name.includes("★") ||
+          name.includes("knife") ||
+          name.includes("karambit") ||
+          name.includes("bayonet") ||
+          name.includes("dagger") ||
+          name.includes("talon") ||
+          name.includes("stiletto") ||
+          name.includes("ursus") ||
+          name.includes("navaja") ||
+          name.includes("falchion") ||
+          name.includes("huntsman")
+        );
+      })
+      .reduce(
+        (sum,entry) =>
+          sum + entry.weight,
+        0
+      ) /
+      totalWeight *
+      100;
+
+  const secretChance =
+    validItems
+      .filter(({item}) => {
+
+        const rarity =
+          String(item?.[1] || "")
+            .trim()
+            .toLowerCase();
+
+        return (
+          rarity.includes("covert") ||
+          rarity.includes("contraband") ||
+          rarity.includes("rare") ||
+          rarity.includes("extraordinary")
+        );
+      })
+      .reduce(
+        (sum,entry) =>
+          sum + entry.weight,
+        0
+      ) /
+      totalWeight *
+      100;
+
+  return {
+    knifeChance,
+    secretChance
+  };
+}
+
+
+function formatCaseOpeningTitle(name) {
+
+  const words =
+    String(name || "CASE")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+  const first =
+    words.shift() || "CASE";
+
+  const rest =
+    words.join(" ");
+
+  return `
+    <span>${first}</span>
+    ${rest}
+  `;
+}
+
 
 async function showCaseDetails(id) {
 
@@ -620,241 +737,251 @@ async function showCaseDetails(id) {
     return;
   }
 
+  const caseIndex =
+    Math.max(
+      0,
+      cases.indexOf(selectedCase)
+    );
+
+  const fallbackArtwork =
+    getCaseArtwork(
+      selectedCase,
+      caseIndex
+    );
+
+  const useApprovedRedArtwork =
+    String(selectedCase.id) === "red";
+
+  const heroArtwork =
+    useApprovedRedArtwork
+      ? "/casezone-red-open-hero.png"
+      : fallbackArtwork;
+
+  const stats =
+    getCaseOpeningStats(
+      selectedCase
+    );
+
+  const itemCount =
+    Array.isArray(selectedCase.items)
+      ? selectedCase.items.length
+      : 0;
+
   modal.classList.remove("hidden");
 
   content.innerHTML = `
-    <div style="
-      min-height:520px;
-      padding:4px;
-    ">
+    <main class="cz-case-detail-page">
 
-      <div style="
-        display:flex;
-        align-items:flex-start;
-        justify-content:space-between;
-        gap:20px;
-        margin-bottom:14px;
-      ">
+      <div class="cz-case-detail-noise"></div>
+      <div class="cz-case-detail-orbit orbit-a"></div>
+      <div class="cz-case-detail-orbit orbit-b"></div>
 
-        <div>
-          <div style="
-            color:#ffd400;
-            font-size:10px;
-            font-weight:900;
-            letter-spacing:2px;
-            margin-bottom:5px;
-          ">
-            CASEZONE
-          </div>
+      <section class="cz-case-detail-inner">
 
-          <h2 style="
-            margin:0;
-            font-size:30px;
-          ">
-            ${selectedCase.name}
-          </h2>
+        <div class="cz-case-detail-copy">
 
-          <p style="
-            margin:6px 0 0;
-            color:#8f8f8f;
-            font-size:13px;
-          ">
-            Подивись, які предмети можуть випасти з цього кейса
+          <h1>
+            ${formatCaseOpeningTitle(selectedCase.name)}
+          </h1>
+
+          <p>
+            Відкрий кейс та отримай топові скіни CS2
           </p>
+
         </div>
 
-      </div>
 
-      <div style="
-        position:relative;
-        min-height:210px;
-        display:grid;
-        place-items:center;
-        overflow:hidden;
-        border:1px solid rgba(255,212,0,.12);
-        border-radius:18px;
-        background:
-          radial-gradient(
-            circle at 50% 52%,
-            rgba(255,212,0,.15),
-            transparent 32%
-          ),
-          linear-gradient(
-            180deg,
-            #141414,
-            #0d0d0d
-          );
-        margin-bottom:22px;
-      ">
+        <div class="cz-case-about-wrap">
 
-        <div style="
-          position:absolute;
-          width:300px;
-          height:110px;
-          border-radius:50%;
-          background:rgba(255,212,0,.14);
-          filter:blur(42px);
-        "></div>
-
-        <img
-          src="${getCaseArtwork(selectedCase, Math.max(0, cases.indexOf(selectedCase)))}"
-          alt="${selectedCase.name}"
-          style="
-            position:relative;
-            z-index:2;
-            width:min(330px,72%);
-            height:190px;
-            object-fit:cover;
-            object-position:center;
-            border-radius:16px;
-            filter:
-              drop-shadow(0 22px 30px rgba(0,0,0,.45))
-              saturate(1.05);
-          "
-        >
-
-      </div>
-
-      <div style="
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:12px;
-        margin-bottom:12px;
-      ">
-        <strong style="
-          font-size:14px;
-        ">
-          🎁 Можливі дропи
-        </strong>
-
-        <span style="
-          color:#777;
-          font-size:11px;
-        ">
-          ${Array.isArray(selectedCase.items) ? selectedCase.items.length : 0}
-          предметів
-        </span>
-      </div>
-
-      <div
-        id="casePossibleDrops"
-        style="
-          display:grid;
-          grid-template-columns:
-            repeat(auto-fit, minmax(130px, 1fr));
-          gap:10px;
-          margin-bottom:22px;
-        "
-      >
-        <div style="
-          grid-column:1/-1;
-          padding:28px;
-          text-align:center;
-          color:#777;
-        ">
-          Завантаження предметів...
-        </div>
-      </div>
-
-      <div style="
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        gap:8px;
-        flex-wrap:wrap;
-        margin:0 0 16px;
-        padding:14px;
-        border:1px solid rgba(255,255,255,.07);
-        border-radius:12px;
-        background:#101010;
-      ">
-
-        <span style="
-          color:#888;
-          font-size:12px;
-          margin-right:4px;
-        ">
-          Кількість:
-        </span>
-
-        ${[1,2,3,4,5].map(q => `
           <button
             type="button"
-            class="case-qty-btn ${q === 1 ? "active" : ""}"
-            data-qty="${q}"
-            onclick="setCaseOpenQuantity(${q}, ${Number(selectedCase.price)})"
-            style="
-              width:42px;
-              height:38px;
-              border-radius:9px;
-              border:1px solid ${q === 1 ? "#ffd400" : "rgba(255,255,255,.10)"};
-              background:${q === 1 ? "#ffd400" : "#171717"};
-              color:${q === 1 ? "#111" : "#aaa"};
-              font-weight:900;
-              cursor:pointer;
+            class="cz-case-about-btn"
+            onclick="
+              document
+                .getElementById('caseAboutPanel')
+                ?.classList
+                .toggle('hidden')
             "
           >
-            x${q}
+            <span>ⓘ</span>
+            Про кейс
           </button>
-        `).join("")}
 
-      </div>
+          <div
+            id="caseAboutPanel"
+            class="cz-case-about-panel hidden"
+          >
+            <strong>
+              ${selectedCase.name}
+            </strong>
 
-      <div style="
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:12px;
-        flex-wrap:wrap;
-        padding-top:16px;
-        border-top:1px solid rgba(255,255,255,.07);
-      ">
+            <span>
+              ${itemCount} можливих предметів
+            </span>
 
-        <button
-          type="button"
-          onclick="
-            $('#modal').classList.add('hidden')
-          "
-          style="
-            min-height:46px;
-            padding:0 18px;
-            border:1px solid rgba(255,255,255,.1);
-            border-radius:11px;
-            background:#141414;
-            color:#bbb;
-            font-weight:800;
-          "
-        >
-          ← Назад
-        </button>
+            <span>
+              Шанси рахуються з реальних ваг кейса на сервері.
+            </span>
+          </div>
+
+        </div>
+
+
+        <div class="cz-case-stage">
+
+          <div class="cz-case-stage-grid"></div>
+          <div class="cz-case-stage-glow"></div>
+
+          <img
+            class="
+              cz-case-stage-art
+              ${useApprovedRedArtwork ? "approved-red-art" : ""}
+            "
+            src="${heroArtwork}"
+            alt="${selectedCase.name}"
+            onerror="
+              this.onerror=null;
+              this.src='${fallbackArtwork}';
+              this.classList.remove('approved-red-art');
+            "
+          >
+
+        </div>
+
+
+        <div class="cz-case-stat-row">
+
+          <article class="cz-case-stat-card">
+            <span class="cz-case-stat-icon">
+              <svg viewBox="0 0 32 32" aria-hidden="true">
+                <ellipse cx="16" cy="8" rx="9" ry="4"></ellipse>
+                <path d="M7 8v6c0 2.2 4 4 9 4s9-1.8 9-4V8"></path>
+                <path d="M7 14v6c0 2.2 4 4 9 4s9-1.8 9-4v-6"></path>
+              </svg>
+            </span>
+
+            <span class="cz-case-stat-value">
+              ${Number(selectedCase.price).toFixed(0)}
+              <small>Core Coins</small>
+            </span>
+
+            <span class="cz-case-stat-label">
+              Ціна кейса
+            </span>
+          </article>
+
+
+          <article class="cz-case-stat-card">
+            <span class="cz-case-stat-icon">
+              <svg viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M22 5c-5 4-9 9-12 15l4 2c4-4 7-8 10-13"></path>
+                <path d="M8 21l-3 6 6-2"></path>
+                <path d="M18 9l7 7"></path>
+              </svg>
+            </span>
+
+            <span class="cz-case-stat-value">
+              ${stats.knifeChance.toFixed(2)}%
+            </span>
+
+            <span class="cz-case-stat-label">
+              Шанс ножа
+            </span>
+          </article>
+
+
+          <article class="cz-case-stat-card">
+            <span class="cz-case-stat-icon">
+              <svg viewBox="0 0 32 32" aria-hidden="true">
+                <circle cx="16" cy="16" r="9"></circle>
+                <circle cx="16" cy="16" r="3"></circle>
+                <path d="M16 2v5M16 25v5M2 16h5M25 16h5"></path>
+              </svg>
+            </span>
+
+            <span class="cz-case-stat-value">
+              ${stats.secretChance.toFixed(2)}%
+            </span>
+
+            <span class="cz-case-stat-label">
+              Шанс секрету
+            </span>
+          </article>
+
+        </div>
+
+
+        <div class="cz-case-qty-row">
+
+          <span>
+            Кількість
+          </span>
+
+          <div class="cz-case-qty-buttons">
+
+            ${[1,2,3,4,5].map(q => `
+              <button
+                type="button"
+                class="case-qty-btn ${q === 1 ? "active" : ""}"
+                data-qty="${q}"
+                onclick="
+                  setCaseOpenQuantity(
+                    ${q},
+                    ${Number(selectedCase.price)}
+                  )
+                "
+              >
+                x${q}
+              </button>
+            `).join("")}
+
+          </div>
+
+        </div>
+
 
         <button
           id="caseOpenBtn"
           type="button"
+          class="cz-case-main-open"
           onclick="
-            startCaseOpening('${selectedCase.id}', selectedOpenQuantity)
-          "
-          style="
-            min-width:260px;
-            min-height:50px;
-            padding:0 24px;
-            border-radius:12px;
-            background:#ffd400;
-            color:#111;
-            font-weight:950;
-            font-size:14px;
-            box-shadow:
-              0 0 28px rgba(255,212,0,.16);
+            startCaseOpening(
+              '${selectedCase.id}',
+              selectedOpenQuantity
+            )
           "
         >
-          🔓 Відкрити x1 —
-          ${Number(selectedCase.price).toFixed(0)} Core Coins
+          <span class="cz-case-open-icon">▣</span>
+          ВІДКРИТИ КЕЙС ЗА
+          ${Number(selectedCase.price).toFixed(0)}
+          Core Coins
         </button>
 
-      </div>
 
-    </div>
+        <section class="cz-case-drops-section">
+
+          <div class="cz-case-drops-heading">
+            <i></i>
+            <span>◇</span>
+            <strong>МОЖЛИВІ ДРОПИ</strong>
+            <span>◇</span>
+            <i></i>
+          </div>
+
+          <div
+            id="casePossibleDrops"
+            class="cz-case-drop-grid"
+          >
+            <div class="cz-case-drop-loading">
+              Завантаження предметів...
+            </div>
+          </div>
+
+        </section>
+
+      </section>
+
+    </main>
   `;
 
   try {
@@ -879,12 +1006,7 @@ async function showCaseDetails(id) {
     if (!items.length) {
 
       dropsBox.innerHTML = `
-        <div style="
-          grid-column:1/-1;
-          padding:30px;
-          text-align:center;
-          color:#777;
-        ">
+        <div class="cz-case-drop-loading">
           У цьому кейсі поки немає предметів.
         </div>
       `;
@@ -893,7 +1015,7 @@ async function showCaseDetails(id) {
     }
 
     dropsBox.innerHTML =
-      items.map((item, index) => {
+      items.map((item,index) => {
 
         const itemName =
           item?.[0] || "Предмет";
@@ -917,88 +1039,45 @@ async function showCaseDetails(id) {
           );
 
         return `
-          <div style="
-            position:relative;
-            overflow:hidden;
-            min-height:150px;
-            padding:10px;
-            border:
-              1px solid
-              ${rarityColor}55;
-            border-radius:12px;
-            background:
-              linear-gradient(
-                180deg,
-                ${rarityColor}12,
-                #111 58%
-              );
-          ">
+          <article
+            class="cz-case-drop-card"
+            style="
+              --drop-rarity:${rarityColor};
+            "
+          >
 
-            <div style="
-              position:absolute;
-              left:15%;
-              right:15%;
-              bottom:-18px;
-              height:45px;
-              border-radius:50%;
-              background:${rarityColor};
-              opacity:.16;
-              filter:blur(22px);
-            "></div>
+            <div class="cz-case-drop-image">
 
-            ${
-              image
-                ? `
-                  <img
-                    src="${image}"
-                    alt="${itemName}"
-                    style="
-                      position:relative;
-                      z-index:2;
-                      width:100%;
-                      height:92px;
-                      object-fit:contain;
-                    "
-                         >
-                `
-                : `
-                  <div style="
-                    height:92px;
-                    display:grid;
-                    place-items:center;
-                    color:#555;
-                    font-size:11px;
-                  ">
-                    Немає фото
-                  </div>
-                `
-            }
+              ${
+                image
+                  ? `
+                    <img
+                      src="${image}"
+                      alt="${itemName}"
+                    >
+                  `
+                  : `
+                    <span class="cz-case-drop-no-image">
+                      Немає фото
+                    </span>
+                  `
+              }
 
-            <div style="
-              position:relative;
-              z-index:2;
-              margin-top:5px;
-            ">
-              <strong style="
-                display:block;
-                font-size:11px;
-                line-height:1.3;
-              ">
+            </div>
+
+            <div class="cz-case-drop-copy">
+
+              <strong>
                 ${itemName}
               </strong>
 
-              <span style="
-                display:block;
-                margin-top:4px;
-                color:${rarityColor};
-                font-size:9px;
-                text-transform:uppercase;
-              ">
+              <span>
                 ${rarity}
               </span>
+
             </div>
 
-          </div>
+          </article>
         `;
 
       }).join("");
@@ -1016,12 +1095,7 @@ async function showCaseDetails(id) {
     if (dropsBox) {
 
       dropsBox.innerHTML = `
-        <div style="
-          grid-column:1/-1;
-          padding:30px;
-          text-align:center;
-          color:#ff6767;
-        ">
+        <div class="cz-case-drop-loading error">
           Не вдалося завантажити предмети.
         </div>
       `;
@@ -1059,21 +1133,6 @@ function setCaseOpenQuantity(
         "active",
         active
       );
-
-      button.style.borderColor =
-        active
-          ? "#ffd400"
-          : "rgba(255,255,255,.10)";
-
-      button.style.background =
-        active
-          ? "#ffd400"
-          : "#171717";
-
-      button.style.color =
-        active
-          ? "#111"
-          : "#aaa";
     });
 
   const openButton =
@@ -1085,8 +1144,17 @@ function setCaseOpenQuantity(
       Number(price || 0) *
       selectedOpenQuantity;
 
-    openButton.innerHTML =
-      `🔓 Відкрити x${selectedOpenQuantity} — ${total.toFixed(0)} Core Coins`;
+    const quantityText =
+      selectedOpenQuantity === 1
+        ? "КЕЙС"
+        : `x${selectedOpenQuantity} КЕЙСИ`;
+
+    openButton.innerHTML = `
+      <span class="cz-case-open-icon">▣</span>
+      ВІДКРИТИ ${quantityText} ЗА
+      ${total.toFixed(0)}
+      Core Coins
+    `;
   }
 }
 
@@ -1233,38 +1301,19 @@ async function startCaseOpening(
   }
 
   content.innerHTML = `
-    <div style="
-      position:relative;
-      overflow:hidden;
-      padding:8px 6px 18px;
-    ">
+    <main class="cz-case-opening-page">
 
-      <div style="
-        text-align:center;
-        margin-bottom:16px;
-      ">
+      <div class="cz-case-opening-head">
 
-        <div style="
-          color:#ffd400;
-          font-size:10px;
-          font-weight:900;
-          letter-spacing:2px;
-        ">
+        <span>
           CASEZONE DROP
-        </div>
+        </span>
 
-        <h2 style="
-          margin:8px 0 4px;
-          font-size:28px;
-        ">
+        <h2>
           ${selectedCase.name}
         </h2>
 
-        <p style="
-          margin:0;
-          color:#888;
-          font-size:13px;
-        ">
+        <p>
           Відкриваємо ${quantity}
           ${quantity === 1 ? "кейс" : "кейси"}...
         </p>
@@ -1273,22 +1322,14 @@ async function startCaseOpening(
 
       <div
         id="multiReels"
-        style="
-          display:grid;
-          gap:10px;
-        "
+        class="cz-case-reels"
       ></div>
 
-      <div style="
-        margin-top:14px;
-        text-align:center;
-        color:#777;
-        font-size:11px;
-      ">
+      <div class="cz-case-server-note">
         Результат кожного відкриття визначається сервером
       </div>
 
-    </div>
+    </main>
   `;
 
   let inventoryBefore = [];
@@ -1823,10 +1864,13 @@ function showMultiOpenResult(
       .filter(Boolean);
 
   content.innerHTML = `
-    <div style="
-      text-align:center;
-      padding:12px;
-    ">
+    <div
+      class="cz-case-result-page"
+      style="
+        text-align:center;
+        padding:12px;
+      "
+    >
 
       <div style="
         color:#ffd400;
