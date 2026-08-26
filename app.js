@@ -176,6 +176,7 @@ async function loadCases() {
     await api("/api/skins");
 
   renderCases();
+  renderNewCases();
 }
 
 
@@ -279,6 +280,155 @@ function getCaseArtwork(c, index) {
    RENDER CASES
 ========================= */
 
+function getCaseRareChance(caseData) {
+
+  const items =
+    Array.isArray(
+      caseData?.items
+    )
+      ? caseData.items
+      : [];
+
+  const weights =
+    items
+      .map(
+        item =>
+          Number(item?.[2] || 0)
+      )
+      .filter(
+        value =>
+          Number.isFinite(value) &&
+          value > 0
+      );
+
+  if (!weights.length) {
+    return 0;
+  }
+
+  const total =
+    weights.reduce(
+      (sum,value) =>
+        sum + value,
+      0
+    );
+
+  const rare =
+    Math.min(...weights);
+
+  return total
+    ? rare / total * 100
+    : 0;
+}
+
+
+function renderCaseCard(
+  caseData,
+  index,
+  options = {}
+) {
+
+  const theme =
+    getCaseTheme(index);
+
+  const artwork =
+    getCaseArtwork(
+      caseData,
+      index
+    );
+
+  const itemCount =
+    Array.isArray(
+      caseData.items
+    )
+      ? caseData.items.length
+      : 0;
+
+  const rareChance =
+    getCaseRareChance(
+      caseData
+    );
+
+  const badge =
+    options.badge || "";
+
+  return `
+    <article
+      class="case-card cz-case-card-v4"
+      data-case-id="${caseData.id}"
+      style="
+        --case-main:${theme.main};
+        --case-dark:${theme.dark};
+        --case-glow:${theme.glow};
+      "
+    >
+
+      ${
+        badge
+          ? `
+            <span class="cz-case-badge-v4">
+              ${badge}
+            </span>
+          `
+          : ""
+      }
+
+      <div class="cz-case-art-v4">
+
+        <div class="cz-case-art-glow"></div>
+
+        <img
+          src="${artwork}"
+          alt="${caseData.name}"
+          loading="lazy"
+          onerror="
+            this.style.display='none';
+          "
+        >
+
+      </div>
+
+      <div class="cz-case-content-v4">
+
+        <h3>
+          ${caseData.name}
+        </h3>
+
+        <div class="cz-case-meta-v4">
+
+          <span>
+            ${itemCount} предметів
+          </span>
+
+          <span>
+            Рідкісний:
+            <b>
+              ${rareChance.toFixed(2)}%
+            </b>
+          </span>
+
+        </div>
+
+        <strong class="cz-case-price-v4">
+          ${Number(caseData.price).toFixed(2)} ₴
+        </strong>
+
+        <button
+          type="button"
+          class="cz-case-open-v4"
+          onclick="
+            showCaseDetails('${caseData.id}')
+          "
+        >
+          ВІДКРИТИ
+        </button>
+
+      </div>
+
+    </article>
+  `;
+}
+
+
 function renderCases() {
 
   const container =
@@ -294,6 +444,7 @@ function renderCases() {
   if (
     activeCaseFilter === "cheap"
   ) {
+
     filteredCases =
       cases.filter(
         c =>
@@ -304,6 +455,7 @@ function renderCases() {
   if (
     activeCaseFilter === "premium"
   ) {
+
     filteredCases =
       cases.filter(
         c =>
@@ -315,6 +467,7 @@ function renderCases() {
   if (
     activeCaseFilter === "expensive"
   ) {
+
     filteredCases =
       cases.filter(
         c =>
@@ -325,14 +478,57 @@ function renderCases() {
   if (!filteredCases.length) {
 
     container.innerHTML = `
-      <div style="
-        grid-column:1/-1;
-        padding:50px;
-        text-align:center;
-        color:#777;
-      ">
-        У цій категорії
-        поки немає кейсів.
+      <div class="cz-case-empty-v4">
+        У цій категорії поки немає кейсів.
+      </div>
+    `;
+
+    return;
+  }
+
+  /*
+    Popular section intentionally stays compact.
+    Existing filtering and opening logic are preserved.
+  */
+  container.innerHTML =
+    filteredCases
+      .slice(0, 8)
+      .map(
+        (caseData,index) =>
+          renderCaseCard(
+            caseData,
+            index,
+            {
+              badge:
+                index < 2
+                  ? "HOT"
+                  : ""
+            }
+          )
+      )
+      .join("");
+}
+
+
+function renderNewCases() {
+
+  const container =
+    $("#newCases");
+
+  if (!container) {
+    return;
+  }
+
+  const newest =
+    [...cases]
+      .slice(-8)
+      .reverse();
+
+  if (!newest.length) {
+
+    container.innerHTML = `
+      <div class="cz-case-empty-v4">
+        Нових кейсів поки немає.
       </div>
     `;
 
@@ -340,134 +536,23 @@ function renderCases() {
   }
 
   container.innerHTML =
-    filteredCases
-      .map((c, index) => {
-
-        const theme =
-          getCaseTheme(index);
-
-        const artwork =
-          getCaseArtwork(c, index);
-
-        const itemCount =
-          Array.isArray(c.items)
-            ? c.items.length
-            : 0;
-
-        return `
-          <article
-            class="case-card"
-            data-case-id="${c.id}"
-            style="
-              --case-main:${theme.main};
-              --case-dark:${theme.dark};
-              --case-glow:${theme.glow};
-            "
-          >
-
-            <div
-              class="cz-new-case-visual"
-              style="
-                position:relative;
-                z-index:2;
-                height:180px;
-                margin:-8px -8px 8px;
-                overflow:hidden;
-                border-radius:14px;
-              "
-            >
-              <img
-                src="${artwork}"
-                alt="${c.name}"
-                loading="lazy"
-                style="
-                  display:block;
-                  width:100%;
-                  height:100%;
-                  object-fit:cover;
-                  object-position:center;
-                  border-radius:14px;
-                  filter:
-                    saturate(1.05)
-                    contrast(1.04);
-                  transition:
-                    transform .22s ease,
-                    filter .22s ease;
-                "
-                onerror="
-                  this.style.display='none';
-                "
-              >
-            </div>
-
-            <div
-              style="
-                position:relative;
-                z-index:3;
-              "
-            >
-
-              <h3
-                style="
-                  margin:7px 0 5px;
-                "
-              >
-                ${c.name}
-              </h3>
-
-              <div
-                style="
-                  color:#777;
-                  font-size:10px;
-                  margin-bottom:11px;
-                "
-              >
-                ${itemCount}
-                предметів
-              </div>
-
-              <div
-                style="
-                  display:flex;
-                  align-items:center;
-                  justify-content:space-between;
-                  gap:8px;
-                "
-              >
-
-                <strong
-                  style="
-                    color:${theme.main};
-                    font-size:17px;
-                    text-shadow:
-                      0 0 12px
-                      ${theme.glow};
-                  "
-                >
-                  ${Number(c.price)} ₴
-                </strong>
-
-                <button
-                  type="button"
-                  onclick="
-                    showCaseDetails('${c.id}')
-                  "
-                  style="
-                    background:${theme.main};
-                    color:#080808;
-                  "
-                >
-                  Відкрити
-                </button>
-
-              </div>
-
-            </div>
-
-          </article>
-        `;
-
-      })
+    newest
+      .map(
+        (caseData,index) =>
+          renderCaseCard(
+            caseData,
+            Math.max(
+              0,
+              cases.indexOf(caseData)
+            ),
+            {
+              badge:
+                index < 2
+                  ? "NEW"
+                  : ""
+            }
+          )
+      )
       .join("");
 }
 
@@ -3692,6 +3777,50 @@ function renderHomeDrops(drops) {
 }
 
 
+function formatHomeStat(value) {
+
+  return Number(
+    value || 0
+  ).toLocaleString(
+    "uk-UA"
+  );
+}
+
+
+function renderHomeStats(stats) {
+
+  const online =
+    $("#homeOnlineStat");
+
+  const casesOpened =
+    $("#homeCasesOpenedStat");
+
+  const skinsIssued =
+    $("#homeSkinsIssuedStat");
+
+  if (online) {
+    online.textContent =
+      formatHomeStat(
+        stats?.online || 0
+      );
+  }
+
+  if (casesOpened) {
+    casesOpened.textContent =
+      formatHomeStat(
+        stats?.casesOpened || 0
+      );
+  }
+
+  if (skinsIssued) {
+    skinsIssued.textContent =
+      formatHomeStat(
+        stats?.skinsIssued || 0
+      );
+  }
+}
+
+
 function renderHomeTopPlayers(players) {
 
   const box =
@@ -3797,6 +3926,10 @@ async function loadHomeDashboard() {
 
     renderHomeTopPlayers(
       data.topPlayers || []
+    );
+
+    renderHomeStats(
+      data.stats || {}
     );
 
   } catch (e) {
