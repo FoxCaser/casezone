@@ -1007,7 +1007,7 @@
 
 
 <!-- =========================
-     ПРОФІЛЬ
+     ПОВНОЕКРАННИЙ ПРОФІЛЬ
 ========================= -->
 
 <div
@@ -1015,130 +1015,178 @@
   class="modal hidden"
 >
 
-  <div class="modal-card profile-card">
+  <div class="modal-card profile-card cz-profile-modal-card">
 
     <button
       id="closeProfile"
-      class="x"
+      class="x cz-profile-close"
+      type="button"
+      aria-label="Закрити профіль"
     >
       ×
     </button>
 
 
-    <div class="modal-heading">
+    <main class="cz-profile-page">
 
-      <span class="modal-heading-icon">
-        👤
-      </span>
+      <!-- TOP DASHBOARD -->
+      <section class="cz-profile-dashboard">
 
-      <div>
+        <!-- PROFILE CARD -->
+        <article class="cz-profile-panel cz-profile-user-card">
 
-        <span class="section-kicker">
-          ACCOUNT
-        </span>
-
-        <h2>
-          Профіль
-        </h2>
-
-      </div>
-
-    </div>
-
-
-    <div class="profile-layout">
-
-
-      <!-- ЛІВЕ МЕНЮ -->
-
-      <div class="profile-menu">
-
-        <button
-          class="profile-tab active"
-          data-tab="settings"
-        >
-          <span>⚙️</span>
-          Налаштування
-        </button>
-
-
-        <button
-          class="profile-tab"
-          data-tab="deposits"
-        >
-          <span>💳</span>
-          Історія поповнень
-        </button>
-
-
-        <button
-          class="profile-tab"
-          data-tab="withdrawals"
-        >
-          <span>📦</span>
-          Історія виводу
-        </button>
-
-      </div>
-
-
-      <!-- ПРАВА ЧАСТИНА -->
-
-      <div class="profile-content">
-
-
-        <!-- НАЛАШТУВАННЯ -->
-
-        <div
-          id="profileSettings"
-          class="profile-section"
-        >
-
-          <div class="profile-section-title">
-
-            <span>
-              SETTINGS
-            </span>
-
-            <h3>
-              Налаштування
-            </h3>
-
+          <div class="cz-profile-panel-label">
+            ПРОФІЛЬ
           </div>
 
 
+          <div class="cz-profile-user-head">
 
-          <div class="steam-profile-info">
+            <div class="cz-profile-avatar-wrap">
 
-            <div>
-              <span class="steam-profile-label">
-                STEAM ID
+              <img
+                id="profileAvatar"
+                class="cz-profile-avatar hidden"
+                alt="Steam avatar"
+              >
+
+              <span
+                id="profileAvatarFallback"
+                class="cz-profile-avatar-fallback"
+              >
+                👤
               </span>
 
-              <strong id="profileSteamId">
-                Не підключено
-              </strong>
             </div>
 
-            <span class="steam-profile-badge">
-              STEAM
-            </span>
+
+            <div class="cz-profile-user-meta">
+
+              <div class="cz-profile-name-row">
+
+                <strong id="profileDisplayName">
+                  CaseZone Player
+                </strong>
+
+                <button
+                  id="profileSettingsToggle"
+                  class="cz-profile-edit-btn"
+                  type="button"
+                  title="Налаштування профілю"
+                >
+                  ✎
+                </button>
+
+              </div>
+
+
+              <span class="cz-profile-steam-label">
+                Steam ID
+              </span>
+
+
+              <div class="cz-profile-steam-row">
+
+                <span id="profileSteamId">
+                  Не підключено
+                </span>
+
+                <button
+                  id="profileCopySteamId"
+                  type="button"
+                  title="Скопіювати Steam ID"
+                >
+                  ▣
+                </button>
+
+              </div>
+
+
+              <span class="cz-profile-balance-label">
+                БАЛАНС
+              </span>
+
+              <strong
+                id="profileBalanceValue"
+                class="cz-profile-balance-value"
+              >
+                0.00 Core Coins
+              </strong>
+
+            </div>
 
           </div>
 
 
-          <div class="trade-url-box">
+          <div class="cz-profile-stat-grid">
+
+            <div class="cz-profile-stat-card">
+
+              <span class="cz-profile-stat-icon">
+                ▣
+              </span>
+
+              <small>
+                Відкрито кейсів
+              </small>
+
+              <strong id="profileCasesOpened">
+                0
+              </strong>
+
+            </div>
+
+
+            <div class="cz-profile-stat-card">
+
+              <span class="cz-profile-stat-icon">
+                ⚒
+              </span>
+
+              <small>
+                Апгрейдів
+              </small>
+
+              <strong id="profileUpgradesCount">
+                0
+              </strong>
+
+            </div>
+
+
+            <div class="cz-profile-stat-card">
+
+              <span class="cz-profile-stat-icon">
+                ♕
+              </span>
+
+              <small>
+                Виграшів
+              </small>
+
+              <strong id="profileWinRate">
+                0.00%
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- Hidden by default so the normal view stays like the reference.
+               Opens from the pencil icon; keeps existing Trade URL functionality. -->
+          <div
+            id="profileSettingsPanel"
+            class="cz-profile-settings-panel hidden"
+          >
+
+            <div class="cz-profile-settings-title">
+              Налаштування Steam
+            </div>
 
             <label for="steamTradeUrl">
               Steam Trade URL
             </label>
-
-
-            <p>
-              Посилання використовується
-              для отримання скінів через Steam.
-            </p>
-
 
             <input
               id="steamTradeUrl"
@@ -1146,82 +1194,314 @@
               placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
             >
 
-
             <button
               id="saveTradeUrl"
-              class="deposit-btn save-trade-btn"
+              class="cz-profile-save-trade"
+              type="button"
             >
               Зберегти Trade URL
             </button>
 
-
             <p id="tradeUrlStatus"></p>
 
-          </div>
 
-        </div>
-
-
-        <!-- ІСТОРІЯ ПОПОВНЕННЯ -->
-
-        <div
-          id="profileDeposits"
-          class="profile-section hidden"
-        >
-
-          <div class="profile-section-title">
-
-            <span>
-              DEPOSITS
-            </span>
-
-            <h3>
+            <button
+              id="profileDepositHistoryToggle"
+              class="cz-profile-history-toggle"
+              type="button"
+            >
               Історія поповнень
-            </h3>
+            </button>
+
+            <div
+              id="depositHistory"
+              class="cz-profile-old-history hidden"
+            >
+              Історія поповнень порожня
+            </div>
 
           </div>
 
+        </article>
 
-          <div id="depositHistory">
-            Історія поповнень порожня
+
+        <!-- BEST DROP -->
+        <article class="cz-profile-panel cz-profile-best-card">
+
+          <div class="cz-profile-panel-label">
+            <span>♛</span>
+            НАЙКРАЩИЙ ДРОП
           </div>
 
-        </div>
+
+          <div
+            id="profileBestDropEmpty"
+            class="cz-profile-best-empty"
+          >
+            Поки немає дропів
+          </div>
 
 
-        <!-- ІСТОРІЯ ВИВОДУ -->
+          <div
+            id="profileBestDrop"
+            class="cz-profile-best-drop hidden"
+          >
 
-        <div
-          id="profileWithdrawals"
-          class="profile-section hidden"
-        >
+            <div class="cz-profile-best-copy">
 
-          <div class="profile-section-title">
+              <strong id="profileBestDropName">
+                —
+              </strong>
 
-            <span>
-              WITHDRAWALS
+              <span id="profileBestDropRarity">
+                —
+              </span>
+
+            </div>
+
+
+            <div class="cz-profile-best-image">
+
+              <img
+                id="profileBestDropImage"
+                alt="Найкращий дроп"
+              >
+
+            </div>
+
+
+            <strong
+              id="profileBestDropValue"
+              class="cz-profile-best-value"
+            >
+              0.00 Core Coins
+            </strong>
+
+
+            <span
+              id="profileBestDropDate"
+              class="cz-profile-best-date"
+            >
+              —
             </span>
 
-            <h3>
-              Історія виводу скінів
-            </h3>
+          </div>
+
+        </article>
+
+
+        <!-- WITHDRAW HISTORY -->
+        <article class="cz-profile-panel cz-profile-withdraw-card">
+
+          <div class="cz-profile-withdraw-head">
+
+            <div class="cz-profile-panel-label">
+              ІСТОРІЯ ВИВОДУ
+            </div>
+
+
+            <select
+              id="profileWithdrawFilter"
+              class="cz-profile-history-select"
+              aria-label="Фільтр історії"
+            >
+              <option value="all">
+                Показати всі
+              </option>
+
+              <option value="completed">
+                Успішні
+              </option>
+
+              <option value="pending">
+                В очікуванні
+              </option>
+
+              <option value="failed">
+                Невдалі
+              </option>
+            </select>
 
           </div>
 
 
-          <div id="withdrawHistory">
-            Історія виводу порожня
+          <div
+            id="profileWithdrawList"
+            class="cz-profile-withdraw-list"
+          >
+            <div class="cz-profile-history-empty">
+              Завантаження...
+            </div>
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- INVENTORY -->
+      <section class="cz-profile-inventory-section">
+
+        <div class="cz-profile-inventory-head">
+
+          <div>
+
+            <span class="cz-profile-panel-label">
+              ВАШ ІНВЕНТАР
+            </span>
+
+            <strong id="profileInventoryCount">
+              0 предметів
+            </strong>
+
+          </div>
+
+
+          <div class="cz-profile-inventory-tools">
+
+            <label class="cz-profile-inventory-search">
+
+              <span>
+                ⌕
+              </span>
+
+              <input
+                id="profileInventorySearch"
+                type="search"
+                placeholder="Пошук предметів..."
+                autocomplete="off"
+              >
+
+            </label>
+
+
+            <select
+              id="profileInventoryRarity"
+              class="cz-profile-inventory-select"
+              aria-label="Фільтр предметів"
+            >
+              <option value="all">
+                Всі предмети
+              </option>
+            </select>
+
+
+            <select
+              id="profileInventorySort"
+              class="cz-profile-inventory-select"
+              aria-label="Сортування предметів"
+            >
+              <option value="value-desc">
+                Вартість: від більшої
+              </option>
+
+              <option value="value-asc">
+                Вартість: від меншої
+              </option>
+
+              <option value="newest">
+                Спочатку нові
+              </option>
+
+              <option value="name">
+                За назвою
+              </option>
+            </select>
+
+
+            <div class="cz-profile-inventory-view">
+
+              <button
+                id="profileInventoryCompact"
+                class="active"
+                type="button"
+                title="Компактний вигляд"
+              >
+                ▦
+              </button>
+
+              <button
+                id="profileInventoryComfort"
+                type="button"
+                title="Більші картки"
+              >
+                ▥
+              </button>
+
+            </div>
+
           </div>
 
         </div>
 
-      </div>
 
-    </div>
+        <div
+          id="profileInventoryGrid"
+          class="cz-profile-inventory-grid"
+        >
+          <div class="cz-profile-history-empty">
+            Завантаження інвентарю...
+          </div>
+        </div>
+
+
+        <button
+          id="profileInventoryLoadMore"
+          class="cz-profile-load-more hidden"
+          type="button"
+        >
+          Завантажити ще
+        </button>
+
+      </section>
+
+
+      <footer class="cz-profile-footer">
+
+        <div>
+          <strong>
+            CASEZONE © 2026
+          </strong>
+
+          <span>
+            Усі права захищені
+          </span>
+        </div>
+
+
+        <nav>
+          <a href="#">
+            Угода користувача
+          </a>
+
+          <a href="#">
+            Політика конфіденційності
+          </a>
+
+          <a href="#">
+            Контакти
+          </a>
+
+          <a href="#">
+            FAQ
+          </a>
+        </nav>
+
+
+        <div class="cz-profile-socials">
+          <span>◉</span>
+          <span>➤</span>
+        </div>
+
+      </footer>
+
+    </main>
 
   </div>
 
 </div>
+
+
 <!-- =========================
      ОСНОВНА МОДАЛКА
 ========================= -->
