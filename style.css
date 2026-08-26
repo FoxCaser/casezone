@@ -12484,3 +12484,70 @@ strong {
     display:none;
   }
 }
+
+/* =========================================================
+   CaSeZoNe — C2 OPEN-CASE BRAND
+   Visual branding only. No functional selectors/logic changed.
+========================================================= */
+
+.cz-logo-icon.cz-logo-case-icon {
+  width:48px !important;
+  height:43px !important;
+
+  padding:0 !important;
+
+  overflow:visible !important;
+
+  border:0 !important;
+  border-radius:0 !important;
+
+  color:transparent !important;
+  background:transparent !important;
+
+  box-shadow:none !important;
+}
+
+.cz-logo-icon.cz-logo-case-icon img {
+  width:100% !important;
+  height:100% !important;
+
+  display:block;
+
+  object-fit:contain;
+
+  border:0;
+  border-radius:0;
+
+  background:transparent;
+
+  filter:
+    drop-shadow(
+      0 0 9px
+      rgba(255,212,0,.22)
+    );
+}
+
+.cz-logo-text strong {
+  letter-spacing:.25px !important;
+}
+
+.cz-logo-text strong span {
+  color:#ffd400 !important;
+}
+
+.cz-footer-v5-brand
+.cz-logo-icon.cz-logo-case-icon {
+  width:44px !important;
+  height:39px !important;
+}
+
+.cz-hero-v5-logo {
+  letter-spacing:-1px !important;
+}
+
+@media (max-width:700px) {
+  .cz-logo-icon.cz-logo-case-icon {
+    width:43px !important;
+    height:39px !important;
+  }
+}
