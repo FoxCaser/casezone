@@ -593,7 +593,7 @@ VALUES
 );
 /* =========================
    HOME DASHBOARD
-   Recent drops + top players
+   Recent drops + top players + stats
 ========================= */
 
 app.get(
@@ -604,7 +604,8 @@ app.get(
 
       const [
         dropsResult,
-        topPlayersResult
+        topPlayersResult,
+        statsResult
       ] =
         await Promise.all([
 
@@ -650,6 +651,43 @@ app.get(
               u.id ASC
             LIMIT 5
             `
+          ),
+
+          pool.query(
+            `
+            SELECT
+              (
+                SELECT COUNT(*)::int
+                FROM openings
+              )
+                AS cases_opened,
+
+              (
+                SELECT COUNT(*)::int
+                FROM inventory
+              )
+                AS skins_issued,
+
+              (
+                SELECT COUNT(
+                  DISTINCT recent.user_id
+                )::int
+                FROM (
+                  SELECT user_id
+                  FROM openings
+                  WHERE created_at >=
+                    NOW() - INTERVAL '15 minutes'
+
+                  UNION
+
+                  SELECT user_id
+                  FROM upgrades
+                  WHERE created_at >=
+                    NOW() - INTERVAL '15 minutes'
+                ) recent
+              )
+                AS online
+            `
           )
 
         ]);
@@ -666,10 +704,31 @@ app.get(
             })
           );
 
+      const statsRow =
+        statsResult.rows[0] || {};
+
       res.json({
         drops,
+
         topPlayers:
-          topPlayersResult.rows
+          topPlayersResult.rows,
+
+        stats: {
+          online:
+            Number(
+              statsRow.online || 0
+            ),
+
+          casesOpened:
+            Number(
+              statsRow.cases_opened || 0
+            ),
+
+          skinsIssued:
+            Number(
+              statsRow.skins_issued || 0
+            )
+        }
       });
 
     } catch (e) {
