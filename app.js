@@ -3408,6 +3408,7 @@ async function startLiqPay(amount) {
 }
 /* =========================
    PROFILE
+   Full-screen dashboard.
 ========================= */
 
 const profileBtn =
@@ -3418,18 +3419,6 @@ const profileModal =
 
 const closeProfile =
   $("#closeProfile");
-
-const profileTabs =
-  $$(".profile-tab");
-
-const profileSettings =
-  $("#profileSettings");
-
-const profileDeposits =
-  $("#profileDeposits");
-
-const profileWithdrawals =
-  $("#profileWithdrawals");
 
 const steamTradeUrl =
   $("#steamTradeUrl");
@@ -3446,77 +3435,1027 @@ const steamAvatarBtn =
 const profileSteamId =
   $("#profileSteamId");
 
+const profileSettingsToggle =
+  $("#profileSettingsToggle");
+
+const profileSettingsPanel =
+  $("#profileSettingsPanel");
+
+const profileCopySteamId =
+  $("#profileCopySteamId");
+
+const profileDepositHistoryToggle =
+  $("#profileDepositHistoryToggle");
+
+const profileWithdrawFilter =
+  $("#profileWithdrawFilter");
+
+const profileInventorySearch =
+  $("#profileInventorySearch");
+
+const profileInventoryRarity =
+  $("#profileInventoryRarity");
+
+const profileInventorySort =
+  $("#profileInventorySort");
+
+const profileInventoryCompact =
+  $("#profileInventoryCompact");
+
+const profileInventoryComfort =
+  $("#profileInventoryComfort");
+
+const profileInventoryLoadMore =
+  $("#profileInventoryLoadMore");
+
+
+let profileInventoryCache = [];
+let profileSkinCache = [];
+let profileWithdrawCache = [];
+let profileInventoryMode = "compact";
+let profileInventoryVisibleLimit = 21;
+
 
 /* =========================
-   HEADER STEAM AVATAR
+   PROFILE HELPERS
 ========================= */
 
-steamAvatarBtn
-  ?.addEventListener(
-    "click",
-    () => {
+function formatProfileDate(
+  value,
+  withTime = false
+) {
 
-      profileBtn?.click();
-    }
+  if (!value) {
+    return "—";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "—";
+  }
+
+  if (withTime) {
+
+    return date
+      .toLocaleString(
+        "uk-UA",
+        {
+          day:"2-digit",
+          month:"2-digit",
+          year:"numeric",
+          hour:"2-digit",
+          minute:"2-digit"
+        }
+      );
+  }
+
+  return date
+    .toLocaleDateString(
+      "uk-UA"
+    );
+}
+
+
+function getProfileStatusMeta(status) {
+
+  const normalized =
+    String(status || "")
+      .trim()
+      .toLowerCase();
+
+  if (
+    normalized === "completed" ||
+    normalized === "success" ||
+    normalized === "sent" ||
+    normalized === "withdrawn"
+  ) {
+
+    return {
+      key:"completed",
+      label:"Успішно"
+    };
+  }
+
+
+  if (
+    normalized === "failed" ||
+    normalized === "rejected" ||
+    normalized === "cancelled" ||
+    normalized === "canceled"
+  ) {
+
+    return {
+      key:"failed",
+      label:"Невдало"
+    };
+  }
+
+
+  return {
+    key:"pending",
+    label:"В очікуванні"
+  };
+}
+
+
+function populateProfileInventoryRarity() {
+
+  if (!profileInventoryRarity) {
+    return;
+  }
+
+  const previous =
+    profileInventoryRarity.value ||
+    "all";
+
+  const values =
+    Array.from(
+      new Set(
+        profileInventoryCache
+          .map(item =>
+            String(
+              item.rarity || ""
+            ).trim()
+          )
+          .filter(Boolean)
+      )
+    )
+      .sort(
+        (a,b) =>
+          a.localeCompare(
+            b,
+            "uk"
+          )
+      );
+
+
+  profileInventoryRarity.innerHTML = `
+    <option value="all">
+      Всі предмети
+    </option>
+
+    ${values.map(value => `
+      <option
+        value="${escapeHomeHtml(
+          normalizeInventoryRarity(
+            value
+          )
+        )}"
+      >
+        ${escapeHomeHtml(value)}
+      </option>
+    `).join("")}
+  `;
+
+
+  profileInventoryRarity.value =
+    Array.from(
+      profileInventoryRarity.options
+    )
+      .some(
+        option =>
+          option.value ===
+          previous
+      )
+        ? previous
+        : "all";
+}
+
+
+function renderProfileInventory() {
+
+  const grid =
+    $("#profileInventoryGrid");
+
+  if (!grid) {
+    return;
+  }
+
+
+  const search =
+    String(
+      profileInventorySearch
+        ?.value || ""
+    )
+      .trim()
+      .toLowerCase();
+
+
+  const rarity =
+    profileInventoryRarity
+      ?.value || "all";
+
+
+  const sort =
+    profileInventorySort
+      ?.value || "value-desc";
+
+
+  let items =
+    profileInventoryCache
+      .filter(item => {
+
+        const matchesSearch =
+          !search ||
+          String(
+            item.item_name || ""
+          )
+            .toLowerCase()
+            .includes(search);
+
+
+        const matchesRarity =
+          rarity === "all" ||
+          normalizeInventoryRarity(
+            item.rarity
+          ) === rarity;
+
+
+        return (
+          matchesSearch &&
+          matchesRarity
+        );
+      });
+
+
+  items =
+    [...items]
+      .sort((a,b) => {
+
+        if (sort === "value-asc") {
+
+          return (
+            Number(a.value || 0) -
+            Number(b.value || 0)
+          );
+        }
+
+
+        if (sort === "newest") {
+
+          return (
+            Number(b.id || 0) -
+            Number(a.id || 0)
+          );
+        }
+
+
+        if (sort === "name") {
+
+          return String(
+            a.item_name || ""
+          )
+            .localeCompare(
+              String(
+                b.item_name || ""
+              ),
+              "uk"
+            );
+        }
+
+
+        return (
+          Number(b.value || 0) -
+          Number(a.value || 0)
+        );
+      });
+
+
+  const count =
+    $("#profileInventoryCount");
+
+  if (count) {
+
+    count.textContent =
+      `${items.length} предметів`;
+  }
+
+
+  grid.classList.toggle(
+    "comfort-view",
+    profileInventoryMode ===
+      "comfort"
   );
+
+
+  if (!items.length) {
+
+    grid.innerHTML = `
+      <div class="cz-profile-history-empty">
+        Предметів не знайдено
+      </div>
+    `;
+
+    profileInventoryLoadMore
+      ?.classList
+      .add("hidden");
+
+    return;
+  }
+
+
+  const visible =
+    items.slice(
+      0,
+      profileInventoryVisibleLimit
+    );
+
+
+  grid.innerHTML =
+    visible
+      .map((item,index) => {
+
+        const skin =
+          profileSkinCache
+            .find(
+              skin =>
+                skin.name ===
+                item.item_name
+            );
+
+
+        const image =
+          skin?.image || "";
+
+
+        const rarityColor =
+          getDropRarityColor(
+            item.rarity,
+            index
+          );
+
+
+        const name =
+          splitInventoryItemName(
+            item.item_name
+          );
+
+
+        return `
+          <article
+            class="cz-profile-item-card"
+            style="
+              --profile-rarity:
+              ${rarityColor};
+            "
+          >
+
+            <div class="cz-profile-item-top">
+
+              <span>
+                ${escapeHomeHtml(
+                  String(
+                    item.rarity || ""
+                  )
+                    .trim()
+                    .slice(0,3)
+                    .toUpperCase() ||
+                  "ITEM"
+                )}
+              </span>
+
+              <span class="cz-profile-item-lock">
+                ◇
+              </span>
+
+            </div>
+
+
+            <div class="cz-profile-item-image">
+
+              ${
+                image
+                  ? `
+                    <img
+                      src="${image}"
+                      alt="${escapeHomeHtml(
+                        name.full
+                      )}"
+                      loading="lazy"
+                    >
+                  `
+                  : `
+                    <span class="cz-profile-item-no-image">
+                      Немає фото
+                    </span>
+                  `
+              }
+
+            </div>
+
+
+            <div class="cz-profile-item-copy">
+
+              <strong>
+                ${escapeHomeHtml(
+                  name.weapon
+                )}
+              </strong>
+
+              ${
+                name.finish
+                  ? `
+                    <b>
+                      ${escapeHomeHtml(
+                        name.finish
+                      )}
+                    </b>
+                  `
+                  : ""
+              }
+
+              <span>
+                ${Number(
+                  item.value || 0
+                ).toFixed(2)}
+                Core Coins
+              </span>
+
+            </div>
+
+          </article>
+        `;
+
+      })
+      .join("");
+
+
+  const hasMore =
+    items.length >
+    profileInventoryVisibleLimit;
+
+
+  profileInventoryLoadMore
+    ?.classList
+    .toggle(
+      "hidden",
+      !hasMore
+    );
+}
+
+
+function renderProfileWithdrawals() {
+
+  const list =
+    $("#profileWithdrawList");
+
+  if (!list) {
+    return;
+  }
+
+
+  const filter =
+    profileWithdrawFilter
+      ?.value || "all";
+
+
+  const visible =
+    profileWithdrawCache
+      .filter(item => {
+
+        if (filter === "all") {
+          return true;
+        }
+
+        return (
+          getProfileStatusMeta(
+            item.status
+          ).key === filter
+        );
+      })
+      .slice(0,6);
+
+
+  if (!visible.length) {
+
+    list.innerHTML = `
+      <div class="cz-profile-history-empty">
+        Історія виводу порожня
+      </div>
+    `;
+
+    return;
+  }
+
+
+  list.innerHTML =
+    visible
+      .map(item => {
+
+        const status =
+          getProfileStatusMeta(
+            item.status
+          );
+
+
+        const name =
+          splitInventoryItemName(
+            item.item_name
+          );
+
+
+        return `
+          <div class="cz-profile-withdraw-row">
+
+            <div class="cz-profile-withdraw-item">
+
+              <div class="cz-profile-withdraw-image">
+
+                ${
+                  item.image
+                    ? `
+                      <img
+                        src="${item.image}"
+                        alt="${escapeHomeHtml(
+                          name.full
+                        )}"
+                      >
+                    `
+                    : `
+                      <span>
+                        ◇
+                      </span>
+                    `
+                }
+
+              </div>
+
+
+              <div>
+
+                <strong>
+                  ${escapeHomeHtml(
+                    name.full
+                  )}
+                </strong>
+
+                <small>
+                  ${escapeHomeHtml(
+                    String(
+                      item.rarity || ""
+                    )
+                  )}
+                </small>
+
+              </div>
+
+            </div>
+
+
+            <strong class="cz-profile-withdraw-value">
+              ${Number(
+                item.value || 0
+              ).toFixed(2)}
+              Core Coins
+            </strong>
+
+
+            <span class="cz-profile-withdraw-date">
+              ${formatProfileDate(
+                item.created_at,
+                true
+              )}
+            </span>
+
+
+            <span
+              class="
+                cz-profile-withdraw-status
+                status-${status.key}
+              "
+            >
+              ${status.label}
+            </span>
+
+          </div>
+        `;
+
+      })
+      .join("");
+}
+
+
+function renderProfileBestDrop(item) {
+
+  const empty =
+    $("#profileBestDropEmpty");
+
+  const box =
+    $("#profileBestDrop");
+
+
+  if (!item) {
+
+    empty
+      ?.classList
+      .remove("hidden");
+
+    box
+      ?.classList
+      .add("hidden");
+
+    return;
+  }
+
+
+  empty
+    ?.classList
+    .add("hidden");
+
+  box
+    ?.classList
+    .remove("hidden");
+
+
+  const name =
+    $("#profileBestDropName");
+
+  if (name) {
+    name.textContent =
+      item.item_name || "—";
+  }
+
+
+  const rarity =
+    $("#profileBestDropRarity");
+
+  if (rarity) {
+
+    rarity.textContent =
+      item.rarity || "—";
+
+    rarity.style.color =
+      getDropRarityColor(
+        item.rarity
+      );
+  }
+
+
+  const image =
+    $("#profileBestDropImage");
+
+  if (image) {
+
+    if (item.image) {
+
+      image.src =
+        item.image;
+
+      image.classList
+        .remove("hidden");
+
+    } else {
+
+      image
+        .classList
+        .add("hidden");
+    }
+  }
+
+
+  const value =
+    $("#profileBestDropValue");
+
+  if (value) {
+
+    value.textContent =
+      Number(
+        item.value || 0
+      ).toFixed(2) +
+      " Core Coins";
+  }
+
+
+  const date =
+    $("#profileBestDropDate");
+
+  if (date) {
+
+    date.textContent =
+      formatProfileDate(
+        item.created_at,
+        true
+      );
+  }
+}
+
+
+function renderProfileUser(user) {
+
+  const displayName =
+    user?.steam_name ||
+    user?.username ||
+    "CaseZone Player";
+
+
+  const name =
+    $("#profileDisplayName");
+
+  if (name) {
+    name.textContent =
+      displayName;
+  }
+
+
+  if (profileSteamId) {
+
+    profileSteamId.textContent =
+      user?.steam_id ||
+      "Не підключено";
+  }
+
+
+  const balance =
+    $("#profileBalanceValue");
+
+  if (balance) {
+
+    balance.textContent =
+      Number(
+        user?.balance || 0
+      ).toFixed(2) +
+      " Core Coins";
+  }
+
+
+  const avatar =
+    $("#profileAvatar");
+
+  const fallback =
+    $("#profileAvatarFallback");
+
+
+  if (
+    avatar &&
+    user?.avatar_url
+  ) {
+
+    avatar.src =
+      user.avatar_url;
+
+    avatar.classList
+      .remove("hidden");
+
+    fallback
+      ?.classList
+      .add("hidden");
+
+  } else {
+
+    avatar
+      ?.classList
+      .add("hidden");
+
+    fallback
+      ?.classList
+      .remove("hidden");
+  }
+
+
+  if (
+    steamTradeUrl &&
+    user?.trade_url
+  ) {
+
+    steamTradeUrl.value =
+      user.trade_url;
+  }
+}
+
+
+function renderProfileStats(stats) {
+
+  const opened =
+    Number(
+      stats?.casesOpened || 0
+    );
+
+  const upgrades =
+    Number(
+      stats?.upgradesCount || 0
+    );
+
+  const wins =
+    Number(
+      stats?.upgradeWins || 0
+    );
+
+  const winRate =
+    upgrades > 0
+      ? (
+          wins /
+          upgrades *
+          100
+        )
+      : 0;
+
+
+  const casesBox =
+    $("#profileCasesOpened");
+
+  if (casesBox) {
+    casesBox.textContent =
+      String(opened);
+  }
+
+
+  const upgradesBox =
+    $("#profileUpgradesCount");
+
+  if (upgradesBox) {
+    upgradesBox.textContent =
+      String(upgrades);
+  }
+
+
+  const winBox =
+    $("#profileWinRate");
+
+  if (winBox) {
+
+    winBox.textContent =
+      winRate.toFixed(2) +
+      "%";
+  }
+}
 
 
 /* =========================
    OPEN PROFILE
 ========================= */
 
+async function openProfilePage() {
+
+  if (!currentUser) {
+
+    auth();
+    return;
+  }
+
+
+  $("#inventory")
+    ?.classList
+    .add("hidden");
+
+
+  profileModal
+    ?.classList
+    .remove("hidden");
+
+
+  profileSettingsPanel
+    ?.classList
+    .add("hidden");
+
+
+  profileInventoryVisibleLimit =
+    21;
+
+
+  const withdrawList =
+    $("#profileWithdrawList");
+
+  const inventoryGrid =
+    $("#profileInventoryGrid");
+
+
+  if (withdrawList) {
+
+    withdrawList.innerHTML = `
+      <div class="cz-profile-history-empty">
+        Завантаження...
+      </div>
+    `;
+  }
+
+
+  if (inventoryGrid) {
+
+    inventoryGrid.innerHTML = `
+      <div class="cz-profile-history-empty">
+        Завантаження інвентарю...
+      </div>
+    `;
+  }
+
+
+  try {
+
+    const [
+      meData,
+      dashboard,
+      inventory,
+      skinsList
+    ] =
+      await Promise.all([
+        api("/api/me"),
+        api("/api/profile-dashboard"),
+        api("/api/inventory"),
+        api("/api/skins")
+      ]);
+
+
+    renderProfileUser(
+      meData.user || {}
+    );
+
+
+    renderProfileStats(
+      dashboard.stats || {}
+    );
+
+
+    renderProfileBestDrop(
+      dashboard.bestDrop || null
+    );
+
+
+    profileWithdrawCache =
+      Array.isArray(
+        dashboard.withdrawals
+      )
+        ? dashboard.withdrawals
+        : [];
+
+
+    profileInventoryCache =
+      Array.isArray(inventory)
+        ? inventory
+        : [];
+
+
+    profileSkinCache =
+      Array.isArray(skinsList)
+        ? skinsList
+        : [];
+
+
+    populateProfileInventoryRarity();
+
+    renderProfileWithdrawals();
+
+    renderProfileInventory();
+
+
+  } catch (e) {
+
+    console.error(
+      "Profile load error:",
+      e
+    );
+
+
+    if (withdrawList) {
+
+      withdrawList.innerHTML = `
+        <div class="cz-profile-history-empty error">
+          Не вдалося завантажити профіль
+        </div>
+      `;
+    }
+
+
+    if (inventoryGrid) {
+
+      inventoryGrid.innerHTML = `
+        <div class="cz-profile-history-empty error">
+          ${escapeHomeHtml(
+            e.message ||
+            "Помилка сервера"
+          )}
+        </div>
+      `;
+    }
+  }
+}
+
+
+/* =========================
+   HEADER PROFILE / AVATAR
+========================= */
+
+steamAvatarBtn
+  ?.addEventListener(
+    "click",
+    openProfilePage
+  );
+
+
 profileBtn
   ?.addEventListener(
     "click",
-    async () => {
-  if (!currentUser) {
-
-        auth();
-        return;
-      }
-
-
-      profileModal
-        ?.classList
-        .remove("hidden");
-
-
-      try {
-
-        const data =
-          await api("/api/me");
-
-
-        if (
-          steamTradeUrl &&
-          data.user?.trade_url
-        ) {
-
-          steamTradeUrl.value =
-            data.user.trade_url;
-        }
-
-
-        if (profileSteamId) {
-
-          profileSteamId.textContent =
-            data.user?.steam_id ||
-            "Не підключено";
-        }
-
-      } catch (e) {
-
-        console.error(
-          "Profile load error:",
-          e
-        );
-      }
-    }
+    openProfilePage
   );
 
 
 /* =========================
-   CLOSE PROFILE
+   CLOSE / NAVIGATION
 ========================= */
 
 closeProfile
@@ -3531,103 +4470,244 @@ closeProfile
   );
 
 
-profileModal
+$("#casesNavBtn")
   ?.addEventListener(
     "click",
-    event => {
+    () => {
+
+      profileModal
+        ?.classList
+        .add("hidden");
+    }
+  );
+
+
+$("#upgradeNavBtn")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      profileModal
+        ?.classList
+        .add("hidden");
+    }
+  );
+
+
+$("#headerInventoryBtn")
+  ?.addEventListener(
+    "click",
+    () => {
+
+      profileModal
+        ?.classList
+        .add("hidden");
+    }
+  );
+
+
+/* =========================
+   PROFILE SETTINGS
+========================= */
+
+profileSettingsToggle
+  ?.addEventListener(
+    "click",
+    () => {
+
+      profileSettingsPanel
+        ?.classList
+        .toggle("hidden");
+    }
+  );
+
+
+profileCopySteamId
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      const steamId =
+        profileSteamId
+          ?.textContent
+          ?.trim() || "";
+
 
       if (
-        event.target ===
-        profileModal
+        !steamId ||
+        steamId ===
+          "Не підключено"
+      ) {
+        return;
+      }
+
+
+      try {
+
+        await navigator
+          .clipboard
+          .writeText(
+            steamId
+          );
+
+        profileCopySteamId
+          .textContent =
+            "✓";
+
+
+        setTimeout(
+          () => {
+
+            profileCopySteamId
+              .textContent =
+                "▣";
+          },
+          1000
+        );
+
+      } catch (e) {
+
+        console.error(
+          "Steam ID copy error:",
+          e
+        );
+      }
+    }
+  );
+
+
+profileDepositHistoryToggle
+  ?.addEventListener(
+    "click",
+    () => {
+
+      const box =
+        $("#depositHistory");
+
+      box
+        ?.classList
+        .toggle("hidden");
+
+
+      if (
+        box &&
+        !box.classList
+          .contains("hidden")
       ) {
 
-        profileModal
-          .classList
-          .add("hidden");
+        loadDepositHistory();
       }
     }
   );
 
 
 /* =========================
-   PROFILE TABS
+   PROFILE WITHDRAW FILTER
 ========================= */
 
-profileTabs.forEach(
-  tab => {
-
-    tab.addEventListener(
-      "click",
-      () => {
-
-        profileTabs.forEach(
-          button =>
-            button.classList
-              .remove("active")
-        );
+profileWithdrawFilter
+  ?.addEventListener(
+    "change",
+    renderProfileWithdrawals
+  );
 
 
-        tab.classList.add(
-          "active"
-        );
+/* =========================
+   PROFILE INVENTORY CONTROLS
+========================= */
+
+profileInventorySearch
+  ?.addEventListener(
+    "input",
+    () => {
+
+      profileInventoryVisibleLimit =
+        21;
+
+      renderProfileInventory();
+    }
+  );
 
 
-        profileSettings
-          ?.classList
-          .add("hidden");
+profileInventoryRarity
+  ?.addEventListener(
+    "change",
+    () => {
 
-        profileDeposits
-          ?.classList
-          .add("hidden");
+      profileInventoryVisibleLimit =
+        21;
 
-        profileWithdrawals
-          ?.classList
-          .add("hidden");
-
-
-        const selected =
-          tab.dataset.tab;
+      renderProfileInventory();
+    }
+  );
 
 
-        if (
-          selected ===
-          "settings"
-        ) {
+profileInventorySort
+  ?.addEventListener(
+    "change",
+    () => {
 
-          profileSettings
-            ?.classList
-            .remove("hidden");
-        }
+      profileInventoryVisibleLimit =
+        21;
 
-
-        if (
-          selected ===
-          "deposits"
-        ) {
-
-          profileDeposits
-            ?.classList
-            .remove("hidden");
-
-          loadDepositHistory();
-        }
+      renderProfileInventory();
+    }
+  );
 
 
-        if (
-          selected ===
-          "withdrawals"
-        ) {
+profileInventoryCompact
+  ?.addEventListener(
+    "click",
+    () => {
 
-          profileWithdrawals
-            ?.classList
-            .remove("hidden");
+      profileInventoryMode =
+        "compact";
 
-          loadWithdrawHistory();
-        }
-      }
-    );
-  }
-);
+      profileInventoryCompact
+        .classList
+        .add("active");
+
+      profileInventoryComfort
+        ?.classList
+        .remove("active");
+
+      renderProfileInventory();
+    }
+  );
+
+
+profileInventoryComfort
+  ?.addEventListener(
+    "click",
+    () => {
+
+      profileInventoryMode =
+        "comfort";
+
+      profileInventoryComfort
+        .classList
+        .add("active");
+
+      profileInventoryCompact
+        ?.classList
+        .remove("active");
+
+      renderProfileInventory();
+    }
+  );
+
+
+profileInventoryLoadMore
+  ?.addEventListener(
+    "click",
+    () => {
+
+      profileInventoryVisibleLimit +=
+        21;
+
+      renderProfileInventory();
+    }
+  );
 
 
 /* =========================
