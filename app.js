@@ -3503,6 +3503,8 @@ let selectedUpgradeTarget = null;
 let upgradeMode = "2x";
 let upgradeBusy = false;
 let upgradePointerAngle = 0;
+let upgradeModeRules = {};
+let upgradeTargetTolerance = 0;
 
 
 const homeSections = () => [
@@ -3594,33 +3596,10 @@ function upgradeSourceTotal() {
 
 function upgradeModeData() {
 
-  const modes = {
-    "2x": {
-      label:"2x",
-      chance:50,
-      multiplier:2
-    },
-
-    "5x": {
-      label:"5x",
-      chance:20,
-      multiplier:5
-    },
-
-    "10x": {
-      label:"10x",
-      chance:10,
-      multiplier:10
-    },
-
-    "75": {
-      label:"75%",
-      chance:75,
-      multiplier:(100 / 75)
-    }
-  };
-
-  return modes[upgradeMode];
+  return (
+    upgradeModeRules[upgradeMode] ||
+    null
+  );
 }
 
 
@@ -3632,7 +3611,10 @@ function getUpgradeTargetRange() {
   const mode =
     upgradeModeData();
 
-  if (!total) {
+  if (
+    !total ||
+    !mode
+  ) {
     return {
       min:0,
       max:0
@@ -3641,20 +3623,21 @@ function getUpgradeTargetRange() {
 
   const exact =
     total *
-    mode.multiplier;
+    Number(mode.multiplier);
 
-  /*
-    Показуємо цілі максимально близько
-    до потрібного множника.
-    Допуск ±8%, щоб у списку були
-    реальні доступні предмети.
-  */
+  const tolerance =
+    Number(
+      upgradeTargetTolerance || 0
+    );
+
   return {
     min:
-      exact * 0.92,
+      exact *
+      (1 - tolerance),
 
     max:
-      exact * 1.08
+      exact *
+      (1 + tolerance)
   };
 }
 
@@ -3682,12 +3665,18 @@ function getEligibleUpgradeTargets() {
 
 function calculateUpgradeChance() {
 
-  if (!upgradeSourceTotal()) {
+  const mode =
+    upgradeModeData();
+
+  if (
+    !upgradeSourceTotal() ||
+    !mode
+  ) {
     return 0;
   }
 
   return Number(
-    upgradeModeData().chance
+    mode.chance
   );
 }
 
@@ -3715,15 +3704,35 @@ async function loadUpgradeData() {
     const [
       inventory,
       targets,
+      upgradeConfig,
       skinList
     ] =
       await Promise.all([
         api("/api/inventory"),
         api("/api/upgrade-targets"),
+        api("/api/upgrade-config"),
         skins.length
           ? Promise.resolve(skins)
           : api("/api/skins")
       ]);
+
+    upgradeModeRules =
+      upgradeConfig?.modes || {};
+
+    upgradeTargetTolerance =
+      Number(
+        upgradeConfig?.targetTolerance || 0
+      );
+
+    if (
+      !upgradeModeRules[upgradeMode]
+    ) {
+      upgradeMode =
+        Object.keys(
+          upgradeModeRules
+        )[0] ||
+        "2x";
+    }
 
     if (!skins.length) {
       skins = skinList;
@@ -4454,7 +4463,7 @@ $("#upgradeActionBtn")
 
 
 function animateUpgradePointer(
-  finalAngle
+  serverStopAngle
 ) {
 
   const pointer =
@@ -4464,42 +4473,33 @@ function animateUpgradePointer(
     return Promise.resolve();
   }
 
-  const start =
-    upgradePointerAngle;
-
-  /*
-    Сервер повертає точний кут 0..360.
-    0° = верх круга.
-    Фіолетовий сектор теж починається зверху.
-  */
-  const serverAngle =
+  const semanticAngle =
     (
-      Number(finalAngle) % 360 + 360
+      Number(serverStopAngle) % 360 +
+      360
     ) % 360;
 
   /*
-    ВАЖЛИВО:
-    Сервер: 0° = верх круга.
-    Наш CSS-трикутник у rotate(0deg)
-    фізично знаходиться знизу.
+    Backend: 0° = top of the circle,
+    clockwise.
 
-    Тому для картинки додаємо 180°.
-    Тепер:
-    - серверний виграшний сектор,
-    - фіолетовий сектор,
-    - місце зупинки стрілки
-    збігаються 1 в 1.
+    Existing CSS pointer is physically at
+    the bottom when rotate(0deg), therefore
+    +180° is ONLY a visual coordinate
+    conversion. It does not determine win/loss.
   */
   const visualAngle =
     (
-      serverAngle + 180
+      semanticAngle +
+      180
     ) % 360;
+
+  const start =
+    upgradePointerAngle;
 
   let delta =
     visualAngle -
-    (
-      start % 360
-    );
+    (start % 360);
 
   if (delta < 0) {
     delta += 360;
@@ -4594,8 +4594,48 @@ async function executeUpgrade() {
         }
       );
 
+    /*
+      Backend is the single source of truth
+      after POST /api/upgrade returns.
+    */
+    const serverChance =
+      Number(result.chance);
+
+    if (
+      Number.isFinite(serverChance)
+    ) {
+
+      $("#upgradeChanceRing")
+        ?.style
+        .setProperty(
+          "--chance",
+          serverChance.toFixed(5)
+        );
+
+      const chanceLabel =
+        $("#upgradeChance");
+
+      if (chanceLabel) {
+        chanceLabel.textContent =
+          serverChance.toFixed(2) + "%";
+      }
+    }
+
+    const stopAngle =
+      Number(
+        result.animation?.stopAngle
+      );
+
+    if (
+      !Number.isFinite(stopAngle)
+    ) {
+      throw new Error(
+        "Сервер не повернув позицію анімації"
+      );
+    }
+
     await animateUpgradePointer(
-      Number(result.rollAngle)
+      stopAngle
     );
 
     showUpgradeResult(
