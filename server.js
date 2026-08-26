@@ -591,6 +591,103 @@ VALUES
     }
   }
 );
+/* =========================
+   HOME DASHBOARD
+   Recent drops + top players
+========================= */
+
+app.get(
+  "/api/home-dashboard",
+  async (req,res) => {
+
+    try {
+
+      const [
+        dropsResult,
+        topPlayersResult
+      ] =
+        await Promise.all([
+
+          pool.query(
+            `
+            SELECT
+              o.id,
+              o.item_name,
+              o.rarity,
+              o.value,
+              o.created_at,
+              u.username
+            FROM openings o
+            JOIN users u
+              ON u.id = o.user_id
+            ORDER BY
+              o.id DESC
+            LIMIT 24
+            `
+          ),
+
+          pool.query(
+            `
+            SELECT
+              u.id,
+              u.username,
+              COUNT(o.id)::int
+                AS openings_count,
+              COALESCE(
+                SUM(o.value),
+                0
+              )
+                AS total_value
+            FROM openings o
+            JOIN users u
+              ON u.id = o.user_id
+            GROUP BY
+              u.id,
+              u.username
+            ORDER BY
+              total_value DESC,
+              openings_count DESC,
+              u.id ASC
+            LIMIT 5
+            `
+          )
+
+        ]);
+
+      const drops =
+        dropsResult.rows
+          .map(
+            item => ({
+              ...item,
+              image:
+                skinImages[
+                  item.item_name
+                ] || null
+            })
+          );
+
+      res.json({
+        drops,
+        topPlayers:
+          topPlayersResult.rows
+      });
+
+    } catch (e) {
+
+      console.error(
+        "Home dashboard error:",
+        e
+      );
+
+      res.status(500).json({
+        error:
+          "Не вдалося завантажити головну сторінку"
+      });
+    }
+  }
+);
+
+
 app.post(
   "/api/open/:caseId",
   auth,
