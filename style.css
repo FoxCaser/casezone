@@ -7344,3 +7344,274 @@ body {
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   CASEZONE V5.1 — VISUAL MATCH PATCH
+   ТІЛЬКИ ДИЗАЙН. ЛОГІКА САЙТУ НЕ ЗМІНЕНА.
+========================================================= */
+
+/* 1. LIVE-стрічка гарантовано видима тільки на головній */
+.cz-live-strip:not(.hidden) {
+  display:flex !important;
+}
+
+.cz-live-strip {
+  height:76px !important;
+  min-height:76px !important;
+  margin-bottom:8px !important;
+}
+
+.cz-live-strip-window {
+  height:74px !important;
+}
+
+.cz-live-track {
+  min-height:74px !important;
+}
+
+.cz-live-drop-card {
+  height:74px !important;
+}
+
+
+/* 2. Банер ближче до затвердженого макета */
+.cz-hero-v5 {
+  min-height:254px !important;
+  height:254px !important;
+  grid-template-columns:
+    minmax(0,.86fr)
+    minmax(460px,1.14fr) !important;
+  padding:
+    24px 38px !important;
+  background:
+    radial-gradient(
+      circle at 68% 58%,
+      rgba(255,197,0,.16),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 93% 44%,
+      rgba(255,212,0,.035),
+      transparent 30%
+    ),
+    linear-gradient(
+      104deg,
+      #0c0e12 0%,
+      #07090c 49%,
+      #0c0b07 100%
+    ) !important;
+}
+
+/* темні силуети/дим як у референсі без додаткових assets */
+.cz-hero-v5::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  opacity:.33;
+  background:
+    radial-gradient(
+      ellipse at 88% 42%,
+      rgba(0,0,0,.72),
+      transparent 25%
+    ),
+    radial-gradient(
+      ellipse at 10% 52%,
+      rgba(0,0,0,.72),
+      transparent 27%
+    ),
+    repeating-linear-gradient(
+      117deg,
+      transparent 0 50px,
+      rgba(255,212,0,.018) 51px
+    );
+}
+
+.cz-hero-v5-content {
+  padding-left:6px;
+}
+
+.cz-hero-v5 h1 {
+  font-size:
+    clamp(43px,4.15vw,63px) !important;
+  letter-spacing:-3.2px !important;
+}
+
+.cz-hero-v5 p {
+  font-size:13px !important;
+  margin-top:8px !important;
+}
+
+.cz-hero-v5-trust {
+  gap:17px !important;
+  margin-top:12px !important;
+}
+
+.cz-hero-v5-open {
+  width:205px !important;
+  min-height:39px !important;
+  margin-top:14px !important;
+}
+
+
+/* 3. Прибираємо квадратний фон з картинки кейса.
+      mix-blend + mask розчиняють темні краї зображення у банері. */
+.cz-hero-v5-visual {
+  min-height:220px !important;
+  overflow:visible !important;
+}
+
+.cz-hero-v5-case {
+  width:min(96%,535px) !important;
+  height:242px !important;
+  object-fit:contain !important;
+
+  mix-blend-mode:screen;
+
+  -webkit-mask-image:
+    radial-gradient(
+      ellipse 76% 72% at 50% 52%,
+      #000 0 62%,
+      rgba(0,0,0,.93) 70%,
+      transparent 100%
+    );
+
+  mask-image:
+    radial-gradient(
+      ellipse 76% 72% at 50% 52%,
+      #000 0 62%,
+      rgba(0,0,0,.93) 70%,
+      transparent 100%
+    );
+
+  filter:
+    saturate(1.15)
+    contrast(1.10)
+    brightness(1.03)
+    drop-shadow(
+      0 24px 25px
+      rgba(0,0,0,.42)
+    ) !important;
+
+  transform:
+    perspective(900px)
+    rotateY(-5deg)
+    rotateZ(-1deg) !important;
+}
+
+.cz-hero-v5-glow {
+  width:420px !important;
+  height:150px !important;
+  bottom:7px !important;
+  opacity:.78;
+}
+
+.cz-hero-v5-floor {
+  width:520px !important;
+  bottom:-39px !important;
+}
+
+.cz-hero-v5-ring.ring-1 {
+  width:405px !important;
+  height:175px !important;
+}
+
+.cz-hero-v5-ring.ring-2 {
+  width:315px !important;
+  height:139px !important;
+}
+
+.cz-hero-v5-logo {
+  bottom:59px !important;
+}
+
+
+/* 4. Статистика компактніше — як у макеті */
+.cz-home-v5-stats {
+  height:61px !important;
+  min-height:61px !important;
+}
+
+.cz-stat-v5 {
+  min-height:59px !important;
+}
+
+.cz-stat-v5 strong {
+  font-size:18px !important;
+}
+
+
+/* 5. Топ гравців — той самий рівень, що статистика + кейси */
+.cz-top-players-v5 {
+  padding:10px !important;
+}
+
+.cz-top-player-row {
+  min-height:48px !important;
+}
+
+
+/* 6. Картки кейсів — однакова висота й жовті кнопки */
+.cz-case-card-v4 {
+  min-height:195px !important;
+}
+
+.cz-case-art-v4 {
+  height:90px !important;
+}
+
+.cz-case-open-v4 {
+  background:
+    linear-gradient(
+      180deg,
+      #ffe553,
+      #ffc800
+    ) !important;
+  border-color:
+    rgba(255,235,98,.45) !important;
+  box-shadow:
+    0 0 11px rgba(255,212,0,.07) !important;
+}
+
+.cz-case-card-v4:hover {
+  border-color:
+    rgba(255,212,0,.38) !important;
+  box-shadow:
+    0 9px 30px rgba(0,0,0,.31),
+    0 0 23px rgba(255,212,0,.085) !important;
+}
+
+
+/* 7. Нижні переваги ще ближчі до референса */
+.cz-benefits-v5 {
+  margin-top:8px !important;
+}
+
+.cz-benefits-v5 .benefit-item {
+  min-height:66px !important;
+}
+
+
+/* 8. На Апгрейді домашні блоки точно не відображаються */
+.cz-live-strip.hidden,
+.cz-hero-v5.hidden,
+.cz-home-v5-grid.hidden,
+.cz-benefits-v5.hidden {
+  display:none !important;
+}
+
+
+@media (max-width:850px) {
+
+  .cz-hero-v5 {
+    height:auto !important;
+    min-height:0 !important;
+    grid-template-columns:1fr !important;
+  }
+
+  .cz-hero-v5-case {
+    height:210px !important;
+  }
+}
