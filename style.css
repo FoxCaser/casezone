@@ -9044,3 +9044,88 @@ body:has(
     font-size:10px;
   }
 }
+
+
+/* =========================================================
+   UPGRADE RESULT — COLOR ONLY
+   No result popup.
+   Green = server returned success:true
+   Red   = server returned success:false
+========================================================= */
+
+.upgrade-target-preview {
+  transition:
+    border-color .22s ease,
+    background .22s ease,
+    box-shadow .22s ease;
+}
+
+
+/* WIN */
+.upgrade-target-preview.upgrade-result-success {
+  border-color:
+    rgba(35,255,88,.95) !important;
+
+  background:
+    radial-gradient(
+      circle at 50% 48%,
+      rgba(19,230,64,.24),
+      rgba(14,102,34,.09) 44%,
+      transparent 70%
+    ),
+    #0d1210 !important;
+
+  box-shadow:
+    inset 0 0 34px
+      rgba(27,255,72,.08),
+    0 0 26px
+      rgba(27,255,72,.32),
+    0 0 58px
+      rgba(27,255,72,.12) !important;
+}
+
+.upgrade-target-preview.upgrade-result-success
+.upgrade-target-glow {
+  background:
+    rgba(29,255,76,.24) !important;
+
+  filter:
+    blur(42px) !important;
+}
+
+
+/* LOSS */
+.upgrade-target-preview.upgrade-result-fail {
+  border-color:
+    rgba(255,42,42,.96) !important;
+
+  background:
+    radial-gradient(
+      circle at 50% 48%,
+      rgba(236,30,30,.23),
+      rgba(115,12,12,.10) 44%,
+      transparent 70%
+    ),
+    #120d0e !important;
+
+  box-shadow:
+    inset 0 0 34px
+      rgba(255,35,35,.08),
+    0 0 26px
+      rgba(255,35,35,.34),
+    0 0 58px
+      rgba(255,35,35,.13) !important;
+}
+
+.upgrade-target-preview.upgrade-result-fail
+.upgrade-target-glow {
+  background:
+    rgba(255,38,38,.24) !important;
+
+  filter:
+    blur(42px) !important;
+}
+
+
+/* The old popup styles may remain in the stylesheet,
+   but no popup is created by app.js anymore. */
