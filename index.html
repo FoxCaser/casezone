@@ -158,117 +158,147 @@
 
 
 <!-- =========================
-     HERO
+     ОСТАННІ ДРОПИ — LIVE TICKER
+========================= -->
+
+<section
+  class="cz-live-strip"
+  id="homeLiveDrops"
+>
+
+  <div class="cz-live-strip-label">
+    <span class="cz-live-red-dot"></span>
+
+    <div>
+      <strong>ОСТАННІ ДРОПИ</strong>
+      <small>LIVE</small>
+    </div>
+  </div>
+
+  <div class="cz-live-strip-window">
+    <div
+      class="cz-live-track"
+      id="liveDropsTrack"
+    >
+      <div class="cz-live-loading">
+        Завантаження останніх дропів...
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- =========================
+     ГОЛОВНИЙ БАНЕР + ТОП ГРАВЦІВ
 ========================= -->
 
 <section class="cz-dashboard-top">
 
   <div class="cz-dashboard-left">
 
-<section class="hero cz-hero">
+    <section class="cz-home-hero-v3">
 
-  <div class="hero-glow hero-glow-left"></div>
-  <div class="hero-glow hero-glow-right"></div>
+      <div class="cz-home-hero-grid"></div>
+      <div class="cz-home-hero-glow"></div>
+
+      <div class="cz-home-hero-content">
+
+        <span class="cz-home-hero-kicker">
+          CASEZONE • CS2
+        </span>
+
+        <h1>
+          ВІДКРИВАЙ КЕЙСИ
+          <span>ОТРИМУЙ ТОП СКІНИ</span>
+        </h1>
+
+        <p>
+          Відкривай кейси, отримуй скіни
+          та збирай власний інвентар.
+        </p>
+
+        <a
+          href="#caseSection"
+          class="cz-home-hero-button"
+        >
+          ВІДКРИТИ КЕЙСИ
+          <span>→</span>
+        </a>
+
+      </div>
+
+      <div class="cz-home-hero-visual">
+
+        <div class="cz-home-neon-frame"></div>
+        <div class="cz-home-case-aura"></div>
+
+        <img
+          src="/gold-case.jpg"
+          alt="CASEZONE"
+          class="cz-home-case-image"
+          onerror="this.style.display='none'"
+        >
+
+        <div class="cz-home-case-badge">
+          <b>CZ</b>
+          <span>CASE OPENING</span>
+        </div>
+
+      </div>
+
+    </section>
 
 
-  <div class="hero-content">
+    <section class="cz-promo-strip-v3">
 
-    <div class="eyebrow">
-      CASEZONE • CS2
-    </div>
+      <div class="cz-promo-icon">
+        🎁
+      </div>
 
-    <h1>
-      ВІДКРИВАЙ КЕЙСИ —
+      <strong>
+        PROMO BONUS
+      </strong>
+
       <span>
-        ОТРИМУЙ ТОП СКІНИ
+        Поповнюй баланс і відкривай більше кейсів
       </span>
-    </h1>
 
-    <p class="sub">
-      Відкривай кейси, отримуй скіни
-      та збирай власний інвентар.
-    </p>
+      <button
+        type="button"
+        id="promoDepositBtn"
+      >
+        ПОПОВНИТИ
+      </button>
 
-
-    <a
-      href="#caseSection"
-      class="hero-open-btn"
-    >
-      ВІДКРИТИ КЕЙСИ
-      <span>→</span>
-    </a>
-
-  </div>
-
-
-  <div class="hero-visual">
-
-    <div class="hero-case-glow"></div>
-
-    <div class="hero-case">
-
-      <div class="hero-case-top">
-        CASEZONE
-      </div>
-
-      <div class="hero-case-logo">
-        CZ
-      </div>
-
-      <div class="hero-case-bottom">
-        DROP
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
+    </section>
 
   </div>
 
 
   <aside class="cz-dashboard-side">
 
-    <div class="community-main dashboard-side-card">
+    <section class="cz-top-players-v3">
 
-      <div class="side-card-title">
-        <span class="side-title-line"></span>
-        <h3>ОСТАННІ ДРОПИ</h3>
+      <div class="cz-top-players-head">
+        <div>
+          <span class="cz-top-line"></span>
+          <strong>ТОП ГРАВЦІВ</strong>
+        </div>
+
+        <small>за виграшами</small>
       </div>
 
-      <div class="live-placeholder">
-        <div class="live-dot"></div>
-        <div>
-          <strong>LIVE DROP</strong>
-          <span>
-            Тут показуються останні виграші гравців
-          </span>
+      <div
+        class="cz-top-players-list"
+        id="topPlayersList"
+      >
+        <div class="cz-top-loading">
+          Завантаження...
         </div>
       </div>
 
-      <div class="side-watermark">🎁</div>
-
-    </div>
-
-    <div class="top-players-card dashboard-side-card">
-
-      <div class="top-card-head">
-        <span>★</span>
-        <h3>ТОП ГРАВЦІВ</h3>
-      </div>
-
-      <div class="top-empty">
-        <div class="top-player-avatar">👤</div>
-        <div>
-          <strong>Prime™ CaseZone</strong>
-          <span>Сума виграшів: 1489324.00 ₴</span>
-        </div>
-      </div>
-
-      <div class="side-watermark crown">♛</div>
-
-    </div>
+    </section>
 
   </aside>
 
